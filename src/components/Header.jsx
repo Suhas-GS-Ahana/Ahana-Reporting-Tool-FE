@@ -15,7 +15,7 @@ export function Header() {
           />
         </Link>
         <div className="ml-auto flex items-center gap-4">
-          <Button variant="ghost" asChild>
+          <Button variant="outline" asChild>
             <Link href="/login">Login</Link>
           </Button>
           <DropdownMenu>

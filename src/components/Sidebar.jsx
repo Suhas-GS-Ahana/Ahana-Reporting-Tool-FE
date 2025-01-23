@@ -2,36 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { History, LayoutDashboard, Settings, FileSpreadsheet, UserCircle } from "lucide-react"
-
-const sidebarItems = [
-  {
-    title: "New Process",
-    href: "/new-process",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "History",
-    href: "/history",
-    icon: History,
-  },
-  {
-    title: "Transactions & Logs",
-    href: "/transactions",
-    icon: FileSpreadsheet,
-  },
-  {
-    title: "Configurations",
-    href: "/configurations",
-    icon: Settings,
-  },
-  {
-    title: "Profile",
-    href: "/profile",
-    icon: UserCircle,
-  },
-]
+import { cn, sidebarItems } from "@/lib/utils"
 
 export function Sidebar() {
   const pathname = usePathname()
