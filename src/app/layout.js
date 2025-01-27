@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen flex flex-col bg-background">
           <Header />
           <div className="flex">
             <Sidebar />

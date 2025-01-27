@@ -8,7 +8,7 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="hidden border-r bg-blue-950 md:block">
+    <div className="hidden h-screen border-r bg-blue-950 md:block">
       <div className="flex h-full flex-col gap-2">
         <div className="flex-1 py-4">
           <nav className="grid gap-1 px-2">
