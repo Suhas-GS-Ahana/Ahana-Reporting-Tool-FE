@@ -3,9 +3,13 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn, sidebarItems } from "@/lib/utils"
+import { useAuth } from "@/contexts/auth-context"
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { user } = useAuth()
+
+  if(!user) return null
 
   return (
     <div className="hidden h-screen border-r bg-blue-950 md:block">

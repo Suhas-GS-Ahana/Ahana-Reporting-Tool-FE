@@ -1,9 +1,15 @@
+'use client'
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UserCircle } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 export function Header() {
+
+  const {user, logout} = useAuth()
+
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4 md:px-6">
@@ -15,9 +21,7 @@ export function Header() {
           />
         </Link>
         <div className="ml-auto flex items-center gap-4">
-          <Button variant="outline" asChild>
-            <Link href="/login">Login</Link>
-          </Button>
+          {user ?  ( 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -28,9 +32,14 @@ export function Header() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          ) : (
+            <Button variant="outline" asChild>
+            <Link href="/login">Login</Link>
+          </Button>
+          )}
         </div>
       </div>
     </div>
