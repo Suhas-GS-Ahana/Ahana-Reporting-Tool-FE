@@ -18,7 +18,7 @@ import {
   } from "@/components/ui/table"
 import { invoices } from "@/lib/utils"
 import { Badge } from "./ui/badge"
-import { Server, Database, Globe, Plug, LayoutList } from "lucide-react"
+import { Server, Database, Globe, Plug, LayoutList, Trash2 } from "lucide-react"
 
 export default function HomePage() {
   const [connections, setConnections] = useState([])
@@ -133,6 +133,7 @@ export default function HomePage() {
               </Select>
             </div>
           <Button disabled={!selectedConnection || loading}>Fetch Schema Information</Button>
+
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">
               <Switch id="temp-table" />
@@ -170,6 +171,7 @@ export default function HomePage() {
             <TableCell>{invoice.paymentStatus}</TableCell>
             <TableCell>{invoice.paymentMethod}</TableCell>
             <TableCell className="text-right">{invoice.totalAmount}</TableCell>
+            <TableCell><Trash2 className="w-3 h-3 cursor-pointer"/></TableCell>
           </TableRow>
         ))}
       </TableBody>

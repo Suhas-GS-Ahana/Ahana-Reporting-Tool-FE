@@ -92,7 +92,7 @@ export default function LoginPage() {
             />
               </div>
             </div>
-            <Button className="w-full bg-blue-950" type='submit' disabled={loading}>{loading ? "Logged In..." : "Login"}</Button>
+            <Button className="w-full bg-blue-950 mt-7" type='submit' disabled={loading}>{loading ? "Logged In..." : "Login"}</Button>
           </form>
           </Form>
         </CardContent>

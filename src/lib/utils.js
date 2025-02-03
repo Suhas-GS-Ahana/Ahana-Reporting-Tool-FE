@@ -8,7 +8,7 @@ export function cn(...inputs) {
 
 export const sidebarItems = [
   {
-    title: "New Process",
+    title: "Process",
     href: "/new-process",
     icon: LayoutDashboard,
   },

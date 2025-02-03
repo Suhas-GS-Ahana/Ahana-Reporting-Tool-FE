@@ -9,6 +9,7 @@ const AuthContext = createContext({})
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [sidebarExpanded, setSidebarExpanded] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -53,9 +54,16 @@ export function AuthProvider({ children }) {
     router.push("/login")
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, loading }}>{children}</AuthContext.Provider>
-}
+  const toggleSidebar = () => {
+    setSidebarExpanded(!sidebarExpanded)
+  }
 
+  return (
+    <AuthContext.Provider value={{ user, login, logout, loading, sidebarExpanded, toggleSidebar }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
 
 export const useAuth = () => useContext(AuthContext)
 
