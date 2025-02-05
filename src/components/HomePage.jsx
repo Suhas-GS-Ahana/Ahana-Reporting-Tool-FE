@@ -24,9 +24,12 @@ export default function HomePage() {
   const [connections, setConnections] = useState([])
   const [selectedConnection, setSelectedConnection] = useState(null)
   const [connectionDetails, setConnectionDetails] = useState(null)
+  const [schemaDetails, setSchemaDetails] = useState([])
+  const [tables, setTables] = useState([])
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
+  console.log(selectedConnection)
   useEffect(() => {
     fetchConnections()
   }, [])
@@ -39,7 +42,7 @@ export default function HomePage() {
         throw new Error("Failed to fetch connections")
       }
       const data = await response.json()
-      setConnections(data.connections)
+      setConnections(data.data)
     } catch (error) {
       toast({
         variant: "destructive",
@@ -60,7 +63,8 @@ export default function HomePage() {
         throw new Error("Failed to fetch connection details")
       }
       const data = await response.json()
-      setConnectionDetails(data.connection.get_connectiondetails)
+      setConnectionDetails(data.data.get_connectiondetails)
+      await handleFetchSchema(connectionName)
     } catch (error) {
       toast({
         variant: "destructive",
@@ -72,13 +76,61 @@ export default function HomePage() {
     }
   }
 
+  const handleFetchSchema = async (connectionName) => {
+    setLoading(true)
+    setSelectedConnection(connectionName)
+    try {
+      const response = await fetch(`http://localhost:8000/connections/get_connectionschema?name=${connectionName}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch connection schema")
+      }
+      const data = await response.json()
+      setSchemaDetails(data.data)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch connection schema",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleFetchTables = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`http://localhost:8000/connections/get_tables?conn_name=${selectedConnection}&schema_name=${schemaDetails.get_connectionschema}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch connection tables")
+      }
+      const data = await response.json()
+      setTables(data.data)
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Fetched Successfully",
+        className: "bg-green-500 text-white",
+      })
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch connection tables",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  console.log(tables)
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Select DataSource & Table</h1>
         <p className="text-muted-foreground">Configure your data source and select tables for processing.</p>
       </div>
-      <div className="flex gap-6">
+      <div className="">
        
       <Card>
         <CardHeader>
@@ -127,13 +179,28 @@ export default function HomePage() {
                   <SelectValue placeholder="Select schema" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="public">public</SelectItem>
-                  <SelectItem value="private">private</SelectItem>
+                  <SelectItem value={schemaDetails?.get_connectionschema}>
+                    {schemaDetails?.get_connectionschema}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          <Button disabled={!selectedConnection || loading}>Fetch Schema Information</Button>
 
+          <Button onClick={handleFetchTables} disabled={!selectedConnection || loading}>Fetch Schema Information</Button>
+          {tables ? (
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Select table" />
+            </SelectTrigger>
+            <SelectContent>
+              {tables.map((table) => (
+                <SelectItem key={table} value={table}>
+                  {table}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          ) : {}}
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">
               <Switch id="temp-table" />
@@ -150,7 +217,7 @@ export default function HomePage() {
           </div>
         </CardContent>
       </Card>
-      <Card className="w-[500px]">
+      {/* <Card className="w-[500px]">
         <CardHeader>
            <CardTitle>Selected table</CardTitle> </CardHeader>
       <Table>
@@ -176,7 +243,7 @@ export default function HomePage() {
         ))}
       </TableBody>
     </Table>
-      </Card>
+      </Card> */}
      
       </div>
 
