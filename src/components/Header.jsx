@@ -16,7 +16,7 @@ export function Header() {
       <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-4">
           <Menu className="h-5 w-5" />
       </Button>
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/configurations" className="flex items-center gap-2">
           <img
             src="https://ahanait.com/wp-content/uploads/2024/02/New1-Ahana-2024-website-Logo-Medium.svg"
             alt="Ahana Logo"

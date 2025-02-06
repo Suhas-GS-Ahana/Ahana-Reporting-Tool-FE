@@ -8,6 +8,11 @@ export function cn(...inputs) {
 
 export const sidebarItems = [
   {
+    title: "Configurations",
+    href: "/configurations",
+    icon: Settings,
+  },
+  {
     title: "Process",
     href: "/new-process",
     icon: LayoutDashboard,
@@ -21,11 +26,6 @@ export const sidebarItems = [
     title: "Transactions & Logs",
     href: "/transactions",
     icon: FileSpreadsheet,
-  },
-  {
-    title: "Configurations",
-    href: "/configurations",
-    icon: Settings,
   },
   {
     title: "Profile",

@@ -9,13 +9,13 @@ export function middleware(request) {
   }
 
   if (user && isPublicPath) {
-    return NextResponse.redirect(new URL("/", request.url))
+    return NextResponse.redirect(new URL("/configurations", request.url))
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/", "/login", "/new-process", "/history", "/transactions", "/configurations", "/profile"],
+  matcher: ["/login", "/new-process", "/history", "/transactions", "/configurations", "/profile"],
 }
 

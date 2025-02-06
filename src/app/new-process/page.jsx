@@ -150,7 +150,8 @@ export default function NewProcess() {
               <Card key={subProcess.id}>
                 <Collapsible>
                   <CardHeader className="pb-3">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between">
+                    <CollapsibleTrigger asChild className="flex w-full items-center justify-between">
+                    <div>
                       <CardTitle className="text-base">{subProcess.name}</CardTitle>
                       <div className="flex gap-2">
                         <Button
@@ -164,6 +165,7 @@ export default function NewProcess() {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                         <ChevronDown className="h-4 w-4" />
+                      </div>
                       </div>
                     </CollapsibleTrigger>
                   </CardHeader>
