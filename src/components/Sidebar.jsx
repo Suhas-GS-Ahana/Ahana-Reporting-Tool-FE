@@ -16,7 +16,7 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "h-screen border-r bg-blue-950 transition-all duration-300 ease-in-out",
+        "min-h-screen border-r bg-blue-950 transition-all duration-300 ease-in-out",
         sidebarExpanded ? "w-50" : "w-16",
       )}
     >

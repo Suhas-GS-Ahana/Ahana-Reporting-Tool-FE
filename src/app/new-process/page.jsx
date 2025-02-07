@@ -117,6 +117,26 @@ export default function NewProcess() {
     })
   }
 
+  let lastAssignedColor = "";
+  const getSubProcessBgColor = (processId) => {
+    const colors = ["bg-red-50", 
+    "bg-yellow-50", 
+    "bg-green-50", 
+    "bg-blue-50", 
+    "bg-purple-50", 
+    "bg-pink-50", 
+    "bg-orange-50", 
+    "bg-teal-50", 
+    "bg-indigo-50", 
+    "bg-cyan-50"];
+    let availableColors = colors.filter(color => color !== lastAssignedColor); // Exclude the last used color
+  let selectedColor = availableColors[processId % availableColors.length]; // Pick a color
+
+  lastAssignedColor = selectedColor; // Update the last used color
+  return selectedColor;
+  };
+  
+
   return (
     <div className="space-y-4">
       <div className="flex gap-4">
@@ -131,7 +151,7 @@ export default function NewProcess() {
       </div>
 
       {processes.map((process) => (
-        <Card key={process.id}>
+        <Card key={process.id} >
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle>{process.name}</CardTitle>
@@ -145,13 +165,15 @@ export default function NewProcess() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4" >
             {process.subProcesses.map((subProcess) => (
-              <Card key={subProcess.id}>
+              <Card key={subProcess.id} className={getSubProcessBgColor(subProcess.id)}>
                 <Collapsible>
                   <CardHeader className="pb-3">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between">
-                      <CardTitle className="text-base">{subProcess.name}</CardTitle>
+                    <CollapsibleTrigger asChild className="flex w-full items-center justify-between">
+                    <div>
+
+                    <CardTitle className="text-base">{subProcess.name}</CardTitle>
                       <div className="flex gap-2">
                         <Button
                           variant="ghost"
@@ -165,6 +187,8 @@ export default function NewProcess() {
                         </Button>
                         <ChevronDown className="h-4 w-4" />
                       </div>
+                    
+                    </div>
                     </CollapsibleTrigger>
                   </CardHeader>
                   <CollapsibleContent>
@@ -172,7 +196,7 @@ export default function NewProcess() {
                       {subProcess.queries.map((query) => (
                         <div key={query.id} className="space-y-2">
                           <div className="flex gap-2">
-                            <Input placeholder="Query Name" value={query.name} className="flex-1" />
+                            <Input placeholder="Query Name" value={query.name} className="flex-1 bg-white" readOnly/>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -181,7 +205,7 @@ export default function NewProcess() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
-                          <Textarea placeholder="Enter SQL query" value={query.query} rows={3} />
+                          <Textarea placeholder="Enter SQL query" value={query.query} rows={3} className=" bg-white" readOnly/>
                         </div>
                       ))}
                       <Button variant="outline" onClick={() => handleAddQuery(process.id, subProcess.id)}>
