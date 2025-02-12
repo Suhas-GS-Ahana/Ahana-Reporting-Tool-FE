@@ -17,21 +17,21 @@ export const sidebarItems = [
     href: "/new-process",
     icon: LayoutDashboard,
   },
-  {
-    title: "History",
-    href: "/history",
-    icon: History,
-  },
-  {
-    title: "Transactions & Logs",
-    href: "/transactions",
-    icon: FileSpreadsheet,
-  },
-  {
-    title: "Profile",
-    href: "/profile",
-    icon: UserCircle,
-  },
+  // {
+  //   title: "History",
+  //   href: "/history",
+  //   icon: History,
+  // },
+  // {
+  //   title: "Transactions & Logs",
+  //   href: "/transactions",
+  //   icon: FileSpreadsheet,
+  // },
+  // {
+  //   title: "Profile",
+  //   href: "/profile",
+  //   icon: UserCircle,
+  // },
 ]
 
 export const invoices = [

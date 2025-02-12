@@ -19,6 +19,7 @@ import {
 import { invoices } from "@/lib/utils"
 import { Badge } from "./../../components/ui/badge"
 import { Server, Database, Globe, Plug, LayoutList, Trash2 } from "lucide-react"
+import Link from "next/link"
 
 export default function Configurations() {
   const [connections, setConnections] = useState([])
@@ -185,8 +186,8 @@ export default function Configurations() {
               </Select>
             </div>
 
-          <Button onClick={handleFetchTables} disabled={!selectedConnection || loading}>Fetch Schema Information</Button>
-          {tables ? (
+          <Link href="/new-process"><Button onClick={handleFetchTables} disabled={!selectedConnection || loading} className="mt-5">Click to Process</Button></Link>
+          {/* {tables ? (
           <Select>
             <SelectTrigger>
               <SelectValue placeholder="Select table" />
@@ -213,7 +214,7 @@ export default function Configurations() {
           <div className="flex gap-3">
           <Button className='bg-blue-950'>Clear Selection</Button>
           <Button className='bg-blue-950'>Create Table</Button>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
       {/* <Card className="w-[500px]">
