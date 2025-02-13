@@ -9,6 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { Play } from "lucide-react"
 
 export default function NewProcess() {
   const { toast } = useToast()
@@ -20,15 +23,14 @@ export default function NewProcess() {
         {
           id: 1,
           name: "Sub Process 1",
-          queries: [
-            { id: 1, name: "select", query: "select * from table" },
-            { id: 2, name: "delete", query: "delete from table" },
+          type: "import", // Added type
+          steps: [
+            {
+              id: 1,
+              description: "",
+              query: "",
+            }
           ],
-        },
-        {
-          id: 2,
-          name: "Sub Process 2",
-          queries: [{ id: 3, name: "", query: "" }],
         },
       ],
     },
@@ -51,27 +53,12 @@ export default function NewProcess() {
           process.subProcesses.push({
             id: Date.now(),
             name: `Sub Process ${subProcessId}`,
-            queries: [],
-          })
-        }
-        return process
-      }),
-    )
-  }
-
-  const handleAddQuery = (processId, subProcessId) => {
-    setProcesses(
-      processes.map((process) => {
-        if (process.id === processId) {
-          process.subProcesses = process.subProcesses.map((subProcess) => {
-            if (subProcess.id === subProcessId) {
-              subProcess.queries.push({
-                id: Date.now(),
-                name: "",
-                query: "",
-              })
-            }
-            return subProcess
+            type: "import",
+            steps: [{
+              id: Date.now(),
+              description: "",
+              query: "",
+            }],
           })
         }
         return process
@@ -88,22 +75,6 @@ export default function NewProcess() {
       processes.map((process) => {
         if (process.id === processId) {
           process.subProcesses = process.subProcesses.filter((subProcess) => subProcess.id !== subProcessId)
-        }
-        return process
-      }),
-    )
-  }
-
-  const handleDeleteQuery = (processId, subProcessId, queryId) => {
-    setProcesses(
-      processes.map((process) => {
-        if (process.id === processId) {
-          process.subProcesses = process.subProcesses.map((subProcess) => {
-            if (subProcess.id === subProcessId) {
-              subProcess.queries = subProcess.queries.filter((query) => query.id !== queryId)
-            }
-            return subProcess
-          })
         }
         return process
       }),
@@ -137,6 +108,103 @@ export default function NewProcess() {
   };
   
 
+  const handleProcessNameChange = (processId, newName) => {
+    setProcesses(
+      processes.map((process) => {
+        if (process.id === processId) {
+          return { ...process, name: newName }
+        }
+        return process
+      })
+    )
+  }
+
+  const handleSubProcessNameChange = (processId, subProcessId, newName) => {
+    setProcesses(
+      processes.map((process) => {
+        if (process.id === processId) {
+          return {
+            ...process,
+            subProcesses: process.subProcesses.map((subProcess) => {
+              if (subProcess.id === subProcessId) {
+                return { ...subProcess, name: newName }
+              }
+              return subProcess
+            })
+          }
+        }
+        return process
+      })
+    )
+  }
+
+  const handleSubProcessTypeChange = (processId, subProcessId, newType) => {
+    setProcesses(
+      processes.map((process) => {
+        if (process.id === processId) {
+          return {
+            ...process,
+            subProcesses: process.subProcesses.map((subProcess) => {
+              if (subProcess.id === subProcessId) {
+                return { ...subProcess, type: newType }
+              }
+              return subProcess
+            })
+          }
+        }
+        return process
+      })
+    )
+  }
+
+  const handleAddStep = (processId, subProcessId) => {
+    setProcesses(
+      processes.map((process) => {
+        if (process.id === processId) {
+          return {
+            ...process,
+            subProcesses: process.subProcesses.map((subProcess) => {
+              if (subProcess.id === subProcessId) {
+                return {
+                  ...subProcess,
+                  steps: [...subProcess.steps, {
+                    id: Date.now(),
+                    description: "",
+                    query: "",
+                  }]
+                }
+              }
+              return subProcess
+            })
+          }
+        }
+        return process
+      })
+    )
+  }
+
+  const handleDeleteStep = (processId, subProcessId, stepId) => {
+    setProcesses(
+      processes.map((process) => {
+        if (process.id === processId) {
+          return {
+            ...process,
+            subProcesses: process.subProcesses.map((subProcess) => {
+              if (subProcess.id === subProcessId) {
+                return {
+                  ...subProcess,
+                  steps: subProcess.steps.filter((step) => step.id !== stepId)
+                }
+              }
+              return subProcess
+            })
+          }
+        }
+        return process
+      })
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex gap-4">
@@ -151,10 +219,14 @@ export default function NewProcess() {
       </div>
 
       {processes.map((process) => (
-        <Card key={process.id} >
+        <Card key={process.id}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle>{process.name}</CardTitle>
+              <Input 
+                value={process.name}
+                onChange={(e) => handleProcessNameChange(process.id, e.target.value)}
+                className="text-xl font-semibold w-[200px]"
+              />
               <div className="flex gap-2">
                 <Button variant="ghost" size="icon" onClick={() => handleAddSubProcess(process.id)}>
                   <Plus className="h-4 w-4" />
@@ -165,50 +237,80 @@ export default function NewProcess() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4" >
+          <CardContent className="space-y-4">
             {process.subProcesses.map((subProcess) => (
               <Card key={subProcess.id} className={getSubProcessBgColor(subProcess.id)}>
                 <Collapsible>
                   <CardHeader className="pb-3">
                     <CollapsibleTrigger asChild className="flex w-full items-center justify-between">
-                    <div>
-                      <CardTitle className="text-base">{subProcess.name}</CardTitle>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteSubProcess(process.id, subProcess.id)
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <ChevronDown className="h-4 w-4" />
-                      </div>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex gap-4 items-center">
+                          <Input 
+                            value={subProcess.name}
+                            onChange={(e) => handleSubProcessNameChange(process.id, subProcess.id, e.target.value)}
+                            className="text-base font-semibold w-[200px] bg-white"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <Select 
+                            value={subProcess.type} 
+                            onValueChange={(value) => handleSubProcessTypeChange(process.id, subProcess.id, value)}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <SelectTrigger className="w-[180px] bg-white">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="import">Import</SelectItem>
+                              <SelectItem value="process">Process</SelectItem>
+                              <SelectItem value="export">Export</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteSubProcess(process.id, subProcess.id)
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                          <ChevronDown className="h-4 w-4" />
+                        </div>
                       </div>
                     </CollapsibleTrigger>
                   </CardHeader>
                   <CollapsibleContent>
                     <CardContent className="space-y-4">
-                      {subProcess.queries.map((query) => (
-                        <div key={query.id} className="space-y-2">
-                          <div className="flex gap-2">
-                            <Input placeholder="Query Name" value={query.name} className="flex-1 bg-white" readOnly/>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteQuery(process.id, subProcess.id, query.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <Textarea placeholder="Enter SQL query" value={query.query} rows={3} className=" bg-white" readOnly/>
-                        </div>
-                      ))}
-                      <Button variant="outline" onClick={() => handleAddQuery(process.id, subProcess.id)}>
+                    {subProcess.steps.map((step, index) => (
+    <div key={step.id} className="space-y-2 p-4 border rounded-lg">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold">Step {index + 1}</h3>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => handleDeleteStep(process.id, subProcess.id, step.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+      <div className="space-y-2">
+        <Label>Description</Label>
+        <Input placeholder="Step description" value={step.description} className="bg-white" />
+        <Label className='pt-5'>SQL Query</Label>
+        <Textarea placeholder="Enter SQL query" value={step.query} rows={3} className="bg-white" />
+        <Button>
+          <Play className="mr-2 h-4 w-4" />
+          Run Query
+        </Button>
+      </div>
+    </div>
+  ))}
+                      <Button variant="outline" onClick={() => handleAddStep(process.id, subProcess.id)}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Add New Query
+                        Add New Step
                       </Button>
                     </CardContent>
                   </CollapsibleContent>
