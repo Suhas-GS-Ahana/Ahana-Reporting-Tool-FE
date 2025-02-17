@@ -4,10 +4,10 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
   Users,
-  Settings,
-  Database,
   LayoutDashboard,
-} from "lucide-react"
+  Shield,
+  FileText
+} from "lucide-react" // Import the icons you need
 
 const adminRoutes = [
   {
@@ -21,14 +21,14 @@ const adminRoutes = [
     href: "/admin/users",
   },
   {
-    title: "Database",
-    icon: Database,
-    href: "/admin/database",
+    title: "Roles",
+    icon: Shield, // Icon for Roles (can change based on preference)
+    href: "/admin/roles",
   },
   {
-    title: "Settings",
-    icon: Settings,
-    href: "/admin/settings",
+    title: "Pages",
+    icon: FileText, // Icon for Pages (or another appropriate one)
+    href: "/admin/pages",
   },
 ]
 
@@ -60,4 +60,4 @@ export function AdminSidebar() {
       </div>
     </nav>
   )
-} 
+}
