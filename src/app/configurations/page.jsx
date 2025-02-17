@@ -17,7 +17,7 @@ import {
     TableRow,
   } from "@/components/ui/table"
 import { invoices } from "@/lib/utils"
-import { Badge } from "./../../components/ui/badge"
+import { Badge } from "@/components/ui/badge"
 import { Server, Database, Globe, Plug, LayoutList, Trash2 } from "lucide-react"
 import Link from "next/link"
 
@@ -37,7 +37,7 @@ export default function Configurations() {
   const fetchConnections = async () => {
     setLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/connections/view_connections")
+      const response = await fetch("http://localhost:8000/get_connections")
       if (!response.ok) {
         throw new Error("Failed to fetch connections")
       }
@@ -58,7 +58,7 @@ export default function Configurations() {
     setLoading(true)
     setSelectedConnection(connectionName)
     try {
-      const response = await fetch(`http://localhost:8000/connections/get_connection?name=${connectionName}`)
+      const response = await fetch(`http://localhost:8000/get_connection?name=${connectionName}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection details")
       }
@@ -80,7 +80,7 @@ export default function Configurations() {
     setLoading(true)
     setSelectedConnection(connectionName)
     try {
-      const response = await fetch(`http://localhost:8000/connections/get_connectionschema?name=${connectionName}`)
+      const response = await fetch(`http://localhost:8000/get_connectionschema?name=${connectionName}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection schema")
       }
@@ -100,7 +100,7 @@ export default function Configurations() {
   const handleFetchTables = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/connections/get_tables?conn_name=${selectedConnection}&schema_name=${schemaDetails.get_connectionschema}`)
+      const response = await fetch(`http://localhost:8000/get_tables?conn_name=${selectedConnection}&schema_name=${schemaDetails.get_connectionschema}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection tables")
       }
@@ -179,9 +179,11 @@ export default function Configurations() {
                   <SelectValue placeholder="Select schema" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={schemaDetails?.get_connectionschema}>
-                    {schemaDetails?.get_connectionschema}
-                  </SelectItem>
+                {schemaDetails.map((schema) => (
+                    <SelectItem key={schema.get_connectionschema} value={schema.get_connectionschema}>
+                      {schema.get_connectionschema}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
