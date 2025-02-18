@@ -20,6 +20,7 @@ import { invoices } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Server, Database, Globe, Plug, LayoutList, Trash2 } from "lucide-react"
 import Link from "next/link"
+import { useConnection } from "@/contexts/ConnectionContext"
 
 export default function Configurations() {
   const [connections, setConnections] = useState([])
@@ -28,6 +29,8 @@ export default function Configurations() {
   const [schemaDetails, setSchemaDetails] = useState([])
   const [tables, setTables] = useState([])
   const [loading, setLoading] = useState(false)
+  const { setConnectionsDetails, setSchemasDetails} = useConnection()
+
   const { toast } = useToast()
 
   useEffect(() => {
@@ -64,6 +67,7 @@ export default function Configurations() {
       }
       const data = await response.json()
       setConnectionDetails(data.data)
+      setConnectionsDetails(data.data)
       await handleFetchSchema(connectionName)
     } catch (error) {
       toast({
@@ -86,6 +90,7 @@ export default function Configurations() {
       }
       const data = await response.json()
       setSchemaDetails(data.data)
+      setSchemasDetails(data.data)
     } catch (error) {
       toast({
         variant: "destructive",

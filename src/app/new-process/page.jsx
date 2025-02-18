@@ -12,9 +12,11 @@ import { Toaster } from "@/components/ui/toaster"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Play } from "lucide-react"
+import { useConnection } from "@/contexts/ConnectionContext"
 
 export default function NewProcess() {
   const { toast } = useToast()
+  const { connectionsDetails, schemasDetails} = useConnection()
   const [processes, setProcesses] = useState([
     {
       id: 1,
@@ -138,7 +140,7 @@ export default function NewProcess() {
     )
   }
 
-  const handleSubProcessTypeChange = (processId, subProcessId, newType) => {
+  const handleSubProcessTypeChange = async (processId, subProcessId, newType) => {
     setProcesses(
       processes.map((process) => {
         if (process.id === processId) {
@@ -155,7 +157,47 @@ export default function NewProcess() {
         return process
       })
     )
+
+    if(newType === "import") {
+      await callImportAPI()
+    }
   }
+
+  const callImportAPI = async () => {
+
+    const payload = {
+      ds_name: connectionsDetails[0],
+      ds_server: connectionsDetails[1],
+      ds_port: connectionsDetails[2],
+      ds_type: connectionsDetails[3],
+      ds_db: connectionsDetails[4],
+      ds_schema: schemasDetails.map(schema => schema.get_connectionschema)
+    }
+    try {
+        const response = await fetch("http://localhost:8000/save_connection", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload)
+        })
+
+        if(!response.ok) {
+          throw new Error("Failed to save connection")
+        }
+
+        const data = await response.json()
+        console.log("Import API response:", data)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to call import API",
+      })
+    }
+  }
+ 
+
 
   const handleAddStep = (processId, subProcessId) => {
     setProcesses(
@@ -251,20 +293,6 @@ export default function NewProcess() {
                             className="text-base font-semibold w-[200px] bg-white"
                             onClick={(e) => e.stopPropagation()}
                           />
-                          <Select 
-                            value={subProcess.type} 
-                            onValueChange={(value) => handleSubProcessTypeChange(process.id, subProcess.id, value)}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <SelectTrigger className="w-[180px] bg-white">
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="import">Import</SelectItem>
-                              <SelectItem value="process">Process</SelectItem>
-                              <SelectItem value="export">Export</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
                         <div className="flex gap-2">
                           <Button
@@ -287,7 +315,26 @@ export default function NewProcess() {
                     {subProcess.steps.map((step, index) => (
     <div key={step.id} className="space-y-2 p-4 border rounded-lg">
       <div className="flex items-center justify-between">
+        <div className="flex gap-8 items-center">
         <h3 className="font-semibold">Step {index + 1}</h3>
+        <Label>Select Type</Label>
+                          <Select 
+                            value={subProcess.type} 
+                            onValueChange={(value) => handleSubProcessTypeChange(process.id, subProcess.id, value)}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <SelectTrigger className="w-[180px] bg-white">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="import">Import</SelectItem>
+                              <SelectItem value="process">Process</SelectItem>
+                              <SelectItem value="export">Export</SelectItem>
+                            </SelectContent>
+                          </Select>
+        </div>
+        
+        
         <Button 
           variant="ghost" 
           size="icon" 
