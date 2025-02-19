@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/Sidebar"
 import { AuthProvider } from "@/contexts/auth-context"
 import { Toaster } from "@/components/ui/toaster"
 import { usePathname } from "next/navigation"
+import { ConnectionProvider } from "@/contexts/ConnectionContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,6 +26,7 @@ export default function Layout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
+          <ConnectionProvider>
           <div className="min-h-screen flex flex-col bg-background">
             <AdminHeader />
             <div className="flex">
@@ -35,6 +37,7 @@ export default function Layout({ children }) {
             </div>
           </div>
           <Toaster />
+          </ConnectionProvider>
         </AuthProvider>
       </body>
     </html>
