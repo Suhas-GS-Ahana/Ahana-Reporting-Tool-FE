@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Save, Trash2, ChevronDown } from "lucide-react"
+import { Plus, Save, Trash2, ChevronDown, Database, ArrowRight, Server, Globe, Plug, LayoutList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,13 +10,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Play } from "lucide-react"
 import { useConnection } from "@/contexts/ConnectionContext"
 
 export default function NewProcess() {
   const { toast } = useToast()
-  const { connectionsDetails, schemasDetails} = useConnection()
+  const { connectionsDetails, schemasDetails } = useConnection()
   const [processes, setProcesses] = useState([
     {
       id: 1,
@@ -25,7 +26,7 @@ export default function NewProcess() {
         {
           id: 1,
           name: "Sub Process 1",
-          type: "import", // Added type
+          type: "", // Initially no type selected
           steps: [
             {
               id: 1,
@@ -55,7 +56,7 @@ export default function NewProcess() {
           process.subProcesses.push({
             id: Date.now(),
             name: `Sub Process ${subProcessId}`,
-            type: "import",
+            type: "",
             steps: [{
               id: Date.now(),
               description: "",
@@ -312,49 +313,97 @@ export default function NewProcess() {
                   </CardHeader>
                   <CollapsibleContent>
                     <CardContent className="space-y-4">
-                    {subProcess.steps.map((step, index) => (
-    <div key={step.id} className="space-y-2 p-4 border rounded-lg">
-      <div className="flex items-center justify-between">
-        <div className="flex gap-8 items-center">
-        <h3 className="font-semibold">Step {index + 1}</h3>
-        <Label>Select Type</Label>
-                          <Select 
-                            value={subProcess.type} 
-                            onValueChange={(value) => handleSubProcessTypeChange(process.id, subProcess.id, value)}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <SelectTrigger className="w-[180px] bg-white">
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="import">Import</SelectItem>
-                              <SelectItem value="process">Process</SelectItem>
-                              <SelectItem value="export">Export</SelectItem>
-                            </SelectContent>
-                          </Select>
-        </div>
-        
-        
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => handleDeleteStep(process.id, subProcess.id, step.id)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-      <div className="space-y-2">
-        <Label>Description</Label>
-        <Input placeholder="Step description" value={step.description} className="bg-white" />
-        <Label className='pt-5'>SQL Query</Label>
-        <Textarea placeholder="Enter SQL query" value={step.query} rows={3} className="bg-white" />
-        <Button>
-          <Play className="mr-2 h-4 w-4" />
-          Run Query
-        </Button>
-      </div>
+                      {subProcess.steps.map((step, index) => (
+                        <div key={step.id} className="space-y-2 p-4 border rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <h3 className="font-semibold">Step {index + 1}</h3>
+                              <Select 
+                                value={subProcess.type} 
+                                onValueChange={(value) => handleSubProcessTypeChange(process.id, subProcess.id, value)}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <SelectTrigger className="w-[180px] bg-white">
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="import">Import</SelectItem>
+                                  <SelectItem value="process">Process</SelectItem>
+                                  <SelectItem value="export">Export</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleDeleteStep(process.id, subProcess.id, step.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {subProcess.type === "import" || subProcess.type === "export" ? (
+                            <div className="flex gap-4">
+                              <Card className="flex-1">
+                                <CardHeader>
+                                  <CardTitle>Source DB</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="flex items-center gap-2">
+                                    <Database className="h-6 w-6" />
+                                    <div>
+                                      <p>Source Database</p>
+                                      <p>Details about the source database</p>
+                                      <div className="flex flex-wrap gap-2 items-center">
+                                      <Badge variant="outline" className="text-xs bg-blue-100 text-blue-600 flex items-center gap-1 px-2 py-1">
+      <Server className="w-3 h-3" /> Name: {connectionsDetails[0]}
+    </Badge>
+    <Badge variant="outline" className="text-xs bg-green-100 text-green-600 flex items-center gap-1 px-2 py-1">
+      <Globe className="w-3 h-3" /> Server: {connectionsDetails[1]}
+    </Badge>
+    <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-600 flex items-center gap-1 px-2 py-1">
+      <Plug className="w-3 h-3" /> Port: {connectionsDetails[2]}
+    </Badge>
+    <Badge variant="outline" className="text-xs bg-purple-100 text-purple-600 flex items-center gap-1 px-2 py-1">
+      <LayoutList className="w-3 h-3" /> Type: {connectionsDetails[3]}
+    </Badge>
+    <Badge variant="outline" className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1">
+      <Database className="w-3 h-3" /> Database: {connectionsDetails[4]}
+    </Badge>
     </div>
-  ))}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              <ArrowRight className="h-6 w-6 self-center" />
+                              <Card className="flex-1">
+                                <CardHeader>
+                                  <CardTitle>Destination DB</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="flex items-center gap-2">
+                                    <Database className="h-6 w-6" />
+                                    <div>
+                                      <p>Destination Database</p>
+                                      <p>Details about the destination database</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          ) : subProcess.type === "process" ? (
+                            <div className="space-y-2">
+                              <Label>Description</Label>
+                              <Input placeholder="Step description" value={step.description} className="bg-white" />
+                              <Label className='pt-5'>SQL Query</Label>
+                              <Textarea placeholder="Enter SQL query" value={step.query} rows={3} className="bg-white" />
+                              <Button>
+                                <Play className="mr-2 h-4 w-4" />
+                                Run Query
+                              </Button>
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
                       <Button variant="outline" onClick={() => handleAddStep(process.id, subProcess.id)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add New Step
@@ -371,4 +420,3 @@ export default function NewProcess() {
     </div>
   )
 }
-
