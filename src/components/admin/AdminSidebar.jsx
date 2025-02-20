@@ -6,7 +6,8 @@ import {
   Users,
   LayoutDashboard,
   Shield,
-  FileText
+  FileText,
+  UserCog
 } from "lucide-react" // Import the icons you need
 
 const adminRoutes = [
@@ -24,6 +25,11 @@ const adminRoutes = [
     title: "Roles",
     icon: Shield, // Icon for Roles (can change based on preference)
     href: "/admin/roles",
+  },
+  {
+    title: "Map Roles", 
+    icon: UserCog, 
+    href: "/admin/map-roles",
   },
   {
     title: "Pages",

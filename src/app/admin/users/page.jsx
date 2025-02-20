@@ -1,20 +1,38 @@
 "use client";
 import { useState } from "react";
-import { Users, Plus, Edit } from "lucide-react";
+import { Users, Plus, Edit, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateUserModal from "./CreateUserModal";
 import EditUserModal from "./EditUserModal";
 
 export default function UsersPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // To open the Create modal
   const [selectedUser, setSelectedUser] = useState(null); // To track selected user for editing or deletion
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // To open the Edit modal
 
   // Dummy users data (Replace with actual API data)
   const users = [
-    { id: 1, name: "John Doe", email: "john@example.com", phone: "1234567890", role: "Admin" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", phone: "0987654321", role: "Editor" },
-    { id: 3, name: "Bob Johnson", email: "bob@example.com", phone: "1122334455", role: "User" },
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      phone: "9245384153",
+      role: "Admin",
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      email: "jane@example.com",
+      phone: "7245861239",
+      role: "Editor",
+    },
+    {
+      id: 3,
+      name: "Bob Johnson",
+      email: "bob@example.com",
+      phone: "8215347852",
+      role: "User",
+    },
   ];
 
   // Function to open edit modal with user data
@@ -26,7 +44,10 @@ export default function UsersPage() {
   // Function to handle user deletion
   const handleDeleteUser = (userId) => {
     // Here you can add the logic for deleting the user (API call or state update)
-    alert(`User with ID ${userId} deleted`);
+    const confirmDelete = window.confirm(`Do you want to delete this user with id ${userId}?`);
+    if (confirmDelete) {
+      alert(`User with ID ${userId} deleted`);
+    }
   };
 
   const handleUpdateUser = (updatedUser) => {
@@ -85,7 +106,14 @@ export default function UsersPage() {
                     onClick={() => handleEditUser(user)}
                     className="text-blue-500 hover:text-blue-600 transition"
                   >
-                    <Edit className="w-5 h-5" /> 
+                    <Edit className="w-5 h-5" />
+                  </button>
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDeleteUser(user.id)}
+                    className="text-red-500 hover:text-red-600 transition"
+                  >
+                    <Trash className="w-5 h-5" />
                   </button>
                 </td>
               </tr>
@@ -103,7 +131,6 @@ export default function UsersPage() {
           user={selectedUser}
           onClose={() => setIsEditModalOpen(false)}
           onUpdate={(updatedUser) => handleUpdateUser(updatedUser)}
-          onDelete={() => handleDeleteUser(selectedUser.id)}
         />
       )}
     </div>

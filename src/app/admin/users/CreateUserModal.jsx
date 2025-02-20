@@ -2,35 +2,19 @@
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
 
-// Utility function to generate a random password
-const generatePassword = () => {
-  const charset =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-  let password = "";
-  for (let i = 0; i < 12; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
-  }
-  return password;
-};
-
 export default function CreateUserModal({ onClose }) {
   const [user, setUser] = useState({
     name: "",
     email: "",
     phone: "",
-    role: "User",
     password: "",
+    role: "User"
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     alert(`User Created: ${JSON.stringify(user)}`);
     onClose(); // Close modal after creating user
-  };
-
-  const handleGeneratePassword = () => {
-    const newPassword = generatePassword();
-    setUser((prevUser) => ({ ...prevUser, password: newPassword }));
   };
 
   return (
@@ -71,34 +55,21 @@ export default function CreateUserModal({ onClose }) {
             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             value={user.phone}
             onChange={(e) => setUser({ ...user, phone: e.target.value })}
+            maxLength={10}
+            pattern="^\d{10}$"
+            title="Phone number must be exactly 10 digits"
             required
           />
 
-          <select
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={user.role}
-            onChange={(e) => setUser({ ...user, role: e.target.value })}
-          >
-            <option value="User">User</option>
-            <option value="Admin">Admin</option>``
-            <option value="Editor">Editor</option>
-          </select>
-
           <div className="flex items-center space-x-4">
             <input
-              type="text"
-              placeholder="Generated Password"
+              type="password"
+              placeholder="Create Password"
               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               value={user.password}
-              readOnly
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
+              required
             />
-            <button
-              type="button"
-              onClick={handleGeneratePassword}
-              className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-            >
-              Generate Password
-            </button>
           </div>
 
           <button

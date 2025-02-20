@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Plus, Trash, Settings } from "lucide-react";
+import { Users, Plus, Pencil, Edit, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
@@ -54,10 +54,15 @@ export default function RolesPage() {
                 <td className="border p-3">{role.name}</td>
                 <td className="border p-3">{role.usersAssigned}</td>
                 <td className="border p-3 text-center flex justify-center gap-3">
-                  <button className="text-blue-500 hover:text-blue-600 transition">
-                    <Settings className="w-5 h-5" />
+                  <button
+                    className="text-blue-500 hover:text-blue-600 transition"
+                  >
+                    <Edit className="w-5 h-5" />
                   </button>
-                  <button className="text-red-500 hover:text-red-600 transition">
+                  {/* Delete Button */}
+                  <button
+                    className="text-red-500 hover:text-red-600 transition"
+                  >
                     <Trash className="w-5 h-5" />
                   </button>
                 </td>
