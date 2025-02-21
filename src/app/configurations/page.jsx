@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { Server, Database, Globe, Plug, LayoutList, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useConnection } from "@/contexts/ConnectionContext"
+import AddNewConnections from "./AddNewConnections"
 
 export default function Configurations() {
   const [connections, setConnections] = useState([])
@@ -102,35 +103,10 @@ export default function Configurations() {
     }
   }
 
-  const handleFetchTables = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch(`http://localhost:8000/get_tables?conn_name=${selectedConnection}&schema_name=${schemaDetails.get_connectionschema}`)
-      if (!response.ok) {
-        throw new Error("Failed to fetch connection tables")
-      }
-      const data = await response.json()
-      setTables(data.data)
-      toast({
-        variant: "success",
-        title: "Success",
-        description: "Fetched Successfully",
-        className: "bg-green-500 text-white",
-      })
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch connection tables",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   
   return (
     <div className="space-y-6">
+      <AddNewConnections />
       <div>
         <h1 className="text-2xl font-bold">Select DataSource & Table</h1>
         <p className="text-muted-foreground">Configure your data source and select tables for processing.</p>
@@ -193,7 +169,7 @@ export default function Configurations() {
               </Select>
             </div>
 
-          <Link href="/new-process"><Button onClick={handleFetchTables} disabled={!selectedConnection || loading} className="mt-5">Click to Process</Button></Link>
+          <Link href="/new-process"><Button disabled={!selectedConnection || loading} className="mt-5">Click to Process</Button></Link>
           {/* {tables ? (
           <Select>
             <SelectTrigger>
