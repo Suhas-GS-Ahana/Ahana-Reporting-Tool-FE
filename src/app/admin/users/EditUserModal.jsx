@@ -1,17 +1,19 @@
 import { useState } from "react";
 
 export default function EditUserModal({ user, onClose, onUpdate }) {
-  const [activeTab, setActiveTab] = useState("edit");
-  const [editedUser, setEditedUser] = useState(user);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [activeTab, setActiveTab] = useState("edit"); // Controls whether the "Edit User Details" tab or the "Change Password" tab is active
+  const [editedUser, setEditedUser] = useState(user); // Stores the modified user data
+  const [newPassword, setNewPassword] = useState(""); // Hold password input values
+  const [confirmPassword, setConfirmPassword] = useState(""); // ""
 
+  // Handling User Update
   const handleUserUpdate = (e) => {
     e.preventDefault();
     onUpdate(editedUser);
     onClose();
   };
 
+  // Handling Password Change
   const handlePasswordChange = (e) => {
     e.preventDefault();
     if (!newPassword) {
@@ -62,6 +64,7 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
         </div>
 
         {activeTab === "edit" ? (
+          // Edit User Form
           <form onSubmit={handleUserUpdate} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -116,6 +119,7 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
             </button>
           </form>
         ) : (
+          // Change Password Form
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">

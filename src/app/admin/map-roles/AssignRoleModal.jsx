@@ -28,7 +28,7 @@ export default function AssignRoleModal({ user, onClose, onSave }) {
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h3 className="text-lg font-bold mb-4">Assign Roles to {user.name}</h3>
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-60 overflow-y-auto border p-2 rounded-md">
           {allRoles.map((role) => (
             <label key={role} className="flex items-center space-x-2">
               <input
