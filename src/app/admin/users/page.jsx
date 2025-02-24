@@ -52,6 +52,7 @@ export default function UsersPage() {
     }
   };
 
+  // Function to handle user updation
   const handleUpdateUser = (updatedUser) => {
     alert(`User Updated: ${JSON.stringify(updatedUser, null, 2)}`);
     // Perform state update or API call

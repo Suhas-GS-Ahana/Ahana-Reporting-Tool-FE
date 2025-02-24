@@ -1,8 +1,12 @@
+// Modal to create new user
+
 "use client";
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
 
 export default function CreateUserModal({ onClose }) {
+
+  // Managing Form State
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -11,6 +15,7 @@ export default function CreateUserModal({ onClose }) {
     role: "User"
   });
 
+  // Handling Form Submission
   const handleSubmit = (e) => {
     e.preventDefault();
     alert(`User Created: ${JSON.stringify(user)}`);
