@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -10,6 +11,7 @@ import { useConnection } from "@/contexts/ConnectionContext"
 import ConnectionForm from "./ConnectionForm"
 import ConnectionDetails from "./ConnectionDetails"
 import SchemaSelector from "./SchemaSelector"
+import { v4 as uuidv4 } from "uuid"
 
 export default function Configurations() {
   const [connections, setConnections] = useState([])
@@ -19,7 +21,9 @@ export default function Configurations() {
   const [loading, setLoading] = useState(false)
   const [showConnectionForm, setShowConnectionForm] = useState(true)
   const { setConnectionsDetails, setSchemasDetails } = useConnection()
+  const [connIdCounter, setConnIdCounter] = useState(10)
   const { toast } = useToast()
+  const router = useRouter()
 
   useEffect(() => {
     fetchConnections()
@@ -98,15 +102,39 @@ export default function Configurations() {
     })
   }
 
-  const handleSaveConnection = async () => {
+  const handleSaveConnection = async (formData) => {
     // Implement save connection logic here
+    const newConnId = connIdCounter + 1
+    const newGuid = uuidv4()
+
+    const payload = {
+      conn_id: newConnId,
+      guid: newGuid,
+      inserted_by: "test_user",
+      modified_by: "admin",
+      inserted_date: new Date().toISOString(),
+      modified_date: new Date().toISOString(),
+      connection_name: formData.connectionName,
+      database_type: "postgresql",
+      server_name: formData.hostName,
+      port_number: parseInt(formData.portNumber, 10),
+      database_name: formData.databaseName,
+      server_login: formData.userName,
+      password: formData.password,
+      filepath: "/path/to/database/file",
+      is_cloud: false,
+      is_onpremise: true,
+      is_connection_encrypted: true,
+      is_active: true,
+      expiry_date: "2025-12-31T23:59:59.999Z",
+    }
     try {
       const response = await fetch("http://localhost:8000/save_connection", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(connectionDetails),
+        body: JSON.stringify(payload),
       })
       if (!response.ok) {
         throw new Error("Failed to save connection")
@@ -116,7 +144,21 @@ export default function Configurations() {
       title: "Saving Connection",
       description: "Connection details saved successfully",
     })
+
+      // Update connIdCounter
+      setConnIdCounter(newConnId)
+
+      // Reset form data
+      setShowConnectionForm(false)
+
+       // Redirect to process page
+      router.push("/new-process")
   } catch (error) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to save connection",
+    })
   }
 }
 

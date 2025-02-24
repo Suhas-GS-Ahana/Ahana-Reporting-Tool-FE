@@ -40,7 +40,7 @@ export function Header() {
           </DropdownMenu>
           ) : (
             <Button variant="outline" asChild>
-            <Link href="/login">Login</Link>
+            <Link href="/auth/login">Login</Link>
           </Button>
           )}
         </div>
