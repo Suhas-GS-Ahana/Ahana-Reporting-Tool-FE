@@ -74,6 +74,13 @@ export default function RolesPage() {
       prevRoles.map((role) => (role.id === newRole.id ? newRole : role))
     );
   };
+
+  const handleDeleteRole = (roleId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this role?");
+    if (confirmDelete) {
+      setRoles((prevRoles) => prevRoles.filter((role) => role.id !== roleId));
+    }
+  };
   
 
   return (
@@ -136,7 +143,8 @@ export default function RolesPage() {
                   >
                     <Edit className="w-5 h-5" />
                   </button>
-                  <button className="text-red-500 hover:text-red-600 transition">
+                  <button className="text-red-500 hover:text-red-600 transition"
+                  onClick={() => handleDeleteRole(role.id)}>
                     <Trash className="w-5 h-5" />
                   </button>
                 </td>
