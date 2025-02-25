@@ -11,7 +11,6 @@ import { useConnection } from "@/contexts/ConnectionContext"
 import ConnectionForm from "./ConnectionForm"
 import ConnectionDetails from "./ConnectionDetails"
 import SchemaSelector from "./SchemaSelector"
-import { v4 as uuidv4 } from "uuid"
 
 export default function Configurations() {
   const [connections, setConnections] = useState([])
@@ -21,7 +20,6 @@ export default function Configurations() {
   const [loading, setLoading] = useState(false)
   const [showConnectionForm, setShowConnectionForm] = useState(true)
   const { setConnectionsDetails, setSchemasDetails } = useConnection()
-  const [connIdCounter, setConnIdCounter] = useState(10)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -104,12 +102,10 @@ export default function Configurations() {
 
   const handleSaveConnection = async (formData) => {
     // Implement save connection logic here
-    const newConnId = connIdCounter + 1
-    const newGuid = uuidv4()
 
     const payload = {
-      conn_id: newConnId,
-      guid: newGuid,
+      conn_id: "",
+      guid: "",
       inserted_by: "test_user",
       modified_by: "admin",
       inserted_date: new Date().toISOString(),
@@ -144,9 +140,6 @@ export default function Configurations() {
       title: "Saving Connection",
       description: "Connection details saved successfully",
     })
-
-      // Update connIdCounter
-      setConnIdCounter(newConnId)
 
       // Reset form data
       setShowConnectionForm(false)
