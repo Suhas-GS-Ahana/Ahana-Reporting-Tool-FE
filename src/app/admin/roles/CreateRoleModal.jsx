@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+//Pages data
 const allPages = [
   { name: "Dashboard", elements: ["Button 1", "Button 2", "Input 1"] },
   { name: "Users", elements: ["Add User", "Delete User", "Edit User"] },
@@ -31,7 +32,11 @@ const allPages = [
   { name: "Logs", elements: ["View Logs", "Export Logs", "Clear Logs"] },
 ];
 
+
+// accepts two props 
 export default function CreateRoleModal({ onClose, onSave }) {
+
+  // State Variables
   const [roleName, setRoleName] = useState(""); // Stores the name of the new role
   const [selectedPages, setSelectedPages] = useState({}); // Keeps track of selected pages and their elements
   const [openDropdown, setOpenDropdown] = useState(null); // Controls which dropdown is open
@@ -63,7 +68,7 @@ export default function CreateRoleModal({ onClose, onSave }) {
     setOpenDropdown(null);
   };
 
-  // Handle selecting/deselecting a page (toggles all elements)
+  // Select/Deselect a Page
   const handlePageSelect = (page) => {
     setSelectedPages((prev) => {
       const allElements = allPages.find((p) => p.name === page).elements;
@@ -73,7 +78,7 @@ export default function CreateRoleModal({ onClose, onSave }) {
     });
   };
 
-  // Handle selecting/deselecting an individual element
+  // Select/Deselect an Individual Element
   const handleElementSelect = (page, element) => {
     setSelectedPages((prev) => {
       const updatedPage = prev[page] || [];
@@ -85,14 +90,7 @@ export default function CreateRoleModal({ onClose, onSave }) {
       };
     });
   };
-
-  // Check if "Select All" should be checked
-  const isAllSelected =
-    Object.keys(selectedPages).length === allPages.length &&
-    allPages.every(
-      (page) => selectedPages[page.name]?.length === page.elements.length
-    );
-
+  
   // Handle Save
   const handleSave = () => {
     if (!roleName.trim()) {
@@ -108,6 +106,13 @@ export default function CreateRoleModal({ onClose, onSave }) {
     onSave(newRole);
     onClose();
   };
+
+  // Check if "Select All" should be checked
+  const isAllSelected =
+    Object.keys(selectedPages).length === allPages.length &&
+    allPages.every(
+      (page) => selectedPages[page.name]?.length === page.elements.length
+    );
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
