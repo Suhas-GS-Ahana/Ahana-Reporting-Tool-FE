@@ -7,7 +7,11 @@ import {
   LayoutDashboard,
   Shield,
   FileText,
-  UserCog
+  UserCog,
+  ClipboardList,
+  Activity,
+  Terminal,
+  FileCode
 } from "lucide-react" // Import the icons you need
 
 const adminRoutes = [
@@ -23,7 +27,7 @@ const adminRoutes = [
   },
   {
     title: "Roles",
-    icon: Shield, // Icon for Roles (can change based on preference)
+    icon: Shield, 
     href: "/admin/roles",
   },
   {
@@ -33,8 +37,18 @@ const adminRoutes = [
   },
   {
     title: "Pages",
-    icon: FileText, // Icon for Pages (or another appropriate one)
+    icon: FileText, 
     href: "/admin/pages",
+  },
+  {
+    title: "User Logs",
+    icon: ClipboardList, 
+    href: "/admin/user-logs",
+  },
+  {
+    title: "Process Logs",
+    icon: FileCode, 
+    href: "/admin/process-logs",
   },
 ]
 
@@ -42,7 +56,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <nav className="hidden border-r bg-background lg:block w-64">
+    <nav className="hidden border-r bg-background lg:block w-64 h-screen">
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="space-y-1">

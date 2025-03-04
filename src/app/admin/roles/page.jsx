@@ -6,37 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateRoleModal from "./CreateRoleModal";
 import EditRoleModal from "./EditRoleModal";
 
-const allPages = [
-  { name: "Dashboard", elements: ["Button 1", "Button 2", "Input 1"] },
-  { name: "Users", elements: ["Add User", "Delete User", "Edit User"] },
-  { name: "Settings", elements: ["Toggle Dark Mode", "Change Password"] },
-  {
-    name: "Reports",
-    elements: ["Generate Report", "Download PDF", "Filter Data"],
-  },
-  { name: "Orders", elements: ["Create Order", "Cancel Order", "Track Order"] },
-  {
-    name: "Products",
-    elements: ["Add Product", "Edit Product", "Delete Product"],
-  },
-  {
-    name: "Notifications",
-    elements: ["Enable Alerts", "Mute Notifications", "Set Preferences"],
-  },
-  {
-    name: "Messages",
-    elements: ["Send Message", "Delete Message", "Archive Chat"],
-  },
-  {
-    name: "Payments",
-    elements: ["Make Payment", "Refund", "View Transactions"],
-  },
-  { name: "Logs", elements: ["View Logs", "Export Logs", "Clear Logs"] },
-];
-
 export default function RolesPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // State Variables
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // Controls visibility of the "Create Role" modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Controls visibility of the "Edit Role" modal
+  // Stores roles with their assigned permissions
   const [roles, setRoles] = useState([
     {
       id: 1,
@@ -53,12 +29,17 @@ export default function RolesPage() {
     },
     { id: 3, name: "User", permissions: { Orders: ["Create Order"] } },
   ]);
-  const [roleToEdit, setRoleToEdit] = useState(null);
+  const [roleToEdit, setRoleToEdit] = useState(null); // Stores the role being edited
 
+
+  // Functions
+
+  // Adding a New Role
   const handleAddRole = (newRole) => {
     setRoles((prevRoles) => [...prevRoles, newRole]);
   };
 
+  // Updating an Existing Roles
   const handleUpdateRole = (updatedRole) => {
     // Remove pages that have no selected elements
     const cleanedPermissions = Object.fromEntries(
@@ -66,20 +47,30 @@ export default function RolesPage() {
         ([, elements]) => elements.length > 0
       )
     );
-  
+
     // Update the role with cleaned permissions
     const newRole = { ...updatedRole, permissions: cleanedPermissions };
-  
+
     setRoles((prevRoles) =>
       prevRoles.map((role) => (role.id === newRole.id ? newRole : role))
     );
   };
-  
+
+  // Deleting a Role
+  const handleDeleteRole = (roleId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this role?"
+    );
+    if (confirmDelete) {
+      setRoles((prevRoles) => prevRoles.filter((role) => role.id !== roleId));
+    }
+  };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Roles Management</h2>
 
+      {/* Roles Stats - Displays the total number of roles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="shadow-md hover:shadow-lg transition">
           <CardHeader>
@@ -92,6 +83,7 @@ export default function RolesPage() {
         </Card>
       </div>
 
+       {/* Add Role Button */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-fit">
         <button
           onClick={() => setIsCreateModalOpen(true)}
@@ -101,6 +93,7 @@ export default function RolesPage() {
         </button>
       </div>
 
+      {/* Roles Table */}
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-gray-100">
@@ -127,6 +120,7 @@ export default function RolesPage() {
                   )}
                 </td>
                 <td className="border p-3 text-center flex justify-center gap-3">
+                  {/* Edit Button */}
                   <button
                     className="text-blue-500 hover:text-blue-600 transition"
                     onClick={() => {
@@ -136,7 +130,11 @@ export default function RolesPage() {
                   >
                     <Edit className="w-5 h-5" />
                   </button>
-                  <button className="text-red-500 hover:text-red-600 transition">
+                  {/* Delete Button */}
+                  <button
+                    className="text-red-500 hover:text-red-600 transition"
+                    onClick={() => handleDeleteRole(role.id)}
+                  >
                     <Trash className="w-5 h-5" />
                   </button>
                 </td>
@@ -146,12 +144,14 @@ export default function RolesPage() {
         </table>
       </div>
 
+      {/* Rendering Modals */}
       {isCreateModalOpen && (
         <CreateRoleModal
           onClose={() => setIsCreateModalOpen(false)}
           onSave={handleAddRole}
         />
       )}
+      
       {isEditModalOpen && (
         <EditRoleModal
           role={roleToEdit}
@@ -159,6 +159,7 @@ export default function RolesPage() {
           onUpdate={handleUpdateRole}
         />
       )}
+
     </div>
   );
 }
