@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Plus, Save, Trash2, ChevronDown, Database, ArrowRight, Server, Globe, Plug, LayoutList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,10 +15,21 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Play } from "lucide-react"
 import { useConnection } from "@/contexts/ConnectionContext"
+import SchemaSelector from "../configurations/SchemaSelector"
+import ConnectionDetails from "../configurations/ConnectionDetails"
 
 export default function NewProcess() {
+  const [schemaDetails, setSchemaDetails] = useState([])
+  const [tableDetails, setTableDetails] = useState([])
+  const [loading, setLoading] = useState(false)
+  const { setSchemasDetails } = useConnection()
   const { toast } = useToast()
   const { connectionsDetails, schemasDetails } = useConnection()
+  const searchParams = useSearchParams()
+  const connectionName = searchParams.get("connectionName")
+  const [connectionDetails, setConnectionDetails] = useState(null)
+  const [connections, setConnections] = useState([])
+  const [selectedConnection, setSelectedConnection] = useState(null)
   const [processes, setProcesses] = useState([
     {
       id: 1,
@@ -159,9 +171,9 @@ export default function NewProcess() {
       })
     )
 
-    if(newType === "import") {
-      await callImportAPI()
-    }
+    // if(newType === "import") {
+    //   await callImportAPI()
+    // }
   }
 
   const callImportAPI = async () => {
@@ -246,6 +258,96 @@ export default function NewProcess() {
         return process
       })
     )
+  }
+
+  useEffect(() => {
+    if (connectionName) {
+      fetchSchemaDetails(connectionName)
+    }
+  }, [connectionName])
+
+  const fetchSchemaDetails = async (connectionName) => {
+    setLoading(true)
+    try {
+      const response = await fetch(`http://localhost:8000/get_connectionschema?name=${connectionName}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch connection schema")
+      }
+      const data = await response.json()
+      setSchemaDetails(data.data)
+      setSchemasDetails(data.data)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch connection schema",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSchemaSelect = async (schema) => {
+    try {
+      const response = await fetch(`http://localhost:8000/get_tables?conn_name=${connectionName}&schema_name=${schema}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch tables")
+      }
+      const data = await response.json()
+      setTableDetails(data.data)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch tables",
+      })
+    }
+  }
+
+  useEffect(() => {
+    fetchConnections()
+  }, [])
+
+  const fetchConnections = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch("http://localhost:8000/view_all_connections")
+      if (!response.ok) {
+        throw new Error("Failed to fetch connections")
+      }
+      const data = await response.json()
+      setConnections(data.data)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch connections",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleConnectionSelect = async (connectionName) => {
+    setLoading(true)
+    setSelectedConnection(connectionName)
+    try {
+      const response = await fetch(`http://localhost:8000/view_connection?name=${connectionName}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch connection details")
+      }
+      const data = await response.json()
+      setConnectionDetails(data.data)
+      setConnectionsDetails(data.data)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch connection details",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -351,27 +453,44 @@ export default function NewProcess() {
                                   <div className="flex items-center gap-2">
                                     <Database className="h-6 w-6" />
                                     <div>
-                                      <p>Source Database</p>
-                                      <p>Details about the source database</p>
                                       <div className="flex flex-wrap gap-2 items-center">
-                                      <Badge variant="outline" className="text-xs bg-blue-100 text-blue-600 flex items-center gap-1 px-2 py-1">
-      <Server className="w-3 h-3" /> Name: {connectionsDetails[0]}
-    </Badge>
-    <Badge variant="outline" className="text-xs bg-green-100 text-green-600 flex items-center gap-1 px-2 py-1">
-      <Globe className="w-3 h-3" /> Server: {connectionsDetails[1]}
-    </Badge>
-    <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-600 flex items-center gap-1 px-2 py-1">
-      <Plug className="w-3 h-3" /> Port: {connectionsDetails[2]}
-    </Badge>
-    <Badge variant="outline" className="text-xs bg-purple-100 text-purple-600 flex items-center gap-1 px-2 py-1">
-      <LayoutList className="w-3 h-3" /> Type: {connectionsDetails[3]}
-    </Badge>
-    <Badge variant="outline" className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1">
-      <Database className="w-3 h-3" /> Database: {connectionsDetails[4]}
-    </Badge>
-    </div>
+                                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-600 flex items-center gap-1 px-2 py-1">
+                                          <Server className="w-3 h-3" /> Name: {connectionsDetails[0]}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs bg-green-100 text-green-600 flex items-center gap-1 px-2 py-1">
+                                          <Globe className="w-3 h-3" /> Server: {connectionsDetails[1]}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-600 flex items-center gap-1 px-2 py-1">
+                                          <Plug className="w-3 h-3" /> Port: {connectionsDetails[2]}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs bg-purple-100 text-purple-600 flex items-center gap-1 px-2 py-1">
+                                          <LayoutList className="w-3 h-3" /> Type: {connectionsDetails[3]}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1">
+                                          <Database className="w-3 h-3" /> Database: {connectionsDetails[4]}
+                                        </Badge>
+                                      </div>
                                     </div>
                                   </div>
+                                  <div className="grid gap-2 mt-8">
+                                    <SchemaSelector schemaDetails={schemaDetails} onSchemaSelect={handleSchemaSelect} />
+                                  </div>
+                                  {tableDetails.length > 0 && (
+                                    <div className="grid gap-2 mt-8">
+                                      <Select multiple>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select tables" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {tableDetails.map((table) => (
+                                            <SelectItem key={table.table_name} value={table.table_name}>
+                                              {table.table_name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  )}
                                 </CardContent>
                               </Card>
                               <ArrowRight className="h-6 w-6 self-center" />
@@ -383,8 +502,23 @@ export default function NewProcess() {
                                   <div className="flex items-center gap-2">
                                     <Database className="h-6 w-6" />
                                     <div>
-                                      <p>Destination Database</p>
-                                      <p>Details about the destination database</p>
+                                    <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Select onValueChange={handleConnectionSelect} disabled={loading}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select data source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {connections.map((connection) => (
+                      <SelectItem key={connection.connection_name} value={connection.connection_name}>
+                        {connection.connection_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {connectionDetails && <ConnectionDetails connectionDetails={connectionDetails} />}
+            </div>
                                     </div>
                                   </div>
                                 </CardContent>

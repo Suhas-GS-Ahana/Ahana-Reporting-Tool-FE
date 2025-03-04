@@ -10,16 +10,14 @@ import Link from "next/link"
 import { useConnection } from "@/contexts/ConnectionContext"
 import ConnectionForm from "./ConnectionForm"
 import ConnectionDetails from "./ConnectionDetails"
-import SchemaSelector from "./SchemaSelector"
 
 export default function Configurations() {
   const [connections, setConnections] = useState([])
   const [selectedConnection, setSelectedConnection] = useState(null)
   const [connectionDetails, setConnectionDetails] = useState(null)
-  const [schemaDetails, setSchemaDetails] = useState([])
   const [loading, setLoading] = useState(false)
   const [showConnectionForm, setShowConnectionForm] = useState(true)
-  const { setConnectionsDetails, setSchemasDetails } = useConnection()
+  const { setConnectionsDetails } = useConnection()
   const { toast } = useToast()
   const router = useRouter()
 
@@ -58,7 +56,6 @@ export default function Configurations() {
       const data = await response.json()
       setConnectionDetails(data.data)
       setConnectionsDetails(data.data)
-      await handleFetchSchema(connectionName)
     } catch (error) {
       toast({
         variant: "destructive",
@@ -70,42 +67,39 @@ export default function Configurations() {
     }
   }
 
-  const handleFetchSchema = async (connectionName) => {
-    setLoading(true)
-    setSelectedConnection(connectionName)
+  const handleTestConnection = async (formData) => {
+    const existingConnection = connections.find(connection => connection.connection_name === formData.connectionName)
+    const url = existingConnection ? `http://localhost:8000/test_connection?conn_id=${existingConnection.id}` : "http://localhost:8000/test_connection"
+    const payload = existingConnection ? {} : formData
+
     try {
-      const response = await fetch(`http://localhost:8000/get_connectionschema?name=${connectionName}`)
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
       if (!response.ok) {
-        throw new Error("Failed to fetch connection schema")
+        throw new Error("Failed to test connection")
       }
-      const data = await response.json()
-      setSchemaDetails(data.data)
-      setSchemasDetails(data.data)
+
+      toast({
+        title: "Testing Connection",
+        description: "Connection test initiated...",
+      })
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch connection schema",
+        description: "Failed to test connection",
       })
-    } finally {
-      setLoading(false)
     }
   }
 
-  const handleTestConnection = async () => {
-    // Implement test connection logic here
-    toast({
-      title: "Testing Connection",
-      description: "Connection test initiated...",
-    })
-  }
-
   const handleSaveConnection = async (formData) => {
-    // Implement save connection logic here
-
     const payload = {
-      conn_id: "",
-      guid: "",
       inserted_by: "test_user",
       modified_by: "admin",
       inserted_date: new Date().toISOString(),
@@ -136,24 +130,24 @@ export default function Configurations() {
         throw new Error("Failed to save connection")
       }
     
-    toast({
-      title: "Saving Connection",
-      description: "Connection details saved successfully",
-    })
+      toast({
+        title: "Saving Connection",
+        description: "Connection details saved successfully",
+      })
 
       // Reset form data
       setShowConnectionForm(false)
 
-       // Redirect to process page
-      router.push("/new-process")
-  } catch (error) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to save connection",
-    })
+      // Redirect to process page with connectionName as query parameter
+      router.push(`/new-process?connectionName=${formData.connectionName}`)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save connection",
+      })
+    }
   }
-}
 
   if (showConnectionForm) {
     return (
@@ -195,11 +189,8 @@ export default function Configurations() {
               </div>
               {connectionDetails && <ConnectionDetails connectionDetails={connectionDetails} />}
             </div>
-            <div className="grid gap-2">
-              <SchemaSelector schemaDetails={schemaDetails} />
-            </div>
 
-            <Link href="/new-process">
+            <Link href={`/new-process?connectionName=${selectedConnection}`}>
               <Button disabled={!selectedConnection || loading} className="mt-5">
                 Click to Process
               </Button>

@@ -75,9 +75,9 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button onClick={onTestConnection}>Test Connection</Button>
-          <Button disabled={isSubmitting}>Save Connection</Button>
-          <Button variant="destructive" onClick={onSkip}>
+          <Button type='button' onClick={() => onTestConnection(newConnectionData)}>Test Connection</Button>
+          <Button type='submit' disabled={isSubmitting}>Save Connection</Button>
+          <Button type='button' variant="destructive" onClick={onSkip}>
             Skip & Continue
           </Button>
         </div>
