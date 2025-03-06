@@ -10,13 +10,14 @@ import Link from "next/link"
 import { useConnection } from "@/contexts/ConnectionContext"
 import ConnectionForm from "./ConnectionForm"
 import ConnectionDetails from "./ConnectionDetails"
+import { BadgePlus } from "lucide-react"
 
 export default function Configurations() {
   const [connections, setConnections] = useState([])
   const [selectedConnection, setSelectedConnection] = useState(null)
   const [connectionDetails, setConnectionDetails] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [showConnectionForm, setShowConnectionForm] = useState(true)
+  const [showConnectionForm, setShowConnectionForm] = useState(false)
   const { setConnectionsDetails } = useConnection()
   const { toast } = useToast()
   const router = useRouter()
@@ -167,9 +168,16 @@ export default function Configurations() {
       </div>
       <div className="">
         <Card>
-          <CardHeader>
+          <CardHeader className='flex flex-row justify-between items-center'>
+            <div>
             <CardTitle>Data Source Configuration</CardTitle>
-            <CardDescription>Select your database and schema information</CardDescription>
+            <CardDescription>Select your database</CardDescription>
+            </div>
+            <div>
+            <Button onClick={() => setShowConnectionForm(true)} className="bg-blue-950 hover:bg-blue-900">
+            <BadgePlus /> Add New Data Source
+            </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
