@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,10 +9,10 @@ import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
-import * as z from 'zod'
+import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormLabel, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form"
-
+import { Eye, EyeOff } from "lucide-react"
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -20,11 +20,11 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
-
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const { toast } = useToast();
-  const router = useRouter();
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const { login } = useAuth()
+  const { toast } = useToast()
+  const router = useRouter()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -59,47 +59,69 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-2.5">
-              <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-2.5">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col space-y-2.5">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Enter your password"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-              <div className="flex flex-col space-y-2.5">
-              <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Enter your password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-              </div>
-            </div>
-            <Button className="w-full bg-blue-950 mt-7" type='submit' disabled={loading}>{loading ? "Logged In..." : "Login"}</Button>
-          </form>
+              <Button className="w-full bg-blue-950 mt-7" type="submit" disabled={loading}>
+                {loading ? "Logged In..." : "Login"}
+              </Button>
+            </form>
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col">
           <p className="mt-4 text-sm text-center text-gray-600">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-blue-600 hover:underline">
+            <Link href="/auth/signup" className="text-blue-600 hover:underline">
               Sign up
             </Link>
           </p>
