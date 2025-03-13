@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("user")
     Cookies.remove("user")
     setUser(null)
-    router.push("/login")
+    router.push("/auth/login")
   }
 
   const toggleSidebar = () => {
