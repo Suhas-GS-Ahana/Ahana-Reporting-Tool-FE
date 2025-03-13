@@ -1,11 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Save } from "lucide-react"
+import { Plus, Save, FileText, Database } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import ProcessCard from "./ProcessCard"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const ProcessList = ({
   initialProcesses,
@@ -20,6 +22,7 @@ const ProcessList = ({
 }) => {
   const { toast } = useToast()
   const [processes, setProcesses] = useState(initialProcesses || [])
+  const [activeTab, setActiveTab] = useState("processes")
 
   let lastAssignedColor = ""
   const getSubProcessBgColor = (processId) => {
@@ -91,8 +94,9 @@ const ProcessList = ({
 
   const handleSave = () => {
     toast({
-      title: "Query Saved",
-      description: "The query has been successfully saved.",
+      title: "Process Saved",
+      description: "Your process has been successfully saved.",
+      variant: "success",
     })
   }
 
@@ -197,41 +201,106 @@ const ProcessList = ({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4">
-        <Button onClick={handleAddProcess} className="bg-blue-950">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Process
-        </Button>
-        <Button variant="secondary" onClick={handleSave}>
-          <Save className="mr-2 h-4 w-4" />
-          Save & Continue
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <Card className="border-blue-100 shadow-sm">
+        <CardHeader className="bg-blue-50 border-b border-blue-100">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-blue-800">ETL Process Designer</CardTitle>
+              <CardDescription>Create and manage your data transformation processes</CardDescription>
+            </div>
+            <div className="flex gap-3">
+              <Button onClick={handleAddProcess} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Process
+              </Button>
+              <Button variant="outline" onClick={handleSave} className="border-blue-200 text-blue-700 hover:bg-blue-50">
+                <Save className="mr-2 h-4 w-4" />
+                Save & Continue
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <Tabs defaultValue="processes" className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="mb-6 bg-blue-50">
+              <TabsTrigger value="processes" className="data-[state=active]:bg-white">
+                <FileText className="mr-2 h-4 w-4" />
+                Processes
+              </TabsTrigger>
+              <TabsTrigger value="connections" className="data-[state=active]:bg-white">
+                <Database className="mr-2 h-4 w-4" />
+                Connections
+              </TabsTrigger>
+            </TabsList>
 
-      {processes.map((process) => (
-        <ProcessCard
-          key={process.id}
-          process={process}
-          onProcessNameChange={handleProcessNameChange}
-          onAddSubProcess={handleAddSubProcess}
-          onDeleteProcess={handleDeleteProcess}
-          onDeleteSubProcess={handleDeleteSubProcess}
-          onSubProcessNameChange={handleSubProcessNameChange}
-          onSubProcessTypeChange={handleSubProcessTypeChange}
-          onAddStep={handleAddStep}
-          onDeleteStep={handleDeleteStep}
-          getSubProcessBgColor={getSubProcessBgColor}
-          connectionsDetails={connectionsDetails}
-          schemasDetails={schemasDetails}
-          schemaDetails={schemaDetails}
-          handleSchemaSelect={handleSchemaSelect}
-          tableDetails={tableDetails}
-          connections={connections}
-          handleConnectionSelect={handleConnectionSelect}
-          connectionDetails={connectionDetails}
-        />
-      ))}
+            <TabsContent value="processes" className="space-y-6">
+              {processes.length === 0 ? (
+                <div className="text-center p-12 border border-dashed rounded-lg">
+                  <FileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-700 mb-2">No Processes Yet</h3>
+                  <p className="text-gray-500 mb-4">Create your first process to get started</p>
+                  <Button onClick={handleAddProcess} className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Process
+                  </Button>
+                </div>
+              ) : (
+                processes.map((process) => (
+                  <ProcessCard
+                    key={process.id}
+                    process={process}
+                    onProcessNameChange={handleProcessNameChange}
+                    onAddSubProcess={handleAddSubProcess}
+                    onDeleteProcess={handleDeleteProcess}
+                    onDeleteSubProcess={handleDeleteSubProcess}
+                    onSubProcessNameChange={handleSubProcessNameChange}
+                    onSubProcessTypeChange={handleSubProcessTypeChange}
+                    onAddStep={handleAddStep}
+                    onDeleteStep={handleDeleteStep}
+                    getSubProcessBgColor={getSubProcessBgColor}
+                    connectionsDetails={connectionsDetails}
+                    schemasDetails={schemasDetails}
+                    schemaDetails={schemaDetails}
+                    handleSchemaSelect={handleSchemaSelect}
+                    tableDetails={tableDetails}
+                    connections={connections}
+                    handleConnectionSelect={handleConnectionSelect}
+                    connectionDetails={connectionDetails}
+                  />
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="connections" className="space-y-4">
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-lg font-medium mb-4">Connection Details</h3>
+                {connectionsDetails ? (
+                  <div className="space-y-2">
+                    <p>
+                      <strong>Name:</strong> {connectionsDetails?.[0]}
+                    </p>
+                    <p>
+                      <strong>Server:</strong> {connectionsDetails?.[1]}
+                    </p>
+                    <p>
+                      <strong>Port:</strong> {connectionsDetails?.[2]}
+                    </p>
+                    <p>
+                      <strong>Type:</strong> {connectionsDetails?.[3]}
+                    </p>
+                    <p>
+                      <strong>Database:</strong> {connectionsDetails?.[4]}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No connection selected</p>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
       <Toaster />
     </div>
   )
