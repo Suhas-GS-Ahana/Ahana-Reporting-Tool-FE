@@ -5,11 +5,11 @@ import { Users, Plus, Edit, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateRoleModal from "./CreateRoleModal";
 import EditRoleModal from "./EditRoleModal";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 
 export default function RolesPage() {
 
   // State Variables
-
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // Controls visibility of the "Create Role" modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Controls visibility of the "Edit Role" modal
   // Stores roles with their assigned permissions
@@ -36,6 +36,17 @@ export default function RolesPage() {
 
   // Adding a New Role
   const handleAddRole = (newRole) => {
+    toast.success(`User created successfully! \n ${JSON.stringify(newRole)}`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+      });
     setRoles((prevRoles) => [...prevRoles, newRole]);
   };
 
@@ -51,9 +62,22 @@ export default function RolesPage() {
     // Update the role with cleaned permissions
     const newRole = { ...updatedRole, permissions: cleanedPermissions };
 
+    toast.success(`Role updated successfully! \n ${JSON.stringify(updatedRole)}`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+      });
+
     setRoles((prevRoles) =>
       prevRoles.map((role) => (role.id === newRole.id ? newRole : role))
     );
+    
   };
 
   // Deleting a Role
@@ -62,6 +86,17 @@ export default function RolesPage() {
       "Are you sure you want to delete this role?"
     );
     if (confirmDelete) {
+      toast.success(`User with ID ${roleId} deleted successfully`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
       setRoles((prevRoles) => prevRoles.filter((role) => role.id !== roleId));
     }
   };
@@ -148,7 +183,7 @@ export default function RolesPage() {
       {isCreateModalOpen && (
         <CreateRoleModal
           onClose={() => setIsCreateModalOpen(false)}
-          onSave={handleAddRole}
+          onAdd={(newRole) => handleAddRole(newRole)}
         />
       )}
       
@@ -159,7 +194,19 @@ export default function RolesPage() {
           onUpdate={handleUpdateRole}
         />
       )}
-
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 }

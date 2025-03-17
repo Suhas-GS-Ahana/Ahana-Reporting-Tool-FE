@@ -6,6 +6,7 @@ import { Users, Plus, Edit, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateUserModal from "./CreateUserModal";
 import EditUserModal from "./EditUserModal";
+import { Bounce, ToastContainer, toast } from "react-toastify";
 
 export default function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false); // To open the Create modal
@@ -16,24 +17,39 @@ export default function UsersPage() {
   const users = [
     {
       id: 1,
-      name: "John Doe",
-      email: "john@example.com",
+      userName: "JohnDoe12",
+      firstName: "John",
+      lastName: "Doe",
       phone: "9245384153",
-      role: "Admin",
+      email: "john@example.com",
+      role: "Admin, Reviewer",
     },
     {
       id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
+      userName: "JaneSmith65",
+      firstName: "Jane",
+      lastName: "Smith",
       phone: "7245861239",
-      role: "Editor",
+      email: "jane@example.com",
+      role: "Editor, Reviewer",
     },
     {
       id: 3,
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      phone: "8215347852",
-      role: "User",
+      userName: "MikeRoss99",
+      firstName: "Mike",
+      lastName: "Ross",
+      phone: "7854123698",
+      email: "mike@example.com",
+      role: "User, Admin",
+    },
+    {
+      id: 4,
+      userName: "SaraConnor88",
+      firstName: "Sara",
+      lastName: "Connor",
+      phone: "6987451236",
+      email: "sara@example.com",
+      role: "User, Editor",
     },
   ];
 
@@ -46,22 +62,59 @@ export default function UsersPage() {
   // Function to handle user deletion
   const handleDeleteUser = (userId) => {
     // Here you can add the logic for deleting the user (API call or state update)
-    const confirmDelete = window.confirm(`Do you want to delete this user with id ${userId}?`);
+    const confirmDelete = window.confirm(
+      `Do you want to delete this user with id ${userId}?`
+    );
     if (confirmDelete) {
-      alert(`User with ID ${userId} deleted`);
+      toast.success(`User with ID ${userId} deleted successfully`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
+        
     }
   };
 
   // Function to handle user updation
   const handleUpdateUser = (updatedUser) => {
-    alert(`User Updated: ${JSON.stringify(updatedUser, null, 2)}`);
     // Perform state update or API call
+    toast.success(`User updated successfully! \n ${JSON.stringify(updatedUser, null, 2)}`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+      });
+  };
+
+  // Function to handle user creation
+  const handleAddUser = (newUser) => {
+    toast.success(`User created successfully! \n ${JSON.stringify(newUser)}`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+      });
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Users Management</h2>
-
       {/* User Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="shadow-md hover:shadow-lg transition">
@@ -90,7 +143,7 @@ export default function UsersPage() {
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border p-3 text-left">Name</th>
+              <th className="border p-3 text-left">User Name</th>
               <th className="border p-3 text-left">Email</th>
               <th className="border p-3 text-left">Phone</th>
               <th className="border p-3 text-left">Role</th>
@@ -100,7 +153,7 @@ export default function UsersPage() {
           <tbody>
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
-                <td className="border p-3">{user.name}</td>
+                <td className="border p-3">{user.userName}</td>
                 <td className="border p-3">{user.email}</td>
                 <td className="border p-3">{user.phone}</td>
                 <td className="border p-3">{user.role}</td>
@@ -126,7 +179,12 @@ export default function UsersPage() {
       </div>
 
       {/* Create User Modal */}
-      {isModalOpen && <CreateUserModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <CreateUserModal
+          onClose={() => setIsModalOpen(false)}
+          onAdd={(newUser) => handleAddUser(newUser)}
+        />
+      )}
 
       {/* Edit User Modal */}
       {isEditModalOpen && (
@@ -136,8 +194,19 @@ export default function UsersPage() {
           onUpdate={(updatedUser) => handleUpdateUser(updatedUser)}
         />
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 }
-
-
