@@ -34,7 +34,7 @@ const allPages = [
 
 
 // accepts two props 
-export default function CreateRoleModal({ onClose, onSave }) {
+export default function CreateRoleModal({ onClose, onAdd }) {
 
   // State Variables
   const [roleName, setRoleName] = useState(""); // Stores the name of the new role
@@ -91,8 +91,8 @@ export default function CreateRoleModal({ onClose, onSave }) {
     });
   };
   
-  // Handle Save
-  const handleSave = () => {
+  // Handle Add Role
+  const handleAddRole = () => {
     if (!roleName.trim()) {
       alert("Please enter a role name.");
       return;
@@ -103,7 +103,7 @@ export default function CreateRoleModal({ onClose, onSave }) {
       usersAssigned: 0,
       permissions: selectedPages, // Storing selected pages & elements
     };
-    onSave(newRole);
+    onAdd(newRole);
     onClose();
   };
 
@@ -200,7 +200,7 @@ export default function CreateRoleModal({ onClose, onSave }) {
             Cancel
           </button>
           <button
-            onClick={handleSave}
+            onClick={handleAddRole}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
             Save Role
