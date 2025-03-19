@@ -25,7 +25,6 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
       return;
     }
     onUpdate({ ...user, password: newPassword });
-    alert("Password successfully changed.");
     onClose();
   };
 
@@ -68,14 +67,14 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
           <form onSubmit={handleUserUpdate} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Name
+                User Name
               </label>
               <input
                 type="text"
                 className="w-full p-2 mt-1 border border-gray-300 rounded-lg"
-                value={editedUser.name}
+                value={editedUser.userName}
                 onChange={(e) =>
-                  setEditedUser({ ...editedUser, name: e.target.value })
+                  setEditedUser({ ...editedUser, userName: e.target.value })
                 }
                 required
               />
@@ -90,6 +89,34 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
                 value={editedUser.email}
                 onChange={(e) =>
                   setEditedUser({ ...editedUser, email: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                First Name
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 mt-1 border border-gray-300 rounded-lg"
+                value={editedUser.firstName}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, firstName: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Last Name
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 mt-1 border border-gray-300 rounded-lg"
+                value={editedUser.lastName}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, lastName: e.target.value })
                 }
                 required
               />
@@ -130,6 +157,8 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
                 className="w-full p-2 mt-1 border border-gray-300 rounded-lg"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{7,}$"
+                title="Password must be at least 7 characters long and include uppercase, lowercase, number, and symbol"
               />
             </div>
             <div>
