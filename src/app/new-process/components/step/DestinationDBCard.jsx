@@ -1,9 +1,11 @@
 "use client"
 
-import { Database } from "lucide-react"
+import { Database, X } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import ConnectionDetails from "@/app/configurations/ConnectionDetails"
 import SchemaSelector from "@/app/configurations/SchemaSelector"
@@ -14,14 +16,18 @@ export default function DestinationDBCard({
   handleDestinationConnectionSelect,
   destinationConnectionDetails,
   destinationSchemaDetails,
+  selectedDestinationSchema,
   handleDestinationSchemaSelect,
   destinationTableDetails,
   selectedDestinationTables,
   toggleDestinationTableSelection,
   toggleDestinationColumnSelection,
+  removeDestinationColumn,
   expandedDestinationTables,
   toggleDestinationTableExpansion,
   getSelectionSummary,
+  getAllSelectedColumns,
+  cardId,
 }) {
   return (
     <Card className="flex-1 border-blue-200 shadow-sm">
@@ -57,7 +63,11 @@ export default function DestinationDBCard({
 
         <div className="grid gap-2">
           {destinationSchemaDetails && (
-            <SchemaSelector schemaDetails={destinationSchemaDetails} onSchemaSelect={handleDestinationSchemaSelect} />
+            <SchemaSelector
+              schemaDetails={destinationSchemaDetails}
+              onSchemaSelect={handleDestinationSchemaSelect}
+              selectedSchema={selectedDestinationSchema}
+            />
           )}
         </div>
 
@@ -71,6 +81,25 @@ export default function DestinationDBCard({
               onClick={(e) => e.stopPropagation()}
             />
 
+            {/* Display selected columns with remove option */}
+            {Object.keys(selectedDestinationTables).length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2 mb-4">
+                {getAllSelectedColumns(selectedDestinationTables).map(({ tableName, columnName }) => (
+                  <Badge key={`${cardId}-${tableName}-${columnName}`} variant="secondary" className="px-2 py-1">
+                    {tableName}.{columnName}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-red-100 hover:text-red-500"
+                      onClick={() => removeDestinationColumn(tableName, columnName)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+
             <TableSelector
               tableDetails={destinationTableDetails}
               selectedTables={selectedDestinationTables}
@@ -78,6 +107,7 @@ export default function DestinationDBCard({
               toggleColumnSelection={toggleDestinationColumnSelection}
               expandedTables={expandedDestinationTables}
               toggleTableExpansion={toggleDestinationTableExpansion}
+              cardId={cardId}
             />
           </div>
         )}
