@@ -32,10 +32,7 @@ const allPages = [
   { name: "Logs", elements: ["View Logs", "Export Logs", "Clear Logs"] },
 ];
 
-
-// accepts two props 
 export default function CreateRoleModal({ onClose, onAdd }) {
-
   // State Variables
   const [roleName, setRoleName] = useState(""); // Stores the name of the new role
   const [selectedPages, setSelectedPages] = useState({}); // Keeps track of selected pages and their elements
