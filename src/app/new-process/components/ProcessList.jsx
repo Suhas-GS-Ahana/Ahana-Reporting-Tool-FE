@@ -24,8 +24,8 @@ const ProcessList = ({
   const [processes, setProcesses] = useState(initialProcesses || [])
   const [activeTab, setActiveTab] = useState("processes")
 
-  let lastAssignedColor = ""
-  const getSubProcessBgColor = (processId) => {
+  // Create a map of process colors to ensure each process has its own color
+  const [processColors] = useState(() => {
     const colors = [
       "bg-red-50",
       "bg-yellow-50",
@@ -38,19 +38,56 @@ const ProcessList = ({
       "bg-indigo-50",
       "bg-cyan-50",
     ]
-    const availableColors = colors.filter((color) => color !== lastAssignedColor)
-    const selectedColor = availableColors[processId % availableColors.length]
 
-    lastAssignedColor = selectedColor
-    return selectedColor
+    const colorMap = {}
+    initialProcesses.forEach((process, index) => {
+      colorMap[process.id] = colors[index % colors.length]
+    })
+
+    return colorMap
+  })
+
+  const getSubProcessBgColor = (subProcessId) => {
+    // Use a deterministic approach based on subProcessId
+    const colors = [
+      "bg-red-50",
+      "bg-yellow-50",
+      "bg-green-50",
+      "bg-blue-50",
+      "bg-purple-50",
+      "bg-pink-50",
+      "bg-orange-50",
+      "bg-teal-50",
+      "bg-indigo-50",
+      "bg-cyan-50",
+    ]
+
+    return colors[subProcessId % colors.length]
   }
 
   const handleAddProcess = () => {
+    const newProcessId = Date.now()
     const newProcess = {
-      id: Date.now(),
+      id: newProcessId,
       name: `Process ${processes.length + 1}`,
       subProcesses: [],
     }
+
+    // Assign a color to the new process
+    const colors = [
+      "bg-red-50",
+      "bg-yellow-50",
+      "bg-green-50",
+      "bg-blue-50",
+      "bg-purple-50",
+      "bg-pink-50",
+      "bg-orange-50",
+      "bg-teal-50",
+      "bg-indigo-50",
+      "bg-cyan-50",
+    ]
+    processColors[newProcessId] = colors[Object.keys(processColors).length % colors.length]
+
     setProcesses([...processes, newProcess])
   }
 
@@ -58,14 +95,14 @@ const ProcessList = ({
     setProcesses(
       processes.map((process) => {
         if (process.id === processId) {
-          const subProcessId = process.subProcesses.length + 1
+          const subProcessId = Date.now()
           process.subProcesses.push({
-            id: Date.now(),
-            name: `Sub Process ${subProcessId}`,
+            id: subProcessId,
+            name: `Sub Process ${process.subProcesses.length + 1}`,
             type: "",
             steps: [
               {
-                id: Date.now(),
+                id: Date.now() + 1,
                 description: "",
                 query: "",
               },
@@ -248,7 +285,7 @@ const ProcessList = ({
               ) : (
                 processes.map((process) => (
                   <ProcessCard
-                    key={process.id}
+                    key={`process-${process.id}`}
                     process={process}
                     onProcessNameChange={handleProcessNameChange}
                     onAddSubProcess={handleAddSubProcess}

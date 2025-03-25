@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import StepHeader from "./step/StepHeader"
 import ProcessStep from "./step/ProcessStep"
@@ -17,11 +17,12 @@ const StepCard = ({
   schemasDetails,
   schemaDetails,
   handleSchemaSelect,
-  tableDetails,
+  tableDetails: initialTableDetails,
   connections,
   handleConnectionSelect,
   connectionDetails,
 }) => {
+  // Separate state for source and destination
   const [selectedTables, setSelectedTables] = useState({})
   const [expandedTables, setExpandedTables] = useState({})
   const [selectedDestinationTables, setSelectedDestinationTables] = useState({})
@@ -31,7 +32,34 @@ const StepCard = ({
   const [selectedDestinationSchema, setSelectedDestinationSchema] = useState(null)
   const [selectedDestinationConnection, setSelectedDestinationConnection] = useState(null)
   const [destinationConnectionDetails, setDestinationConnectionDetails] = useState(null)
+  const [selectedSchema, setSelectedSchema] = useState(null)
+  const [tableDetails, setTableDetails] = useState(initialTableDetails || [])
+  const [previousType, setPreviousType] = useState(subProcess.type)
   const { toast } = useToast()
+
+  // Store the previous type to detect changes
+  useEffect(() => {
+    if (previousType !== subProcess.type) {
+      setPreviousType(subProcess.type)
+      // Don't reset selections when switching types
+    }
+  }, [subProcess.type, previousType])
+
+  // Update local table details when props change
+  useEffect(() => {
+    if (initialTableDetails) {
+      setTableDetails(initialTableDetails)
+    }
+  }, [initialTableDetails])
+
+  // Parse columns from the columns_with_types string
+  const parseColumns = (columnsString) => {
+    if (!columnsString) return []
+    return columnsString.split(", ").map((column) => {
+      const [name, type] = column.split(" ")
+      return { name, type }
+    })
+  }
 
   // Toggle table selection
   const toggleTableSelection = (tableName) => {
@@ -79,6 +107,20 @@ const StepCard = ({
     })
   }
 
+  // Remove a specific column
+  const removeColumn = (tableName, columnName) => {
+    setSelectedTables((prev) => {
+      const newSelection = { ...prev }
+      if (newSelection[tableName]) {
+        newSelection[tableName] = newSelection[tableName].filter((col) => col !== columnName)
+        if (newSelection[tableName].length === 0) {
+          delete newSelection[tableName]
+        }
+      }
+      return newSelection
+    })
+  }
+
   // Toggle table expansion
   const toggleTableExpansion = (tableName) => {
     setExpandedTables((prev) => ({
@@ -87,7 +129,7 @@ const StepCard = ({
     }))
   }
 
-  // Toggle destination table selection
+  // Toggle destination table selection - completely separate from source
   const toggleDestinationTableSelection = (tableName) => {
     setSelectedDestinationTables((prev) => {
       const newSelection = { ...prev }
@@ -133,21 +175,26 @@ const StepCard = ({
     })
   }
 
+  // Remove a specific destination column
+  const removeDestinationColumn = (tableName, columnName) => {
+    setSelectedDestinationTables((prev) => {
+      const newSelection = { ...prev }
+      if (newSelection[tableName]) {
+        newSelection[tableName] = newSelection[tableName].filter((col) => col !== columnName)
+        if (newSelection[tableName].length === 0) {
+          delete newSelection[tableName]
+        }
+      }
+      return newSelection
+    })
+  }
+
   // Toggle destination table expansion
   const toggleDestinationTableExpansion = (tableName) => {
     setExpandedDestinationTables((prev) => ({
       ...prev,
       [tableName]: !prev[tableName],
     }))
-  }
-
-  // Parse columns from the columns_with_types string
-  const parseColumns = (columnsString) => {
-    if (!columnsString) return []
-    return columnsString.split(", ").map((column) => {
-      const [name, type] = column.split(" ")
-      return { name, type }
-    })
   }
 
   // Get a summary of selected tables and columns
@@ -157,6 +204,33 @@ const StepCard = ({
 
     if (tableCount === 0) return "No tables selected"
     return `${tableCount} table${tableCount > 1 ? "s" : ""}, ${columnCount} column${columnCount > 1 ? "s" : ""} selected`
+  }
+
+  // Handle schema selection for source
+  const handleLocalSchemaSelect = async (schema) => {
+    setSelectedSchema(schema)
+    try {
+      // Directly fetch tables for the selected schema
+      const response = await fetch(
+        `http://localhost:8000/get_tables?conn_name=${connectionsDetails?.[0]}&schema_name=${schema}`,
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch tables")
+      }
+      const data = await response.json()
+      setTableDetails(data.data)
+
+      // Also call the parent handler if provided
+      if (handleSchemaSelect) {
+        await handleSchemaSelect(schema)
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch tables for schema",
+      })
+    }
   }
 
   // Handle schema selection for destination
@@ -207,8 +281,25 @@ const StepCard = ({
     }
   }
 
+  // Get all selected columns for display
+  const getAllSelectedColumns = (selectedTables) => {
+    const result = []
+    Object.entries(selectedTables).forEach(([tableName, columns]) => {
+      columns.forEach((columnName) => {
+        result.push({ tableName, columnName })
+      })
+    })
+    return result
+  }
+
+  // Generate a unique ID for this step card
+  const stepCardId = `process-${process.id}-subprocess-${subProcess.id}-step-${step.id}`
+
   return (
-    <div key={step.id} className="space-y-4 p-6 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+    <div
+      key={stepCardId}
+      className="space-y-4 p-6 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
+    >
       <StepHeader
         index={index}
         subProcess={subProcess}
@@ -223,7 +314,8 @@ const StepCard = ({
           <ImportExportStep
             connectionsDetails={connectionsDetails}
             schemaDetails={schemaDetails}
-            handleSchemaSelect={handleSchemaSelect}
+            handleSchemaSelect={handleLocalSchemaSelect}
+            selectedSchema={selectedSchema}
             tableDetails={tableDetails}
             connections={connections}
             handleConnectionSelect={handleConnectionSelect}
@@ -231,19 +323,24 @@ const StepCard = ({
             selectedTables={selectedTables}
             toggleTableSelection={toggleTableSelection}
             toggleColumnSelection={toggleColumnSelection}
+            removeColumn={removeColumn}
             expandedTables={expandedTables}
             toggleTableExpansion={toggleTableExpansion}
             selectedDestinationTables={selectedDestinationTables}
             toggleDestinationTableSelection={toggleDestinationTableSelection}
             toggleDestinationColumnSelection={toggleDestinationColumnSelection}
+            removeDestinationColumn={removeDestinationColumn}
             expandedDestinationTables={expandedDestinationTables}
             toggleDestinationTableExpansion={toggleDestinationTableExpansion}
             destinationSchemaDetails={destinationSchemaDetails}
             destinationTableDetails={destinationTableDetails}
+            selectedDestinationSchema={selectedDestinationSchema}
             handleDestinationSchemaSelect={handleDestinationSchemaSelect}
             handleDestinationConnectionSelect={handleDestinationConnectionSelect}
             destinationConnectionDetails={destinationConnectionDetails}
             getSelectionSummary={getSelectionSummary}
+            getAllSelectedColumns={getAllSelectedColumns}
+            stepCardId={stepCardId}
           />
         ) : subProcess.type === "process" ? (
           <ProcessStep step={step} />
