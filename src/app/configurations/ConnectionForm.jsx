@@ -136,8 +136,8 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button type="button" onClick={() => onTestConnection(newConnectionData)}>Test Connection</Button>
-          <Button type="submit" disabled={isSubmitting}>Save Connection</Button>
+          <Button type="button" className='bg-blue-950 hover:bg-blue-900' onClick={() => onTestConnection(newConnectionData)}>Test Connection</Button>
+          <Button type="submit" className='bg-blue-950 hover:bg-blue-900' disabled={isSubmitting}>Save Connection</Button>
           <Button type="button" variant="destructive" onClick={onSkip}>
             Skip & Continue
           </Button>

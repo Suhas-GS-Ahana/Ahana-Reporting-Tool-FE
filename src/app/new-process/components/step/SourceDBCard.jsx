@@ -61,13 +61,13 @@ export default function SourceDBCard({
                     variant="outline"
                     className="text-xs bg-purple-100 text-purple-600 flex items-center gap-1 px-2 py-1"
                   >
-                    <LayoutList className="w-3 h-3" /> Type: {connectionsDetails?.[3]}
+                    <LayoutList className="w-3 h-3" /> Type: {connectionsDetails.database_type}
                   </Badge>
                   <Badge
                     variant="outline"
                     className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1"
                   >
-                    <Database className="w-3 h-3" /> Database: {connectionsDetails?.[4]}
+                    <Database className="w-3 h-3" /> Database: {connectionsDetails.connection_name}
                   </Badge>
                 </>
               )}

@@ -212,7 +212,7 @@ const StepCard = ({
     try {
       // Directly fetch tables for the selected schema
       const response = await fetch(
-        `http://localhost:8000/get_tables?conn_name=${connectionsDetails?.[0]}&schema_name=${schema}`,
+        `http://localhost:8000/get_tables?id=2&schema_name=${encodeURIComponent(schema.schema_name)}`,
       )
       if (!response.ok) {
         throw new Error("Failed to fetch tables")
@@ -235,10 +235,11 @@ const StepCard = ({
 
   // Handle schema selection for destination
   const handleDestinationSchemaSelect = async (schema) => {
+  console.log(schema)
     setSelectedDestinationSchema(schema)
     try {
       const response = await fetch(
-        `http://localhost:8000/get_tables?conn_name=${selectedDestinationConnection}&schema_name=${schema}`,
+       `http://localhost:8000/get_tables?id=${2}&schema_name=${encodeURIComponent(schema.schema_name)}`,
       )
       if (!response.ok) {
         throw new Error("Failed to fetch tables")
@@ -255,10 +256,10 @@ const StepCard = ({
   }
 
   // Handle connection selection for destination
-  const handleDestinationConnectionSelect = async (connectionName) => {
-    setSelectedDestinationConnection(connectionName)
+  const handleDestinationConnectionSelect = async (dataSourcesId) => {
+    setSelectedDestinationConnection(dataSourcesId)
     try {
-      const response = await fetch(`http://localhost:8000/get_connectionschema?name=${connectionName}`)
+      const response = await fetch(`http://localhost:8000/get_connectionschema?id=${dataSourcesId}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection schema")
       }
@@ -266,7 +267,7 @@ const StepCard = ({
       setDestinationSchemaDetails(data.data)
 
       // Fetch connection details
-      const connectionResponse = await fetch(`http://localhost:8000/view_connection?name=${connectionName}`)
+      const connectionResponse = await fetch(`http://localhost:8000/view_connection?id=${dataSourcesId}`)
       if (!connectionResponse.ok) {
         throw new Error("Failed to fetch connection details")
       }
