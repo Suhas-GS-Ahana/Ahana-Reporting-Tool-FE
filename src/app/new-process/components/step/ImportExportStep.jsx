@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react"
 import SourceDBCard from "./SourceDBCard"
 import DestinationDBCard from "./DestinationDBCard"
+import { Button } from "@/components/ui/button"
 
 export default function ImportExportStep({
   connectionsDetails,
@@ -34,6 +35,7 @@ export default function ImportExportStep({
   stepCardId,
 }) {
   return (
+    <div>
     <div className="flex gap-4 items-stretch">
       <SourceDBCard
         connectionsDetails={connectionsDetails}
@@ -78,6 +80,10 @@ export default function ImportExportStep({
         cardId={`${stepCardId}-destination`}
         stepCardId={stepCardId}
       />
+    </div>
+      <div className="flex items-center mt-5 flex-row-reverse">
+      <Button className="bg-blue-950 hover:bg-blue-900">Submit</Button>
+      </div>
     </div>
   )
 }
