@@ -45,12 +45,13 @@ export default function Configurations() {
       setLoading(false)
     }
   }
+  console.log(connections)
 
-  const handleConnectionSelect = async (connectionName) => {
+  const handleConnectionSelect = async (dataSourcesId) => {
     setLoading(true)
-    setSelectedConnection(connectionName)
+    setSelectedConnection(dataSourcesId)
     try {
-      const response = await fetch(`http://localhost:8000/view_connection?name=${connectionName}`)
+      const response = await fetch(`http://localhost:8000/view_connection?id=${dataSourcesId}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection details")
       }
@@ -101,23 +102,22 @@ export default function Configurations() {
 
   const handleSaveConnection = async (formData) => {
     const payload = {
-      inserted_by: "test_user",
-      modified_by: "admin",
-      inserted_date: new Date().toISOString(),
-      modified_date: new Date().toISOString(),
-      connection_name: formData.connectionName,
-      database_type: "postgresql",
-      server_name: formData.hostName,
-      port_number: parseInt(formData.portNumber, 10),
-      database_name: formData.databaseName,
-      server_login: formData.userName,
-      password: formData.password,
-      filepath: "/path/to/database/file",
-      is_cloud: false,
-      is_onpremise: true,
-      is_connection_encrypted: true,
-      is_active: true,
-      expiry_date: "2025-12-31T23:59:59.999Z",
+      p_inserted_by: 1,
+      p_modified_by: 1,
+      p_connection_name: formData.connectionName,
+      p_database_type: "postgresql",
+      p_server_name: formData.hostName,
+      p_port_number: parseInt(formData.portNumber, 10),
+      p_database_name: formData.databaseName,
+      p_server_login: formData.userName,
+      p_password: formData.password,
+      p_filepath: "/path/to/database/file",
+      p_is_cloud: false,
+      p_is_onpremise: true,
+      p_is_connection_encrypted: true,
+      p_is_active: true,
+      p_is_deleted: false,
+      p_expiry_date: "2025-12-31T23:59:59.999Z",
     }
     try {
       const response = await fetch("http://localhost:8000/save_connection", {
@@ -188,7 +188,7 @@ export default function Configurations() {
                   </SelectTrigger>
                   <SelectContent>
                     {connections.map((connection) => (
-                      <SelectItem key={connection.connection_name} value={connection.connection_name}>
+                      <SelectItem key={connection.data_sources_id} value={String(connection.data_sources_id)}>
                         {connection.connection_name}
                       </SelectItem>
                     ))}

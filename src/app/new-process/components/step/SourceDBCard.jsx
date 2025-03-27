@@ -39,7 +39,7 @@ export default function SourceDBCard({
             <div className="flex flex-wrap gap-2 items-center">
               {connectionsDetails && (
                 <>
-                  <Badge
+                  {/* <Badge
                     variant="outline"
                     className="text-xs bg-blue-100 text-blue-600 flex items-center gap-1 px-2 py-1"
                   >
@@ -56,18 +56,18 @@ export default function SourceDBCard({
                     className="text-xs bg-yellow-100 text-yellow-600 flex items-center gap-1 px-2 py-1"
                   >
                     <Plug className="w-3 h-3" /> Port: {connectionsDetails?.[2]}
-                  </Badge>
+                  </Badge> */}
                   <Badge
                     variant="outline"
                     className="text-xs bg-purple-100 text-purple-600 flex items-center gap-1 px-2 py-1"
                   >
-                    <LayoutList className="w-3 h-3" /> Type: {connectionsDetails?.[3]}
+                    <LayoutList className="w-3 h-3" /> Type: {connectionsDetails.database_type}
                   </Badge>
                   <Badge
                     variant="outline"
                     className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1"
                   >
-                    <Database className="w-3 h-3" /> Database: {connectionsDetails?.[4]}
+                    <Database className="w-3 h-3" /> Database: {connectionsDetails.connection_name}
                   </Badge>
                 </>
               )}

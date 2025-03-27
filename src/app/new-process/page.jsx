@@ -47,7 +47,7 @@ export default function NewProcess() {
   const fetchSchemaDetails = async (connectionName) => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/get_connectionschema?name=${connectionName}`)
+      const response = await fetch(`http://localhost:8000/get_connectionschema?id=${connectionName}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection schema")
       }
@@ -67,18 +67,18 @@ export default function NewProcess() {
 
   const handleSchemaSelect = async (schema) => {
     try {
-      const response = await fetch(`http://localhost:8000/get_tables?conn_name=${connectionName}&schema_name=${schema}`)
+      const response = await fetch(`http://localhost:8000/get_tables?id${dataSourcesId}&schema_name=${schema}`)
       if (!response.ok) {
         throw new Error("Failed to fetch tables")
       }
       const data = await response.json()
       setTableDetails(data.data)
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch tables",
-      })
+      // toast({
+      //   variant: "destructive",
+      //   title: "Error",
+      //   description: "Failed to fetch tables",
+      // })
     }
   }
 
@@ -106,11 +106,11 @@ export default function NewProcess() {
     }
   }
 
-  const handleConnectionSelect = async (connectionName) => {
+  const handleConnectionSelect = async (dataSourcesId) => {
     setLoading(true)
-    setSelectedConnection(connectionName)
+    setSelectedConnection(dataSourcesId)
     try {
-      const response = await fetch(`http://localhost:8000/view_connection?name=${connectionName}`)
+      const response = await fetch(`http://localhost:8000/view_connection?id=${dataSourcesId}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection details")
       }

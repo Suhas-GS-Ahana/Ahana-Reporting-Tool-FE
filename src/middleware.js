@@ -2,10 +2,10 @@ import { NextResponse } from "next/server"
 
 export function middleware(request) {
   const user = request.cookies.get("user")
-  const isPublicPath = request.nextUrl.pathname === "/login"
+  const isPublicPath = request.nextUrl.pathname === "/auth/login"
 
   if (!user && !isPublicPath) {
-    return NextResponse.redirect(new URL("/login", request.url))
+    return NextResponse.redirect(new URL("/auth/login", request.url))
   }
 
   if (user && isPublicPath) {
@@ -16,6 +16,6 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/login", "/new-process", "/history", "/transactions", "/configurations", "/profile"],
+  matcher: ["/auth/login", "/new-process", "/history", "/transactions", "/configurations", "/profile"],
 }
 

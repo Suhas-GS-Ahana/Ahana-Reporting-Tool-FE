@@ -49,9 +49,9 @@ export default function DestinationDBCard({
                   <SelectContent>
                     {connections &&
                       connections.map((connection) => (
-                        <SelectItem key={connection.connection_name} value={connection.connection_name}>
-                          {connection.connection_name}
-                        </SelectItem>
+                        <SelectItem key={connection.data_sources_id} value={String(connection.data_sources_id)}>
+                        {connection.connection_name}
+                      </SelectItem>
                       ))}
                   </SelectContent>
                 </Select>

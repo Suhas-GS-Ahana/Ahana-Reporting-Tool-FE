@@ -16,7 +16,7 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "min-h-screen border-r bg-blue-950 transition-all duration-300 ease-in-out",
+        "min-h-screen border-r transition-all duration-300 ease-in-out",
         sidebarExpanded ? "w-50" : "w-16",
       )}
     >
@@ -31,7 +31,7 @@ export function Sidebar() {
                       href={item.href}
                       className={cn(
                         "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                        pathname === item.href ? "bg-accent text-accent-foreground" : "text-cyan-50",
+                        pathname === item.href ? "bg-accent text-accent-foreground" : "",
                         sidebarExpanded ? "justify-start" : "justify-center",
                       )}
                     >

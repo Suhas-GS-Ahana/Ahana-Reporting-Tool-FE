@@ -52,10 +52,9 @@ export default function ProcessStep({ step, stepId }) {
         />
       </div>
 
-      <Button className="bg-blue-600 hover:bg-blue-700">
-        <Play className="mr-2 h-4 w-4" />
-        Run Query
-      </Button>
+      <div className="flex items-center mt-5 flex-row-reverse">
+      <Button className="bg-blue-950 hover:bg-blue-900">Submit</Button>
+      </div>
     </Card>
   )
 }

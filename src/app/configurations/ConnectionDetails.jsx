@@ -15,10 +15,10 @@ const ConnectionDetails = ({ connectionDetails }) => {
         <Plug className="w-3 h-3" /> Port: {connectionDetails[2]}
       </Badge> */}
       <Badge variant="outline" className="text-xs bg-purple-100 text-purple-600 flex items-center gap-1 px-2 py-1">
-        <LayoutList className="w-3 h-3" /> Type: {connectionDetails[3]}
+        <LayoutList className="w-3 h-3" /> Type: {connectionDetails.database_type}
       </Badge>
       <Badge variant="outline" className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1">
-        <Database className="w-3 h-3" /> Database: {connectionDetails[4]}
+        <Database className="w-3 h-3" /> Database: {connectionDetails.connection_name}
       </Badge>
     </div>
   )
