@@ -10,8 +10,8 @@ export default function StepHeader({ index, subProcess, process, onSubProcessTyp
       <div className="flex items-center gap-4">
         <h3 className="font-semibold">Step {index + 1}</h3>
         <Select
-          value={subProcess.type}
-          onValueChange={(value) => onSubProcessTypeChange(process.id, subProcess.id, value)}
+          value={step.type || ""}
+          onValueChange={(value) => onSubProcessTypeChange(process.id, subProcess.id, step.id, value)}
           onClick={(e) => e.stopPropagation()}
         >
           <SelectTrigger className="w-[180px] bg-white">

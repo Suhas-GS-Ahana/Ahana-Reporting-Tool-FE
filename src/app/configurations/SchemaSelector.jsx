@@ -19,9 +19,9 @@ const SchemaSelector = ({ schemaDetails, onSchemaSelect }) => {
         <SelectValue placeholder="Select schema" />
       </SelectTrigger>
       <SelectContent>
-        {schemaDetails.map((schema) => (
-          <SelectItem key={schema.get_connectionschema} value={schema.get_connectionschema}>
-            {schema.get_connectionschema}
+        {schemaDetails.map((schema, index) => (
+          <SelectItem key={index} value={schema}>
+            {schema.schema_name}
           </SelectItem>
         ))}
       </SelectContent>

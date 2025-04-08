@@ -167,7 +167,7 @@ const ProcessList = ({
     )
   }
 
-  const handleSubProcessTypeChange = (processId, subProcessId, newType) => {
+  const handleSubProcessTypeChange = (processId, subProcessId, stepId, newType) => {
     setProcesses(
       processes.map((process) => {
         if (process.id === processId) {
@@ -175,7 +175,15 @@ const ProcessList = ({
             ...process,
             subProcesses: process.subProcesses.map((subProcess) => {
               if (subProcess.id === subProcessId) {
-                return { ...subProcess, type: newType }
+                return {
+                  ...subProcess,
+                  steps: subProcess.steps.map((step) => {
+                    if (step.id === stepId) {
+                      return { ...step, type: newType }
+                    }
+                    return step
+                  }),
+                }
               }
               return subProcess
             }),
@@ -200,6 +208,7 @@ const ProcessList = ({
                     ...subProcess.steps,
                     {
                       id: Date.now(),
+                      type: "", // Initialize with empty type
                       description: "",
                       query: "",
                     },
