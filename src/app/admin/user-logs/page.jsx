@@ -622,8 +622,8 @@ const UserLogsPage = () => {
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full border border-collapse border-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
+          <thead className="bg-[hsl(var(--table-header-background))] text-[hsl(var(--table-header-foreground))]">
+            <tr >
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -642,7 +642,7 @@ const UserLogsPage = () => {
           </thead>
           <tbody>
             {paginatedData.map((item, index) => (
-              <tr key={index}>
+              <tr key={index} className="hover:bg-gray-50">
                 {columns.map((column) => (
                   <td key={column.key} className="border p-3">
                     {item[column.key]}
@@ -659,14 +659,14 @@ const UserLogsPage = () => {
           <Button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
-            className="flex items-center gap-2 px-4 py-2 h-8 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="flex items-center gap-2 px-4 py-2 h-8 bg-[hsl(var(--button-color))] text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
           >
             Prev
           </Button>
           <Button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="flex items-center gap-2 px-4 py-2 h-8 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="flex items-center gap-2 px-4 py-2 h-8 bg-[hsl(var(--button-color))] text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
           >
             Next
           </Button>

@@ -44,7 +44,7 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
         <div className="flex gap-4 mb-4">
           <button
             className={`px-4 py-2 rounded-lg ${
-              activeTab === "edit" ? "bg-blue-500 text-white" : "bg-gray-200"
+              activeTab === "edit" ? "bg-[hsl(var(--button-color))] text-white" : "bg-gray-200"
             }`}
             onClick={() => setActiveTab("edit")}
           >
@@ -53,7 +53,7 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
           <button
             className={`px-4 py-2 rounded-lg ${
               activeTab === "password"
-                ? "bg-blue-500 text-white"
+                ? "bg-[hsl(var(--button-color))] text-white"
                 : "bg-gray-200"
             }`}
             onClick={() => setActiveTab("password")}
@@ -140,7 +140,7 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="px-4 py-2 bg-[hsl(var(--button-color))] text-white rounded-lg hover:bg-[hsl(var(--button-color-hover))] transition"
             >
               Save Changes
             </button>
@@ -174,7 +174,7 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              className="px-4 py-2 bg-[hsl(var(--button-color))] text-white rounded-lg hover:bg-[hsl(var(--button-color-hover))] transition"
             >
               Change Password
             </button>

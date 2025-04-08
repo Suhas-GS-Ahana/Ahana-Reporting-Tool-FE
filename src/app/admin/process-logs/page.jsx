@@ -151,7 +151,7 @@ export default function ExecutionTable() {
       {/* Table */}
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full border border-collapse border-gray-200">
-          <thead className="bg-gray-100">
+          <thead className="bg-[hsl(var(--table-header-background))] text-[hsl(var(--table-header-foreground))]">
             <tr>
               <th className="border p-3 text-left w-10"></th>
               <th className="border p-3 text-left">Id</th>
