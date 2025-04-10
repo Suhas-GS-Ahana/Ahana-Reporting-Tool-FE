@@ -198,7 +198,7 @@ export default function CreateRoleModal({ onClose, onAdd }) {
           </button>
           <button
             onClick={handleAddRole}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            className="px-4 py-2 bg-[hsl(var(--button-color))] text-white rounded-lg hover:bg-[hsl(var(--button-color-hover))]"
           >
             Save Role
           </button>

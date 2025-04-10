@@ -242,7 +242,7 @@ export default function MapRolesPage() {
             <CardTitle>Total Users with Roles</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <UserCog className="h-8 w-8 text-blue-500" />
+            <UserCog className="h-8 w-8 text-[hsl(var(--icon-color))]" />
             <span className="text-2xl font-bold">{users.length}</span>
           </CardContent>
         </Card>
@@ -258,7 +258,7 @@ export default function MapRolesPage() {
       />
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full border-collapse border border-gray-200">
-          <thead className="bg-gray-100">
+          <thead className="bg-[hsl(var(--table-header-background))] text-[hsl(var(--table-header-foreground))]">
             <tr>
               {columns.map((column) => (
                 <th
@@ -291,7 +291,7 @@ export default function MapRolesPage() {
                 <td className="border p-3 text-center">
                   <button
                     onClick={() => handleAssignRole(user)}
-                    className="text-blue-500 hover:text-blue-600 transition"
+                    className="text-[hsl(var(--button2-color))] hover:text-[hsl(var(--button2-color-hover))] transition"
                   >
                     Assign Role
                   </button>
@@ -308,14 +308,14 @@ export default function MapRolesPage() {
           <Button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
-            className="flex items-center gap-2 px-4 py-2 h-8 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="flex items-center gap-2 px-4 py-2 h-8 bg-[hsl(var(--button-color))]  text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
           >
             Prev
           </Button>
           <Button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="flex items-center gap-2 px-4 py-2 h-8 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="flex items-center gap-2 px-4 py-2 h-8 bg-[hsl(var(--button-color))]  text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
           >
             Next
           </Button>

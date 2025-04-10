@@ -359,7 +359,7 @@ export default function UsersPage() {
             <CardTitle>Total Users</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <Users className="h-8 w-8 text-blue-500" />
+            <Users className="h-8 w-8 text-[hsl(var(--icon-color))]" />
             <span className="text-2xl font-bold">1,250</span>
           </CardContent>
         </Card>
@@ -369,7 +369,7 @@ export default function UsersPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-fit">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--button-color))] text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
         >
           <Plus className="w-4 h-4" /> Add User
         </button>
@@ -385,7 +385,7 @@ export default function UsersPage() {
       />
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full border-collapse border border-gray-200">
-          <thead className="bg-gray-100">
+          <thead className="bg-[hsl(var(--table-header-background))] text-[hsl(var(--table-header-foreground))]">
             <tr>
               {columns.map((column) => (
                 <th
@@ -416,14 +416,14 @@ export default function UsersPage() {
                   {/* Edit Button */}
                   <button
                     onClick={() => handleEditUser(user)}
-                    className="text-blue-500 hover:text-blue-600 transition"
+                    className="text-[hsl(var(--button2-color))] hover:text-[hsl(var(--button2-color-hover))] transition"
                   >
                     <Edit className="w-5 h-5" />
                   </button>
                   {/* Delete Button */}
                   <button
                     onClick={() => handleDeleteUser(user.id)}
-                    className="text-red-500 hover:text-red-600 transition"
+                    className="text-[hsl(var(--button2-color))] hover:text-[hsl(var(--button2-color-hover))] transition"
                   >
                     <Trash className="w-5 h-5" />
                   </button>
@@ -440,14 +440,14 @@ export default function UsersPage() {
           <Button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
-            className="flex items-center gap-2 px-4 py-2 h-8 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="flex items-center gap-2 px-4 py-2 h-8 bg-[hsl(var(--button-color))] text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
           >
             Prev
           </Button>
           <Button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="flex items-center gap-2 px-4 py-2 h-8 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="flex items-center gap-2 px-4 py-2 h-8 bg-[hsl(var(--button-color))] text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
           >
             Next
           </Button>

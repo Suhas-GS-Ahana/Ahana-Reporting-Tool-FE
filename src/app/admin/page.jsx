@@ -13,7 +13,7 @@ export default function Dashboard() {
             <CardTitle>Total Users</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <Users className="h-8 w-8 text-blue-500" />
+            <Users className="h-8 w-8 text-[hsl(var(--icon-color))]" />
             <span className="text-2xl font-bold">1,250</span>
           </CardContent>
         </Card>
@@ -24,7 +24,7 @@ export default function Dashboard() {
             <CardTitle>Total Roles</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <Shield className="h-8 w-8 text-green-500" />
+            <Shield className="h-8 w-8 text-[hsl(var(--icon-color))]" />
             <span className="text-2xl font-bold">12</span>
           </CardContent>
         </Card>
@@ -35,7 +35,7 @@ export default function Dashboard() {
             <CardTitle>Pages Managed</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <FileText className="h-8 w-8 text-yellow-500" />
+            <FileText className="h-8 w-8 text-[hsl(var(--icon-color))]" />
             <span className="text-2xl font-bold">50</span>
           </CardContent>
         </Card>
@@ -44,17 +44,17 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link href="/admin/users">
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--button-color))]  text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition">
           <Users className="w-4 h-4" /> Manage Users
           </button>
         </Link>
         <Link href="/admin/roles">
-          <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--button-color))]  text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition">
             <Shield className="w-4 h-4" /> Manage Roles
           </button>
         </Link>
         <Link href="/admin/pages">
-          <button className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transition">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--button-color))]  text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition">
             <FileText className="w-4 h-4" /> Edit Page Access
           </button>
         </Link>

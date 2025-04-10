@@ -13,6 +13,7 @@ import {
   Terminal,
   FileCode
 } from "lucide-react" // Import the icons you need
+import ThemeChanger from "@/components/ThemeChanger";
 
 const adminRoutes = [
   {
@@ -65,9 +66,9 @@ export function AdminSidebar() {
                 key={route.href}
                 href={route.href}
                 className={cn(
-                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-[hsl(var(--sidebar-hover))]  hover:text-black",
                   pathname === route.href
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-[hsl(var(--sidebar-hover))] text-black"
                     : "transparent"
                 )}
               >
@@ -76,6 +77,7 @@ export function AdminSidebar() {
               </Link>
             ))}
           </div>
+        <ThemeChanger/>
         </div>
       </div>
     </nav>

@@ -55,7 +55,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
               </label>
               <input
                 type="text"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg "
                 value={user.userName}
                 onChange={(e) => setUser({ ...user, userName: e.target.value })}
                 required
@@ -68,7 +68,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
               </label>
               <input
                 type="email"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg "
                 value={user.email}
                 onChange={(e) => setUser({ ...user, email: e.target.value })}
                 required
@@ -81,7 +81,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
               </label>
               <input
                 type="text"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg "
                 value={user.firstName}
                 onChange={(e) =>
                   setUser({ ...user, firstName: e.target.value })
@@ -96,7 +96,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
               </label>
               <input
                 type="text"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg "
                 value={user.lastName}
                 onChange={(e) => setUser({ ...user, lastName: e.target.value })}
                 required
@@ -111,7 +111,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
             </label>
             <input
               type="tel"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-gray-300 rounded-lg "
               value={user.phone}
               onChange={(e) => setUser({ ...user, phone: e.target.value })}
               maxLength={10}
@@ -129,7 +129,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
               </label>
               <input
                 type="password"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg "
                 value={user.password}
                 onChange={(e) => setUser({ ...user, password: e.target.value })}
                 pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{7,}$"
@@ -144,7 +144,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
               </label>
               <input
                 type="password"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg "
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -155,7 +155,7 @@ export default function CreateUserModal({ onClose, onAdd }) {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+            className="w-full flex items-center justify-center px-4 py-2 bg-[hsl(var(--button-color))] text-white rounded-lg shadow-md hover:bg-[hsl(var(--button-color-hover))] transition"
           >
             <Plus className="w-4 h-4 mr-2" /> Create User
           </button>
