@@ -12,6 +12,11 @@ import ConnectionForm from "./ConnectionForm"
 import ConnectionDetails from "./ConnectionDetails"
 import { BadgePlus } from "lucide-react"
 
+
+const host = process.env.NEXT_PUBLIC_API_HOST;
+const port = process.env.NEXT_PUBLIC_API_PORT;
+const baseURL = `http://${host}:${port}`;
+
 export default function Configurations() {
   const [connections, setConnections] = useState([])
   const [selectedConnection, setSelectedConnection] = useState(null)
@@ -29,7 +34,7 @@ export default function Configurations() {
   const fetchConnections = async () => {
     setLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/view_all_connections")
+      const response = await fetch(`${baseURL}/connection`)
       if (!response.ok) {
         throw new Error("Failed to fetch connections")
       }
@@ -51,7 +56,7 @@ export default function Configurations() {
     setLoading(true)
     setSelectedConnection(dataSourcesId)
     try {
-      const response = await fetch(`http://localhost:8000/view_connection?id=${dataSourcesId}`)
+      const response = await fetch(`${baseURL}/connection-view?conn_id=${dataSourcesId}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection details")
       }
@@ -120,7 +125,7 @@ export default function Configurations() {
       p_expiry_date: "2025-12-31T23:59:59.999Z",
     }
     try {
-      const response = await fetch("http://localhost:8000/save_connection", {
+      const response = await fetch(`${baseURL}/connection-save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

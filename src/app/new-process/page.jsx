@@ -38,6 +38,11 @@ export default function NewProcess() {
     },
   ])
 
+  const host = process.env.NEXT_PUBLIC_API_HOST;
+  const port = process.env.NEXT_PUBLIC_API_PORT;
+  const baseURL = `http://${host}:${port}`;
+
+
   useEffect(() => {
     if (connectionName) {
       fetchSchemaDetails(connectionName)
@@ -47,7 +52,7 @@ export default function NewProcess() {
   const fetchSchemaDetails = async (connectionName) => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/get_connectionschema?id=${connectionName}`)
+      const response = await fetch(`${baseURL}/connection-schema?conn_id=${connectionName}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection schema")
       }
@@ -67,7 +72,7 @@ export default function NewProcess() {
 
   const handleSchemaSelect = async (schema) => {
     try {
-      const response = await fetch(`http://localhost:8000/get_tables?id${dataSourcesId}&schema_name=${schema}`)
+      const response = await fetch(`${baseURL}/connection-tables?conn_id=${dataSourcesId}&schema_name=${schema}`)
       if (!response.ok) {
         throw new Error("Failed to fetch tables")
       }
@@ -89,7 +94,7 @@ export default function NewProcess() {
   const fetchConnections = async () => {
     setLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/view_all_connections")
+      const response = await fetch(`${baseURL}/connection`)
       if (!response.ok) {
         throw new Error("Failed to fetch connections")
       }
@@ -110,7 +115,7 @@ export default function NewProcess() {
     setLoading(true)
     setSelectedConnection(dataSourcesId)
     try {
-      const response = await fetch(`http://localhost:8000/view_connection?id=${dataSourcesId}`)
+      const response = await fetch(`${baseURL}/connection-view?conn_id=${dataSourcesId}`)
       if (!response.ok) {
         throw new Error("Failed to fetch connection details")
       }

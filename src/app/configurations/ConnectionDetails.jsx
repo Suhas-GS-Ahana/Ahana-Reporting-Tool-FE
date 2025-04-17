@@ -18,7 +18,7 @@ const ConnectionDetails = ({ connectionDetails }) => {
         <LayoutList className="w-3 h-3" /> Type: {connectionDetails.database_type}
       </Badge>
       <Badge variant="outline" className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1">
-        <Database className="w-3 h-3" /> Database: {connectionDetails.connection_name}
+        <Database className="w-3 h-3" /> Database: {connectionDetails.database_name}
       </Badge>
     </div>
   )

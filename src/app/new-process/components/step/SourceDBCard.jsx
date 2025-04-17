@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { Database, Server, Globe, Plug, LayoutList, X } from "lucide-react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import SchemaSelector from "@/app/configurations/SchemaSelector"
-import TableSelector from "./TableSelector"
+import { Database, Server, Globe, Plug, LayoutList, X } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import SchemaSelector from "@/app/configurations/SchemaSelector";
+import TableSelector from "./TableSelector";
 
 export default function SourceDBCard({
   connectionsDetails,
@@ -61,13 +61,15 @@ export default function SourceDBCard({
                     variant="outline"
                     className="text-xs bg-purple-100 text-purple-600 flex items-center gap-1 px-2 py-1"
                   >
-                    <LayoutList className="w-3 h-3" /> Type: {connectionsDetails.database_type}
+                    <LayoutList className="w-3 h-3" /> Type:{" "}
+                    {connectionsDetails.database_type}
                   </Badge>
                   <Badge
                     variant="outline"
                     className="text-xs bg-red-100 text-red-600 flex items-center gap-1 px-2 py-1"
                   >
-                    <Database className="w-3 h-3" /> Database: {connectionsDetails.connection_name}
+                    <Database className="w-3 h-3" /> Database:{" "}
+                    {connectionsDetails.connection_name}
                   </Badge>
                 </>
               )}
@@ -86,47 +88,69 @@ export default function SourceDBCard({
         </div>
 
         {tableDetails && tableDetails.length > 0 && (
-          <div className="grid gap-2 mt-4">
-            <Label>Select Tables and Columns</Label>
-            <Input
-              readOnly
-              value={getSelectionSummary(selectedTables)}
-              className="bg-white"
-              onClick={(e) => e.stopPropagation()}
-            />
+          <div className="grid gap-6 mt-4">
+            <div>
+              {/* Display selected columns with remove option */}
+              {Object.keys(selectedTables).length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2 mb-4">
+                  {getAllSelectedColumns(selectedTables).map(
+                    ({ tableName, columnName }) => (
+                      <Badge
+                        key={`${cardId}-${tableName}-${columnName}`}
+                        variant="secondary"
+                        className="px-2 py-1"
+                      >
+                        {tableName}.{columnName}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-4 w-4 p-0 ml-1 hover:bg-red-100 hover:text-red-500"
+                          onClick={() => removeColumn(tableName, columnName)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </Badge>
+                    )
+                  )}
+                </div>
+              )}
 
-            {/* Display selected columns with remove option */}
-            {Object.keys(selectedTables).length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2 mb-4">
-                {getAllSelectedColumns(selectedTables).map(({ tableName, columnName }) => (
-                  <Badge key={`${cardId}-${tableName}-${columnName}`} variant="secondary" className="px-2 py-1">
-                    {tableName}.{columnName}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-4 w-4 p-0 ml-1 hover:bg-red-100 hover:text-red-500"
-                      onClick={() => removeColumn(tableName, columnName)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
+              <TableSelector
+                tableDetails={tableDetails}
+                selectedTables={selectedTables}
+                toggleTableSelection={toggleTableSelection}
+                toggleColumnSelection={toggleColumnSelection}
+                expandedTables={expandedTables}
+                toggleTableExpansion={toggleTableExpansion}
+                cardId={cardId}
+              />
+            </div>
+
+            {/* <div className="grid gap-3 mt-4">
+              <Label>Select Tables and Columns</Label>
+              <Input
+                readOnly
+                value={Object.keys(selectedTables)}
+                className="bg-white"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div> */}
+
+            <div className="max-h-64 overflow-y-auto border rounded-xl p-2 bg-gray-50">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Object.keys(selectedTables).map((tableName) => (
+                  <div
+                    key={tableName}
+                    className="w-35 h-7 bg-white border rounded-lg shadow-sm flex items-center justify-center text-center text-sm font-medium text-gray-700 hover:shadow-md transition"
+                  >
+                    {tableName}
+                  </div>
                 ))}
               </div>
-            )}
-
-            <TableSelector
-              tableDetails={tableDetails}
-              selectedTables={selectedTables}
-              toggleTableSelection={toggleTableSelection}
-              toggleColumnSelection={toggleColumnSelection}
-              expandedTables={expandedTables}
-              toggleTableExpansion={toggleTableExpansion}
-              cardId={cardId}
-            />
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
-
