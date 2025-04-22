@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -118,14 +117,14 @@ export default function LoginPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex flex-col">
+        {/* <CardFooter className="flex flex-col">
           <p className="mt-4 text-sm text-center text-gray-600">
             Don't have an account?{" "}
             <Link href="/auth/signup" className="text-blue-600 hover:underline">
               Sign up
             </Link>
           </p>
-        </CardFooter>
+        </CardFooter> */}
       </Card>
     </div>
   )

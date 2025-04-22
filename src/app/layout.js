@@ -1,13 +1,13 @@
-import { Inter } from 'next/font/google'
-import "./globals.css"
-import ClientLayout from "@/components/ClientLayout"
+import { Inter } from "next/font/google";
+import "./globals.css";
+import ClientLayout from "@/components/ClientLayout";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "ETL Reporting Tool",
+  title: "OPMD Reporting Tool",
   description: "Data transformation and reporting made easy",
-}
+};
 
 export default function RootLayout({ children }) {
   return (
@@ -16,5 +16,5 @@ export default function RootLayout({ children }) {
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
-  )
+  );
 }
