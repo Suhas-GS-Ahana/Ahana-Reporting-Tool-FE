@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
   // State Variables
   const [user, setUser] = useState(null); // Holds the current logged-in user's info
   const [loading, setLoading] = useState(true); // Tells if we're still checking the login status
-  const [sidebarExpanded, setSidebarExpanded] = useState(true); // Controls whether the sidebar is expanded or collapsed
+  const [sidebarExpanded, setSidebarExpanded] = useState(false); // Controls whether the sidebar is expanded or collapsed
 
   const router = useRouter();
 

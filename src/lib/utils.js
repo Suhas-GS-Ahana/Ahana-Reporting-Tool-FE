@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
-import { History, LayoutDashboard, Settings, FileSpreadsheet, UserCircle } from "lucide-react"
+import { History, LayoutDashboard, Settings, FileSpreadsheet, UserCircle, Home, Cog, FileSliders, } from "lucide-react"
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -8,14 +8,19 @@ export function cn(...inputs) {
 
 export const sidebarItems = [
   {
+    title: "Home",
+    href: "/home",
+    icon: Home,
+  },
+  {
     title: "Configurations",
     href: "/configurations",
-    icon: Settings,
+    icon: Cog,
   },
   {
     title: "Process",
-    href: "/new-process",
-    icon: LayoutDashboard,
+    href: "/process",
+    icon: FileSliders,
   },
   // {
   //   title: "History",

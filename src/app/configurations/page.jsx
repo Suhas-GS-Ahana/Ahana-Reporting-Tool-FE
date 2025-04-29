@@ -1,10 +1,8 @@
 // This Configurations component handles the configuration of data source connections such as databases.
-// This allows a user to:
-// Fetch and view existing data source connections
-// Select one to view its details
-// Add a new connection
-// Test and save a connection
-// Proceed to a data processing step
+// This allows a user to: Fetch and view existing data source connections, Select one to view its details,
+// Add a new connection, Proceed to the next step (process creation)
+
+// API called - /connection
 
 "use client";
 
@@ -30,7 +28,8 @@ import { useConnection } from "@/contexts/ConnectionContext";
 import Link from "next/link";
 import ConnectionForm from "./ConnectionForm";
 import ConnectionDetails from "./ConnectionDetails";
-import { BadgePlus } from "lucide-react";
+import { BadgePlus, PlusCircle } from "lucide-react";
+import BackButton from "@/components/BackButton";
 
 // API Setup
 const host = process.env.NEXT_PUBLIC_API_HOST;
@@ -39,14 +38,14 @@ const baseURL = `http://${host}:${port}`;
 
 export default function Configurations() {
   // State Variables
-  const [connections, setConnections] = useState([]); //  list of all available data source connections
-  const [selectedConnection, setSelectedConnection] = useState(null); // Stores the ID of the selected data source connection from the dropdown
-  const [connectionDetails, setConnectionDetails] = useState(null); // more info of the selected connection
-  const [loading, setLoading] = useState(false);  //  Indicates whether data is currently being fetched
-  const [showConnectionForm, setShowConnectionForm] = useState(false); // Controls whether the "Add New Data Source" form is visible
+  const [connections, setConnections] = useState([]); //  all data source connections
+  const [selectedConnection, setSelectedConnection] = useState(null); // selected connection ID
+  // const [connectionDetails, setConnectionDetails] = useState(null); // selected connection details
+  const [loading, setLoading] = useState(false);
+  const [showConnectionForm, setShowConnectionForm] = useState(false); // For Add Form visibility
 
   // updates the context so other components can access connection details
-  const { setConnectionsDetails } = useConnection();
+  const { connectionDetails,setConnectionDetails } = useConnection();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -55,7 +54,8 @@ export default function Configurations() {
     fetchConnections();
   }, []);
 
-  // Fetches existing connections from the backend (setting - connections)
+  // Fetches existing connections from the backend (/connection)
+  // sets - connections
   const fetchConnections = async () => {
     setLoading(true);
     try {
@@ -63,8 +63,8 @@ export default function Configurations() {
       if (!response.ok) {
         throw new Error("Failed to fetch connections");
       }
-      const data = await response.json();
-      setConnections(data.data);
+      const {data} = await response.json();
+      setConnections(data);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -76,8 +76,8 @@ export default function Configurations() {
     }
   };
 
-  // Handle Connection Selection (setting - selectedConnection,ConnectionDetails,ConnectionsDetails)
-  const handleConnectionSelect = async (dataSourcesId) => {
+  // Handle Connection Selection (setting - selectedConnection,connectionDetails)
+  const handleConnectionSelect = async(dataSourcesId) => {
     setLoading(true);
     setSelectedConnection(dataSourcesId);
     try {
@@ -87,9 +87,9 @@ export default function Configurations() {
       if (!response.ok) {
         throw new Error("Failed to fetch connection details");
       }
-      const {data} = await response.json();
-      setConnectionDetails(data);  //save details in state
-      setConnectionsDetails(data); //save details in context
+      const { data } = await response.json();
+      // setConnectionDetails(data); //save details in state
+      setConnectionDetails(data); //save details in context
     } catch (error) {
       toast({
         variant: "destructive",
@@ -101,49 +101,13 @@ export default function Configurations() {
     }
   };
 
-  // Testing a Connection
-  const handleTestConnection = async (formData) => {
-    const existingConnection = connections.find(
-      (connection) => connection.connection_name === formData.connectionName
-    );
-    const url = existingConnection
-      ? `${baseURL}/connection-test?conn_id=${existingConnection.id}`
-      : `${baseURL}/connection-test`;
-    const payload = existingConnection ? {} : formData;
-
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to test connection");
-      }
-
-      toast({
-        title: "Testing Connection",
-        description: "Connection test initiated...",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to test connection",
-      });
-    }
-  };
-
   // Saving a New Connection
   const handleSaveConnection = async (formData) => {
     const payload = {
       p_inserted_by: 1,
       p_modified_by: 1,
       p_connection_name: formData.connectionName,
-      p_database_type: "postgresql",
+      p_database_type: "PostgreSQL",
       p_server_name: formData.hostName,
       p_port_number: parseInt(formData.portNumber, 10),
       p_database_name: formData.databaseName,
@@ -157,6 +121,7 @@ export default function Configurations() {
       p_is_deleted: false,
       p_expiry_date: "2025-12-31T23:59:59.999Z",
     };
+
     try {
       const response = await fetch(`${baseURL}/connection-save`, {
         method: "POST",
@@ -165,20 +130,30 @@ export default function Configurations() {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
-        throw new Error("Failed to save connection");
+
+      if (response.status === 200) {
+        toast({
+          title: "Saving Connection",
+          description: "Connection details saved successfully",
+        });
+
+        setShowConnectionForm(false);
+        router.push(`/new-process?connectionName=${formData.connectionName}`);
+      } else if (response.status === 400) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Connection already exists",
+        });
+      } else if (response.status === 500) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Invalid connection",
+        });
+      } else {
+        throw new Error("Unexpected error");
       }
-
-      toast({
-        title: "Saving Connection",
-        description: "Connection details saved successfully",
-      });
-
-      // Reset form data
-      setShowConnectionForm(false);
-
-      // Redirect to process page with connectionName as query parameter
-      router.push(`/new-process?connectionName=${formData.connectionName}`);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -192,7 +167,7 @@ export default function Configurations() {
   if (showConnectionForm) {
     return (
       <ConnectionForm
-        onTestConnection={handleTestConnection}
+        // onTestConnection={handleTestConnection}
         onSaveConnection={handleSaveConnection}
         onSkip={() => setShowConnectionForm(false)}
       />
@@ -200,35 +175,42 @@ export default function Configurations() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6 px-6 py-6 ">
+      {/* Back Button */}
+      <div className="absolute top-0 left-0">
+        <BackButton />
+      </div>
+
       {/* Heading */}
       <div>
-        <h1 className="text-2xl font-bold">Select DataSource & Table</h1>
-        <p className="text-muted-foreground">
-          Configure your data source and select tables for processing.
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Configure Your Data Source
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Choose an existing data source or add a new one to begin.
         </p>
       </div>
 
       {/* Card */}
       <div>
-        <Card>
+        <Card className="rounded-md shadow-md hover:shadow-lg transition">
           <CardHeader className="flex flex-row justify-between items-center">
-            <div>
+            <div className="space-y-1">
               <CardTitle>Data Source Configuration</CardTitle>
               <CardDescription>Select your database</CardDescription>
             </div>
             <div>
               <Button
                 onClick={() => setShowConnectionForm(true)}
-                className="bg-blue-950 hover:bg-blue-900"
+                className="shadow-sm hover:bg-gray-500 rounded-full px-4 py-2 transition"
               >
-                <BadgePlus /> Add New Data Source
+                <PlusCircle className="mr-1 h-4 w-4" />
+                Add Connection
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-
               {/* Dropdown to Select Connection */}
               <div className="grid gap-2">
                 <Select
@@ -236,7 +218,7 @@ export default function Configurations() {
                   disabled={loading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select data source" />
+                    <SelectValue placeholder="Select connection" />
                   </SelectTrigger>
                   <SelectContent>
                     {connections.map((connection) => (
@@ -261,7 +243,7 @@ export default function Configurations() {
             <Link href={`/new-process?connectionName=${selectedConnection}`}>
               <Button
                 disabled={!selectedConnection || loading}
-                className="mt-5"
+                className="mt-5 hover:bg-gray-500 shadow-sm"
               >
                 Click to Process
               </Button>

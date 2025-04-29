@@ -1,6 +1,6 @@
 // This file creates a context for managing connection-related data
 // (like database connection info and schemas) across your app
-// shares - connectionsDetails, setConnectionsDetails, schemasDetails, setSchemasDetails
+// shares - connectionDetails, setConnectionDetails, schemasDetails, setSchemasDetails
 
 // useConnection
 
@@ -10,14 +10,14 @@ const ConnectionContext = createContext(); // Creates a new context object
 
 export const ConnectionProvider = ({ children }) => {
   // state variables
-  const [connectionsDetails, setConnectionsDetails] = useState(null); // Stores data about current database connections
+  const [connectionDetails, setConnectionDetails] = useState(null); // Stores data about current database connections
   const [schemasDetails, setSchemasDetails] = useState([]); // Stores data about database schemas
 
   return (
     <ConnectionContext.Provider
       value={{
-        connectionsDetails,
-        setConnectionsDetails,
+        connectionDetails,
+        setConnectionDetails,
         schemasDetails,
         setSchemasDetails,
       }}
