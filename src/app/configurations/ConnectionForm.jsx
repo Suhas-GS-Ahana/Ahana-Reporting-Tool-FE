@@ -1,14 +1,14 @@
 // This ConnectionForm component is used to collect database connection details
-// from a user and handle three possible actions: Test, Save, and Skip
+// from a user and create a new connection
 
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import BackButton from "@/components/BackButton";
+import { ArrowLeft } from "lucide-react";
 
-//three callback functions as props: onTestConnection, onSaveConnection, onSkip
-const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
+//three callback functions as props: onSaveConnection, onSkip, onBack
+const ConnectionForm = ({ onSaveConnection, onSkip, onBack }) => {
   // State Variables
   const [newConnectionData, setNewConnectionData] = useState({
     connectionName: "",
@@ -160,14 +160,24 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
     // </div>
 
     <div className="relative">
-      {/* <div className="absolute top-0 left-0">
-        <BackButton />
-      </div> */}
-      <div className="relative max-w-3xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
+      {/* Back Button */}
+      <div className="absolute top-0 left-0">
+        <button
+          onClick={onBack}
+          className="flex items-center space-x-1 border bg-transparent shadow-sm hover:shadow-md text-xs rounded-sm p-2 h-6"
+        >
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
+
+      {/* Add Data Source Form Card*/}
+      <div className="relative max-w-3xl mx-auto bg-white shadow-md rounded-md p-8 border">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6">
           Add a New Data Source
         </h1>
         <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Connection Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Connection Name
@@ -186,6 +196,7 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
             )}
           </div>
 
+          {/* Database Host */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Database Host
@@ -202,6 +213,7 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
             )}
           </div>
 
+          {/* Database Port */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Database Port
@@ -218,6 +230,7 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
             )}
           </div>
 
+          {/* Database Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Database Name
@@ -234,6 +247,7 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
             )}
           </div>
 
+          {/* User Name and Password */}
           <div className="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -269,6 +283,7 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
             </div>
           </div>
 
+          {/* Submit & Skip Butttons */}
           <div className="flex space-x-4 mt-6">
             <Button
               type="submit"
@@ -286,6 +301,7 @@ const ConnectionForm = ({ onTestConnection, onSaveConnection, onSkip }) => {
               Skip & Continue
             </Button>
           </div>
+          
         </form>
       </div>
     </div>

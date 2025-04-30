@@ -41,9 +41,9 @@ export function Sidebar() {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-100 hover:text-accent-foreground hover:shadow-inner",
+                        "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-100 hover:text-accent-foreground hover:shadow-inner hover:border",
                         pathname === item.href
-                          ? "bg-gray-100 text-accent-foreground shadow-inner"
+                          ? "bg-gray-100 text-accent-foreground shadow-inner border"
                           : "",
                         sidebarExpanded ? "justify-start" : "justify-center"
                       )}

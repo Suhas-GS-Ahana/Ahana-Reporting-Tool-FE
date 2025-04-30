@@ -13,6 +13,7 @@ export default function NewProcess() {
   const [connectionDetails, setConnectionDetails] = useState(null)
   const [connections, setConnections] = useState([])
   const [selectedConnection, setSelectedConnection] = useState(null)
+
   const { toast } = useToast()
   const { connectionsDetails, schemasDetails, setSchemasDetails } = useConnection()
   const searchParams = useSearchParams()

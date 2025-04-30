@@ -2,7 +2,7 @@
 // This allows a user to: Fetch and view existing data source connections, Select one to view its details,
 // Add a new connection, Proceed to the next step (process creation)
 
-// API called - /connection
+// API called - /connection, /connection-view, /connection-save
 
 "use client";
 
@@ -40,12 +40,12 @@ export default function Configurations() {
   // State Variables
   const [connections, setConnections] = useState([]); //  all data source connections
   const [selectedConnection, setSelectedConnection] = useState(null); // selected connection ID
-  // const [connectionDetails, setConnectionDetails] = useState(null); // selected connection details
+  const [connectionsDetails, setConnectionsDetails] = useState(null); // selected connection details
   const [loading, setLoading] = useState(false);
   const [showConnectionForm, setShowConnectionForm] = useState(false); // For Add Form visibility
 
   // updates the context so other components can access connection details
-  const { connectionDetails,setConnectionDetails } = useConnection();
+  const { connectionDetails, setConnectionDetails } = useConnection(); // selected connection details (global)
   const { toast } = useToast();
   const router = useRouter();
 
@@ -61,9 +61,9 @@ export default function Configurations() {
     try {
       const response = await fetch(`${baseURL}/connection`);
       if (!response.ok) {
-        throw new Error("Failed to fetch connections");
+        throw new Error("Failed to fetch connections"); //-----------------(doubt)
       }
-      const {data} = await response.json();
+      const { data } = await response.json();
       setConnections(data);
     } catch (error) {
       toast({
@@ -76,8 +76,9 @@ export default function Configurations() {
     }
   };
 
-  // Handle Connection Selection (setting - selectedConnection,connectionDetails)
-  const handleConnectionSelect = async(dataSourcesId) => {
+  // Handle Connection Selection  (/connection-view)
+  // (setting - selectedConnection,connectionDetails,connectionsDetails)
+  const handleConnectionSelect = async (dataSourcesId) => {
     setLoading(true);
     setSelectedConnection(dataSourcesId);
     try {
@@ -88,7 +89,7 @@ export default function Configurations() {
         throw new Error("Failed to fetch connection details");
       }
       const { data } = await response.json();
-      // setConnectionDetails(data); //save details in state
+      setConnectionsDetails(data); //save details in state
       setConnectionDetails(data); //save details in context
     } catch (error) {
       toast({
@@ -101,7 +102,7 @@ export default function Configurations() {
     }
   };
 
-  // Saving a New Connection
+  // Saving a New Connection (/connection-save)
   const handleSaveConnection = async (formData) => {
     const payload = {
       p_inserted_by: 1,
@@ -138,7 +139,7 @@ export default function Configurations() {
         });
 
         setShowConnectionForm(false);
-        router.push(`/new-process?connectionName=${formData.connectionName}`);
+        router.push(`/configurations`);
       } else if (response.status === 400) {
         toast({
           variant: "destructive",
@@ -167,9 +168,9 @@ export default function Configurations() {
   if (showConnectionForm) {
     return (
       <ConnectionForm
-        // onTestConnection={handleTestConnection}
         onSaveConnection={handleSaveConnection}
         onSkip={() => setShowConnectionForm(false)}
+        onBack={() => setShowConnectionForm(false)}
       />
     );
   }
@@ -194,11 +195,13 @@ export default function Configurations() {
       {/* Card */}
       <div>
         <Card className="rounded-md shadow-md hover:shadow-lg transition">
+          {/* Header */}
           <CardHeader className="flex flex-row justify-between items-center">
             <div className="space-y-1">
               <CardTitle>Data Source Configuration</CardTitle>
               <CardDescription>Select your database</CardDescription>
             </div>
+            {/* Add New Connection Button */}
             <div>
               <Button
                 onClick={() => setShowConnectionForm(true)}
@@ -209,7 +212,10 @@ export default function Configurations() {
               </Button>
             </div>
           </CardHeader>
+
+          {/* Content */}
           <CardContent className="space-y-6">
+            {/* Dropdown & Connection Details */}
             <div className="grid gap-4">
               {/* Dropdown to Select Connection */}
               <div className="grid gap-2">
@@ -234,7 +240,7 @@ export default function Configurations() {
               </div>
 
               {/* Display connection details */}
-              {connectionDetails && (
+              {connectionsDetails && (
                 <ConnectionDetails connectionDetails={connectionDetails} />
               )}
             </div>
@@ -254,3 +260,6 @@ export default function Configurations() {
     </div>
   );
 }
+
+
+// SchemaSelector.jsx currently not used
