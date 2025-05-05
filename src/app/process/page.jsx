@@ -1,6 +1,40 @@
 import React from "react";
 
 export default function ProcessPage() {
+
+ const process_save_data = {
+    "process": {
+      "p_inserted_by": 1,
+      "p_modified_by": 1,
+      "p_process_name": "string",
+      "p_process_version": 1,
+      "p_rerun": true
+    },
+    "subprocesses": [
+      {
+        "subprocess_data": {
+          "p_inserted_by": 1,
+          "p_modified_by": 1,
+          "p_sub_process_order": 1,
+          "p_sub_process_name": "string"
+        },
+        "steps": [
+          {
+            "p_inserted_by": 1,
+            "p_modified_by": 1,
+            "p_data_source_id": "int",
+            "p_process_step_order": 1,
+            "p_process_step_action": "string",
+            "p_process_step_description": "string",
+            "p_process_step_query": "string"
+          }
+        ]
+      }
+    ]
+  }
+
+
+
   return (
     <div>
       <h1>Process Page</h1>

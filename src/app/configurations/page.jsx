@@ -246,7 +246,7 @@ export default function Configurations() {
             </div>
 
             {/* Process Button */}
-            <Link href={`/new-process?connectionName=${selectedConnection}`}>
+            <Link href={`/temp-process?connectionName=${selectedConnection}`}>
               <Button
                 disabled={!selectedConnection || loading}
                 className="mt-5 hover:bg-gray-500 shadow-sm"
