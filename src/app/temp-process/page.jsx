@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash, ChevronRight } from "lucide-react";
+import { Plus, Trash, ChevronRight, Component } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -87,8 +87,8 @@ export default function CreateProcess() {
       const newSteps = [...subprocesses[subprocessIndex].steps];
       newSteps.push({
         id: Date.now(),
-        step_no: `Step ${newSteps.length + 1}`,
-        step_type: "import", // Default type
+        step_no: newSteps.length + 1,
+        step_type: "", // Default type
         source_tables: [],
         destination_tables: [],
         description: "",
@@ -128,7 +128,7 @@ export default function CreateProcess() {
       // Renumber steps
       const renamedSteps = updatedSteps.map((step, index) => ({
         ...step,
-        step_no: `Step ${index + 1}`,
+        step_no: index + 1,
       }));
 
       const updatedSubprocesses = [...subprocesses];
@@ -283,7 +283,7 @@ export default function CreateProcess() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      {/* Header */}
+      {/* Header - function called - saveProcess */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Create New Process</h1>
         <Button onClick={saveProcess} disabled={loading}>
@@ -302,7 +302,7 @@ export default function CreateProcess() {
         </Alert>
       )}
 
-      {/* Main Process Card - function caleld - addSubprocess */}
+      {/* Main Process Card - function called - addSubprocess */}
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Process Details</CardTitle>
@@ -368,17 +368,20 @@ function SubprocessCard({
 }) {
   return (
     <Card className="mb-6">
-      {/* Subprocess name & delete subprocess */}
+      {/* function called - updateSubprocessName, deleteSubprocess */}
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <div className="w-full">
+            <label className="block text-sm font-medium mb-1">
+              Subprocess Name
+            </label>
             <Input
               value={subprocess.subprocess_name}
               onChange={(e) =>
                 updateSubprocessName(subprocess.id, e.target.value)
               }
               placeholder="Enter subprocess name"
-              className="text-lg font-semibold"
+              className="w-full"
             />
           </div>
           <Button
@@ -408,7 +411,7 @@ function SubprocessCard({
         </div>
       </CardContent>
 
-      {/* add steps */}
+      {/* function called - addStep */}
       <CardFooter>
         <Button
           onClick={() => addStep(subprocess.id)}
@@ -422,6 +425,9 @@ function SubprocessCard({
   );
 }
 
+// The StepCard component displays and manages a single step in the process management interface.
+// It provides controls for selecting the step type and deleting the step, and renders different
+// content based on the step type.
 function StepCard({
   step,
   subprocessId,
@@ -431,9 +437,12 @@ function StepCard({
 }) {
   return (
     <Card className="border border-gray-200">
+      {/* function called - updateStep, deleteStep */}
       <CardHeader className="pb-2 bg-gray-50">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-md font-medium">{step.step_no}</CardTitle>
+          <CardTitle className="text-md font-medium">
+            Step {step.step_no}
+          </CardTitle>
           <div className="flex items-center space-x-2">
             <Select
               value={step.step_type}
@@ -442,7 +451,7 @@ function StepCard({
               }
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select step type" />
+                <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="import">Import</SelectItem>
@@ -461,6 +470,7 @@ function StepCard({
           </div>
         </div>
       </CardHeader>
+      {/* renders step cards */}
       <CardContent className="pt-4">
         {step.step_type === "import" ? (
           <ImportStepContent
@@ -470,19 +480,30 @@ function StepCard({
             connectionId={connectionId}
             updateStep={updateStep}
           />
-        ) : (
+        ) : step.step_type === "process-query" ||
+          step.step_type === "export" ? (
           <QueryStepContent
             step={step}
             subprocessId={subprocessId}
             stepId={step.id}
             updateStep={updateStep}
           />
+        ) : (
+          <div className="border ">
+            <div className="text-center text-sm text-gray-500 p-5 ">
+              Please select the step type
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
   );
 }
 
+// This Component manages the selection of database tables for an import operation. It allows users to:
+// Select a schema from a source database
+// Select tables from that schema to import
+// Automatically mirror those selections to a destination database
 function ImportStepContent({
   step,
   subprocessId,
@@ -490,15 +511,15 @@ function ImportStepContent({
   connectionId,
   updateStep,
 }) {
-  const [sourceSchemas, setSourceSchemas] = useState([]);
-  const [selectedSourceSchema, setSelectedSourceSchema] = useState("");
-  const [sourceTables, setSourceTables] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [sourceSchemas, setSourceSchemas] = useState([]); //List of available schemas in the source database
+  const [selectedSourceSchema, setSelectedSourceSchema] = useState(""); //Currently selected schema
+  const [sourceTables, setSourceTables] = useState([]); //Tables available in the selected schema
+  const [loading, setLoading] = useState(false); //Loading state for API calls
 
   // For destination - fixed values as per requirements
   const destinationConnectionId = "3";
   const destinationSchema = "destination_schema";
-  const [destinationTables, setDestinationTables] = useState([]);
+  const [destinationTables, setDestinationTables] = useState([]); //Tables available in the destination schema
 
   // Fetch source schemas
   useEffect(() => {
@@ -508,9 +529,9 @@ function ImportStepContent({
   }, [connectionId]);
 
   // Fetch destination tables (fixed connection and schema)
-  useEffect(() => {
-    fetchDestinationTables();
-  }, []);
+  // useEffect(() => {
+  //   fetchDestinationTables();
+  // }, []);
 
   // When source schema changes, fetch tables
   useEffect(() => {
@@ -519,11 +540,12 @@ function ImportStepContent({
     }
   }, [selectedSourceSchema]);
 
+  // api - (/connection-schema), sets - sourceSchemas
   const fetchSourceSchemas = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://10.235.20.52:8001/connection-schema?conn_id=${connectionId}`
+        `${baseURL}/connection-schema?conn_id=${connectionId}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -538,17 +560,20 @@ function ImportStepContent({
     }
   };
 
+  // api - (/connection-tables), sets - sourceTables
   const fetchSourceTables = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://10.235.20.52:8001/connection-tables?conn_id=${connectionId}&schema_name=${selectedSourceSchema}`
+        `${baseURL}/connection-tables?conn_id=${connectionId}&schema_name=${selectedSourceSchema}`
       );
-      if (response.ok) {
+      if (response.status === 200) {
         const data = await response.json();
         if (data.status === "success") {
           setSourceTables(data.data);
         }
+      } else {
+        setSourceTables([])
       }
     } catch (error) {
       console.error("Error fetching tables:", error);
@@ -557,25 +582,26 @@ function ImportStepContent({
     }
   };
 
-  const fetchDestinationTables = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `http://10.235.20.52:8001/connection-tables?conn_id=${destinationConnectionId}&schema_name=${destinationSchema}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === "success") {
-          setDestinationTables(data.data);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching destination tables:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchDestinationTables = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch(
+  //       `${baseURL}/connection-tables?conn_id=${destinationConnectionId}&schema_name=${destinationSchema}`
+  //     );
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       if (data.status === "success") {
+  //         setDestinationTables(data.data);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching destination tables:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
+  //sets - selectedSourceSchema, calls function - updateStep
   const handleSourceSchemaChange = (schema) => {
     setSelectedSourceSchema(schema);
     // Reset selected tables when schema changes
@@ -609,6 +635,7 @@ function ImportStepContent({
           </CardHeader>
           <CardContent className="pt-4">
             <div className="space-y-4">
+              {/* function called - handleSourceSchemaChange */}
               <div>
                 <label className="block text-sm font-medium mb-1">Schema</label>
                 <Select
@@ -641,6 +668,7 @@ function ImportStepContent({
                     <div className="text-center py-4">Loading tables...</div>
                   ) : (
                     <>
+                      {/* list of table checkboxes */}
                       <ScrollArea className="h-60 border rounded-md p-4">
                         <div className="space-y-2">
                           {sourceTables.map((table) => (
@@ -671,6 +699,7 @@ function ImportStepContent({
                         </div>
                       </ScrollArea>
 
+                      {/* list of selected tables */}
                       {step.source_tables.length > 0 && (
                         <div className="mt-4">
                           <label className="block text-sm font-medium mb-2">
