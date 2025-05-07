@@ -573,7 +573,7 @@ function ImportStepContent({
           setSourceTables(data.data);
         }
       } else {
-        setSourceTables([])
+        setSourceTables([]);
       }
     } catch (error) {
       console.error("Error fetching tables:", error);
@@ -582,30 +582,11 @@ function ImportStepContent({
     }
   };
 
-  // const fetchDestinationTables = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await fetch(
-  //       `${baseURL}/connection-tables?conn_id=${destinationConnectionId}&schema_name=${destinationSchema}`
-  //     );
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       if (data.status === "success") {
-  //         setDestinationTables(data.data);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching destination tables:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   //sets - selectedSourceSchema, calls function - updateStep
   const handleSourceSchemaChange = (schema) => {
     setSelectedSourceSchema(schema);
     // Reset selected tables when schema changes
-    updateStep(subprocessId, stepId, "source_tables", []);
+    // updateStep(subprocessId, stepId, "source_tables", []);
   };
 
   const handleSourceTableChange = (tableName, isChecked) => {
@@ -659,6 +640,7 @@ function ImportStepContent({
                 </Select>
               </div>
 
+              {/* container for selecting tables */}
               {selectedSourceSchema && (
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -669,35 +651,41 @@ function ImportStepContent({
                   ) : (
                     <>
                       {/* list of table checkboxes */}
-                      <ScrollArea className="h-60 border rounded-md p-4">
-                        <div className="space-y-2">
-                          {sourceTables.map((table) => (
-                            <div
-                              key={table.table_name}
-                              className="flex items-center space-x-2"
-                            >
-                              <Checkbox
-                                id={`source-${table.table_name}`}
-                                checked={step.source_tables.includes(
-                                  table.table_name
-                                )}
-                                onCheckedChange={(checked) =>
-                                  handleSourceTableChange(
-                                    table.table_name,
-                                    checked
-                                  )
-                                }
-                              />
-                              <label
-                                htmlFor={`source-${table.table_name}`}
-                                className="text-sm cursor-pointer"
+                      {sourceTables.length > 0 ? (
+                        <ScrollArea className="h-60 border rounded-md p-4">
+                          <div className="space-y-2">
+                            {sourceTables.map((table) => (
+                              <div
+                                key={table.table_name}
+                                className="flex items-center space-x-2"
                               >
-                                {table.table_name}
-                              </label>
-                            </div>
-                          ))}
+                                <Checkbox
+                                  id={`source-${table.table_name}`}
+                                  checked={step.source_tables.includes(
+                                    table.table_name
+                                  )}
+                                  onCheckedChange={(checked) =>
+                                    handleSourceTableChange(
+                                      table.table_name,
+                                      checked
+                                    )
+                                  }
+                                />
+                                <label
+                                  htmlFor={`source-${table.table_name}`}
+                                  className="text-sm cursor-pointer"
+                                >
+                                  {table.table_name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      ) : (
+                        <div className="py-3 px-4 bg-gray-100 rounded text-gray-600 text-sm">
+                          No tables exist in this schema
                         </div>
-                      </ScrollArea>
+                      )}
 
                       {/* list of selected tables */}
                       {step.source_tables.length > 0 && (
@@ -777,6 +765,7 @@ function ImportStepContent({
 function QueryStepContent({ step, subprocessId, stepId, updateStep }) {
   return (
     <div className="space-y-4">
+      {/* Description */}
       <div>
         <label className="block text-sm font-medium mb-1">Description</label>
         <Input
@@ -787,6 +776,8 @@ function QueryStepContent({ step, subprocessId, stepId, updateStep }) {
           placeholder="Enter step description"
         />
       </div>
+      
+      {/* Query */}
       <div>
         <label className="block text-sm font-medium mb-1">Query</label>
         <Textarea
