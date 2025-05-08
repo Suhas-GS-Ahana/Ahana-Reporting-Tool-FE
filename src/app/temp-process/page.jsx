@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash, ChevronRight, Component } from "lucide-react";
+import { Plus, Trash, ChevronRight, Component, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -92,7 +92,7 @@ export default function CreateProcess() {
         source_tables: [],
         destination_tables: [],
         description: "",
-        query: "",
+        query: [],
       });
 
       const updatedSubprocesses = [...subprocesses];
@@ -162,12 +162,19 @@ export default function CreateProcess() {
               source_tables: step.source_tables,
               destination_tables: step.destination_tables,
             };
-          } else {
+          } else if (step.step_type === "process-query") {
             return {
               step_no: step.step_no,
               step_type: step.step_type,
               description: step.description,
               query: step.query,
+            };
+          } else{
+            return {
+              step_no: step.step_no,
+              step_type: step.step_type,
+              description: step.description,
+              queries: step.queries,
             };
           }
         }),
@@ -480,9 +487,15 @@ function StepCard({
             connectionId={connectionId}
             updateStep={updateStep}
           />
-        ) : step.step_type === "process-query" ||
-          step.step_type === "export" ? (
+        ) : step.step_type === "process-query" ? (
           <QueryStepContent
+            step={step}
+            subprocessId={subprocessId}
+            stepId={step.id}
+            updateStep={updateStep}
+          />
+        ) : step.step_type === "export" ? (
+          <ExportStepContent
             step={step}
             subprocessId={subprocessId}
             stepId={step.id}
@@ -776,7 +789,7 @@ function QueryStepContent({ step, subprocessId, stepId, updateStep }) {
           placeholder="Enter step description"
         />
       </div>
-      
+
       {/* Query */}
       <div>
         <label className="block text-sm font-medium mb-1">Query</label>
@@ -788,6 +801,96 @@ function QueryStepContent({ step, subprocessId, stepId, updateStep }) {
           placeholder="Enter SQL query"
           className="min-h-[150px]"
         />
+      </div>
+    </div>
+  );
+}
+
+function ExportStepContent({ step, subprocessId, stepId, updateStep }) {
+  // Use useEffect to initialize queries if needed
+  useEffect(() => {
+    if (!Array.isArray(step.queries) || step.queries.length === 0) {
+      updateStep(subprocessId, stepId, "queries", [""]);
+    }
+  }, [step.queries, subprocessId, stepId, updateStep]);
+
+  // Handler for updating a specific query by index
+  const updateQuery = (index, value) => {
+    const updatedQueries = [...step.queries];
+    updatedQueries[index] = value;
+    updateStep(subprocessId, stepId, "queries", updatedQueries);
+  };
+
+  // Handler for adding a new query
+  const addQuery = () => {
+    const updatedQueries = [...step.queries, ""];
+    updateStep(subprocessId, stepId, "queries", updatedQueries);
+  };
+
+  // Handler for removing a query by index
+  const removeQuery = (index) => {
+    // Prevent removing if it's the last query
+    if (step.queries.length <= 1) return;
+
+    const updatedQueries = step.queries.filter((_, i) => i !== index);
+    updateStep(subprocessId, stepId, "queries", updatedQueries);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Description</label>
+        <Input
+          value={step.description || ""}
+          onChange={(e) =>
+            updateStep(subprocessId, stepId, "description", e.target.value)
+          }
+          placeholder="Enter step description"
+        />
+      </div>
+
+      {/* Queries */}
+      <div>
+        <div className="flex justify-between items-center mb-1">
+          <label className="block text-sm font-medium">Queries</label>
+          <Button
+            onClick={addQuery}
+            variant = "outline"
+            // className="h-8"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Query
+          </Button>
+        </div>
+
+        <div className="space-y-3">
+          {Array.isArray(step.queries) &&
+            step.queries.map((query, index) => (
+              <div key={index} className="flex gap-2">
+                <div className="flex-grow">
+                  <Textarea
+                    value={query}
+                    onChange={(e) => updateQuery(index, e.target.value)}
+                    placeholder={`Enter query ${index + 1}`}
+                    className="min-h-[100px]"
+                  />
+                </div>
+
+                {/* Only show delete button if there's more than one query */}
+                {step.queries.length > 1 && (
+                  <Button
+                    onClick={() => removeQuery(index)}
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500 hover:text-red-700 transisition"
+                  >
+                    <Trash size={18} />
+                  </Button>
+                )}
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );
