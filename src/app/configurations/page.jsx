@@ -175,6 +175,10 @@ export default function Configurations() {
     );
   }
 
+  const handleProcess = (selectedConnection) => {
+    router.push(`/temp-process?connectionName=${selectedConnection}`);
+  };
+
   return (
     <div className="relative space-y-6 px-6 py-6 ">
       {/* Back Button */}
@@ -194,7 +198,7 @@ export default function Configurations() {
 
       {/* Card */}
       <div>
-        <Card className="rounded-md shadow-md hover:shadow-lg transition">
+        <Card className="rounded-md shadow-md ">
           {/* Header */}
           <CardHeader className="flex flex-row justify-between items-center">
             <div className="space-y-1">
@@ -204,8 +208,8 @@ export default function Configurations() {
             {/* Add New Connection Button */}
             <div>
               <Button
-                onClick={() => setShowConnectionForm(true)}
-                className="shadow-sm hover:bg-gray-500 rounded-full px-4 py-2 transition"
+                onClick={() => {setShowConnectionForm(true); setConnectionsDetails(null); setSelectedConnection(null)}}
+                className="shadow-sm bg-blue-600 hover:bg-blue-700 rounded-full px-4 py-2 transition"
               >
                 <PlusCircle className="mr-1 h-4 w-4" />
                 Add Connection
@@ -241,19 +245,20 @@ export default function Configurations() {
 
               {/* Display connection details */}
               {connectionsDetails && (
-                <ConnectionDetails connectionDetails={connectionDetails} />
+                <ConnectionDetails connectionsDetails={connectionsDetails} />
               )}
             </div>
 
             {/* Process Button */}
-            <Link href={`/temp-process?connectionName=${selectedConnection}`}>
+           
               <Button
                 disabled={!selectedConnection || loading}
-                className="mt-5 hover:bg-gray-500 shadow-sm"
+                className="mt-5 bg-gray-700 shadow-sm"
+                onClick={()=>handleProcess(selectedConnection)}
               >
                 Click to Process
               </Button>
-            </Link>
+            
           </CardContent>
         </Card>
       </div>

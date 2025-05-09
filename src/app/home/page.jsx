@@ -38,7 +38,7 @@ export default function HomePage() {
               Add and manage data source connections. Create ETL processes to
               automate data flow.
             </p>
-            <Button variant="default">Go to Configuration</Button>
+            <Button className="bg-gray-700">Go to Configuration</Button>
           </CardContent>
         </Card>
 
@@ -56,7 +56,7 @@ export default function HomePage() {
               Manage and execute business processes like NPA analysis with
               robust reporting options.
             </p>
-            <Button variant="default">Go to Process</Button>
+            <Button className="bg-gray-700">Go to Process</Button>
           </CardContent>
         </Card>
       </div>

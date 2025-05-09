@@ -29,7 +29,7 @@ export default function ClientLayout({ children }) {
             {isAdmin ? <AdminSidebar /> : <Sidebar />}
             <main
               className={cn(
-                "p-6  overflow-y-auto transition-all duration-300 ease-in-out",
+                "p-6  overflow-y-auto transition-all duration-300 ease-in-out ",
                 sidebarExpanded
                   ? "ml-50 w-[calc(100%-12.5rem)]"
                   : "ml-16 w-[calc(100%-4rem)]"
