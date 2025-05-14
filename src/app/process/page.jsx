@@ -1,3 +1,4 @@
+// Process Management Page
 // Page to manage process - edit & execute
 
 "use client";
@@ -36,6 +37,8 @@ import {
   Search,
   Filter,
   Loader2,
+  Loader,
+  LoaderPinwheel,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +49,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// API Setup
+const host = process.env.NEXT_PUBLIC_API_HOST;
+const port = process.env.NEXT_PUBLIC_API_PORT;
+const baseURL = `http://${host}:${port}`;
+
 export default function ProcessPage() {
   const router = useRouter();
   const [processes, setProcesses] = useState([]);
@@ -53,21 +61,23 @@ export default function ProcessPage() {
   const [error, setError] = useState(null);
   
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Number of items per page
   
   // Sorting state
-  const [sortField, setSortField] = useState("process_name");
-  const [sortDirection, setSortDirection] = useState("asc");
+  const [sortField, setSortField] = useState("process_name"); // Field to sort by
+  const [sortDirection, setSortDirection] = useState("asc"); // Sort direction (asc/desc)
   
   // Filter state
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // Search/filter text
 
+  // api - (/process)
+  // setting - processes
   useEffect(() => {
     const fetchProcesses = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://10.235.20.52:8001/process");
+        const response = await fetch(`${baseURL}/process`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -161,15 +171,19 @@ export default function ProcessPage() {
     <div className="flex min-h-screen flex-col ">
       <div className="p-6">
         <Card className="w-full shadow-md rounded-md">
+          {/* Header */}
           <CardHeader className="bg-gray-1 rounded-t-md">
             <CardTitle className="text-xl">Process Management</CardTitle>
-            <CardDescription className="">
+            <CardDescription>
               View, edit and execute processes
             </CardDescription>
           </CardHeader>
+
+          {/* Main Content */}
           <CardContent className="pt-6">
             {/* Search and filter */}
             <div className="flex flex-col md:flex-row gap-4 mb-6">
+              {/* Search Process */}
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
@@ -179,6 +193,7 @@ export default function ProcessPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              {/* Set page row limit */}
               <div className="flex gap-2">
                 <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
                   <SelectTrigger className="w-32">
@@ -298,7 +313,7 @@ export default function ProcessPage() {
                                 </Button>
                                 <Button 
                                   size="sm" 
-                                  className="h-8 px-2 bg-blue-600 hover:bg-blue-700"
+                                  className="h-8 px-2 bg-blue-500 hover:bg-blue-600"
                                   onClick={() => handleExecute(process.process_master_id)}
                                 >
                                   <Play className="h-4 w-4 mr-1" /> Execute

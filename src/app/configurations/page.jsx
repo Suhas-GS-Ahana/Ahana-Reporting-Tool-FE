@@ -209,7 +209,7 @@ export default function Configurations() {
             <div>
               <Button
                 onClick={() => {setShowConnectionForm(true); setConnectionsDetails(null); setSelectedConnection(null)}}
-                className="shadow-sm bg-blue-600 hover:bg-blue-700 rounded-full px-4 py-2 transition"
+                className="shadow-sm bg-blue-500 hover:bg-blue-600 rounded-full px-4 py-2 transition"
               >
                 <PlusCircle className="mr-1 h-4 w-4" />
                 Add Connection
