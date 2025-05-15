@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
+import { Description } from '@radix-ui/react-toast'
 
 const SchemaSelector = ({ schemaDetails, onSchemaSelect }) => {
   const [selectedSchema, setSelectedSchema] = useState(null)
@@ -30,3 +31,30 @@ const SchemaSelector = ({ schemaDetails, onSchemaSelect }) => {
 }
 
 export default SchemaSelector
+
+
+
+// {
+//   process_name:"string",
+//   subprocess:{
+//     {
+//       subprocess_name:"string",
+//       steps:{
+//         {
+//           step_no:"string",
+//           step_type:"string", //import
+//           source_tables:"[array]",
+//           destination_tables:"[array]"
+//         },
+//         {
+//           step_no:"string",
+//           step_type:"string", //process-query or export
+//           description:"string",
+//           query:"string"
+//         },
+//         {},{},{}..etc
+//       }
+//     },
+//     {},{},{}...etc
+//   },
+// }

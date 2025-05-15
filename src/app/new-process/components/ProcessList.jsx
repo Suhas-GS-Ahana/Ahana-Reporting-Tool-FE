@@ -324,19 +324,19 @@ const ProcessList = ({
                 {connectionsDetails ? (
                   <div className="space-y-2">
                     <p>
-                      <strong>Name:</strong> {connectionsDetails?.[0]}
+                      <strong>Name:</strong> {connectionsDetails.connection_name}
                     </p>
                     <p>
-                      <strong>Server:</strong> {connectionsDetails?.[1]}
+                      <strong>Server:</strong> {connectionsDetails.server_name}
                     </p>
                     <p>
-                      <strong>Port:</strong> {connectionsDetails?.[2]}
+                      <strong>Port:</strong> {connectionsDetails?.port_number}
+                    </p>
+                    <p> 
+                      <strong>Database Type:</strong> {connectionsDetails.database_type}
                     </p>
                     <p>
-                      <strong>Type:</strong> {connectionsDetails?.[3]}
-                    </p>
-                    <p>
-                      <strong>Database:</strong> {connectionsDetails?.[4]}
+                      <strong>Database Name:</strong> {connectionsDetails.database_name}
                     </p>
                   </div>
                 ) : (
