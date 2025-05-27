@@ -262,13 +262,79 @@ export default function CreateProcess() {
       return !dataType.toLowerCase().includes("not null");
     };
 
+    // Helper function to create table mappings
+    const createTableMappings = async (
+      selectedTables,
+      connectionId,
+      connectionsDetails,
+      destinationSchema,
+      destinationConnId
+    ) => {
+      const tableMappings = await Promise.all(
+        selectedTables.map(async ({ schema_name, table_name }) => {
+          // Fetch source columns
+          const sourceColumns = await fetchColumnDetails(
+            connectionId,
+            schema_name,
+            table_name
+          );
+          // Fetch destination columns
+          const destColumns = await fetchColumnDetails(
+            destinationConnId || connectionId,
+            destinationSchema,
+            table_name
+          );
+
+          // Create mappings between source and destination columns
+          const mappings = sourceColumns.map((sourceCol, index) => {
+            // Try to find matching destination column by name or use index-based mapping
+            const destCol =
+              destColumns.find(
+                (col) =>
+                  col.p_column_name.toLowerCase() ===
+                  sourceCol.p_column_name.toLowerCase()
+              ) ||
+              destColumns[index] ||
+              destColumns[0]; // Fallback to index or first column
+
+            return {
+              p_inserted_by: 1,
+              p_modified_by: 1,
+              p_source_conn_id: Number(connectionId),
+              p_source_db: connectionsDetails.database_name,
+              p_source_schema: schema_name,
+              p_source_table: table_name,
+              p_source_column: sourceCol.p_column_name,
+              p_source_data_type: sourceCol.p_datatype,
+              p_dest_conn_id: Number(destinationConnId || connectionId),
+              p_dest_db: connectionsDetails.database_name, // Assuming same database
+              p_dest_schema: destinationSchema,
+              p_dest_table: table_name,
+              p_dest_column: destCol
+                ? destCol.p_column_name
+                : `mapped_${sourceCol.p_column_name}`,
+              p_dest_data_type: destCol
+                ? destCol.p_datatype
+                : sourceCol.p_datatype,
+              p_ordinal_position: sourceCol.p_ordinal_position,
+            };
+          });
+
+          return mappings;
+        })
+      );
+
+      return tableMappings;
+    };
+
     // Main function to format data
     const formatDataWithConfigDetails = async (
       processName,
       subprocesses,
       connectionId,
       connectionsDetails,
-      destinationSchema
+      destinationSchema,
+      destinationConnId = null
     ) => {
       const formattedSubprocesses = await Promise.all(
         subprocesses.map(async (sp) => ({
@@ -293,7 +359,7 @@ export default function CreateProcess() {
                       );
                       // Fetch columns for destination table
                       const destColumns = await fetchColumnDetails(
-                        connectionId,
+                        destinationConnId || connectionId,
                         destinationSchema,
                         table_name
                       );
@@ -305,6 +371,15 @@ export default function CreateProcess() {
 
                 // Flatten the nested arrays
                 const flattenedConfigDetails = tableConfigDetails.flat();
+
+                // Create table mappings
+                const tableMappings = await createTableMappings(
+                  step.selected_tables,
+                  connectionId,
+                  connectionsDetails,
+                  destinationSchema,
+                  destinationConnId
+                );
 
                 return {
                   steps: {
@@ -350,7 +425,7 @@ export default function CreateProcess() {
                     ]
                   ),
                   table_config_details: flattenedConfigDetails,
-                  table_mapping: [],
+                  table_mapping: tableMappings,
                 };
               } else if (step.step_type === "process-query") {
                 return {
@@ -1243,411 +1318,4 @@ function ExportStepContent({ step, subprocessId, stepId, updateStep }) {
 
 // ----------------------------------------------------------------------------
 
-const temp = {
-  process: {
-    p_inserted_by: 1,
-    p_modified_by: 1,
-    p_process_name: "p1",
-    p_process_version: 1,
-    p_rerun: true,
-  },
-  subprocesses: [
-    {
-      subprocess_data: {
-        p_inserted_by: 1,
-        p_modified_by: 1,
-        p_sub_process_order: 1,
-        p_sub_process_name: "s1",
-      },
-      steps: [
-        {
-          steps: {
-            p_inserted_by: 1,
-            p_modified_by: 1,
-            p_data_source_id: 3,
-            p_process_step_order: 1,
-            p_process_step_action: "import",
-          },
-          create_table: [
-            {
-              table_name: "config_queries",
-              schema_name: "config",
-              is_table_exist: false,
-            },
-          ],
-          table_config: [
-            {
-              p_inserted_by: 1,
-              p_modified_by: 1,
-              p_connection_name: "ReportingToolDB",
-              p_database_name: "ReportingToolDEV",
-              p_schema_name: "config",
-              p_table_name: "config_queries",
-              p_is_temp_table: false,
-              p_table_type: "staging",
-              p_table_category: "sales",
-              p_is_upsert: true,
-            },
-            {
-              p_inserted_by: 1,
-              p_modified_by: 1,
-              p_connection_name: "ReportingToolDB",
-              p_database_name: "ReportingToolDEV",
-              p_schema_name: "destination_schema",
-              p_table_name: "config_queries",
-              p_is_temp_table: false,
-              p_table_type: "staging",
-              p_table_category: "sales",
-              p_is_upsert: true,
-            },
-          ],
-          table_config_details: [
-            [
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "config_queries_id",
-                p_datatype: "bigint",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: true,
-                p_ordinal_position: 1,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "config_queries_guid",
-                p_datatype: "uuid",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: true,
-                p_ordinal_position: 2,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "inserted_by",
-                p_datatype: "bigint",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 3,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "modified_by",
-                p_datatype: "bigint",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 4,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "inserted_date",
-                p_datatype: "timestamp without time zone",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 5,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "modified_date",
-                p_datatype: "timestamp without time zone",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 6,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "database_type",
-                p_datatype: "character varying",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 7,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "fetch_schemas",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 8,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "fetch_tables",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 9,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "is_active",
-                p_datatype: "bit",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 10,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "is_deleted",
-                p_datatype: "bit",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 11,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "fetch_column_details",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 12,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "create_table_query",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 13,
-                p_nullable: true,
-              },
-            ],
-            [
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "config_queries_id",
-                p_datatype: "bigint",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: true,
-                p_ordinal_position: 1,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "config_queries_guid",
-                p_datatype: "uuid",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: true,
-                p_ordinal_position: 2,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "inserted_by",
-                p_datatype: "bigint",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 3,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "modified_by",
-                p_datatype: "bigint",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 4,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "inserted_date",
-                p_datatype: "timestamp without time zone",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 5,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "modified_date",
-                p_datatype: "timestamp without time zone",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 6,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "database_type",
-                p_datatype: "character varying",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 7,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "fetch_schemas",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 8,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "fetch_tables",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 9,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "is_active",
-                p_datatype: "bit",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 10,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "is_deleted",
-                p_datatype: "bit",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 11,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "fetch_column_details",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 12,
-                p_nullable: true,
-              },
-              {
-                p_inserted_by: 1,
-                p_modified_by: 1,
-                p_column_name: "create_table_query",
-                p_datatype: "text",
-                p_length: 0,
-                p_precision: 0,
-                p_scale: 0,
-                p_is_primary_key: true,
-                p_isautogenerated: false,
-                p_ordinal_position: 13,
-                p_nullable: true,
-              },
-            ],
-          ],
-          table_mapping: [],
-        },
-      ],
-    },
-  ],
-};
+
