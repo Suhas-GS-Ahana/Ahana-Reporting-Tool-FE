@@ -74,29 +74,29 @@ export default function ProcessPage() {
   // api - (/process)
   // setting - processes
   useEffect(() => {
-    const fetchProcesses = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${baseURL}/process`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const result = await response.json();
-        if (result.status === "success") {
-          setProcesses(result.data);
-        } else {
-          setError("Failed to fetch processes");
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProcesses();
   }, []);
-
+  
+  const fetchProcesses = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${baseURL}/process`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (result.status === "success") {
+        setProcesses(result.data);
+      } else {
+        setError("Failed to fetch processes");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // Handle sort
   const handleSort = (field) => {
     if (sortField === field) {
@@ -138,7 +138,7 @@ export default function ProcessPage() {
 
   // Handle edit
   const handleEdit = (id) => {
-    router.push(`/process/edit/${id}`);
+    router.push(`/process/edit-process?processId=${id}&connectionName=${1}`);
   };
 
   // Handle execute
