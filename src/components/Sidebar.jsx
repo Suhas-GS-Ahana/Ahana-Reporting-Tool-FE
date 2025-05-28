@@ -35,7 +35,7 @@ export function Sidebar() {
         <div className="flex-1 py-4">
           <nav className="grid gap-1 px-2">
             {sidebarItems.map((item, index) => (
-              <TooltipProvider key={index}>
+              <TooltipProvider key={index} delayDuration={150} >
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
@@ -56,7 +56,7 @@ export function Sidebar() {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className={cn(sidebarExpanded && "hidden")}
+                    className={cn(sidebarExpanded && "hidden","shadow-lg")}
                   >
                     {item.title}
                   </TooltipContent>
