@@ -1,12 +1,19 @@
-"use client"
+"use client";
 
 import BackButton from "@/components/BackButton";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
-export default function AddConnection({ onSaveConnection, onSkip }) {
+// API Setup
+const host = process.env.NEXT_PUBLIC_API_HOST;
+const port = process.env.NEXT_PUBLIC_API_PORT;
+const baseURL = `http://${host}:${port}`;
+
+export default function AddConnection() {
   // State Variables
   const [newConnectionData, setNewConnectionData] = useState({
     connectionName: "",
@@ -18,6 +25,9 @@ export default function AddConnection({ onSaveConnection, onSkip }) {
   }); //holds the values for all the input fields
   const [isSubmitting, setIsSubmitting] = useState(false); //prevents multiple submissions
   const [errors, setErrors] = useState({}); //stores validation errors for each input field
+
+  const {toast} = useToast();
+  const router = useRouter();
 
   // Updates the form data when any input changes
   const handleChange = (e) => {
@@ -46,7 +56,86 @@ export default function AddConnection({ onSaveConnection, onSkip }) {
     return newErrors;
   };
 
-  // If valid, calls onSaveConnection with the form data
+  //---------------------
+  const handleSaveConnection = async (formData) => {
+    const payload = {
+      p_inserted_by: 1,
+      p_modified_by: 1,
+      p_connection_name: formData.connectionName,
+      p_database_type: "PostgreSQL",
+      p_server_name: formData.hostName,
+      p_port_number: parseInt(formData.portNumber, 10),
+      p_database_name: formData.databaseName,
+      p_server_login: formData.userName,
+      p_password: formData.password,
+      p_filepath: "/path/to/database/file",
+      p_is_cloud: false,
+      p_is_onpremise: true,
+      p_is_connection_encrypted: true,
+      p_is_active: true,
+      p_is_deleted: false,
+      p_expiry_date: "2025-12-31T23:59:59.999Z",
+    };
+
+    try {
+      const response = await fetch(`${baseURL}/connection-save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 200) {
+        toast({
+          title: "Saving Connection",
+          description: "Connection details saved successfully",
+        });
+
+        router.push(`/connections`);
+        return; // Success - no error thrown
+      } else if (response.status === 400) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Connection already exists",
+        });
+        throw new Error("Connection already exists");
+      } else if (response.status === 500) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Invalid connection",
+        });
+        throw new Error("Invalid connection");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Unexpected error occurred",
+        });
+        throw new Error(`Unexpected error: ${response.status}`);
+      }
+    } catch (error) {
+      // Handle network errors or re-throw API errors
+      if (
+        error.message.includes("Connection already exists") ||
+        error.message.includes("Invalid connection") ||
+        error.message.includes("Unexpected error")
+      ) {
+        throw error; // Re-throw API errors
+      }
+
+      // Handle network/fetch errors
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save connection - network error",
+      });
+      throw new Error("Network error occurred");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
@@ -56,18 +145,120 @@ export default function AddConnection({ onSaveConnection, onSkip }) {
     }
     if (isSubmitting) return;
     setIsSubmitting(true);
-    await onSaveConnection(newConnectionData);
-    setIsSubmitting(false);
-    setNewConnectionData({
-      connectionName: "",
-      hostName: "",
-      portNumber: "",
-      databaseName: "",
-      userName: "",
-      password: "",
-    });
-    setErrors({});
+
+    try {
+      await handleSaveConnection(newConnectionData);
+
+      // Only reset form and clear errors on successful save
+      setNewConnectionData({
+        connectionName: "",
+        hostName: "",
+        portNumber: "",
+        databaseName: "",
+        userName: "",
+        password: "",
+      });
+      setErrors({});
+    } catch (error) {
+      // Set form error to display to user
+      setErrors({
+        submit: error.message || "Failed to save connection",
+      });
+    } finally {
+      // Always reset submitting state
+      setIsSubmitting(false);
+    }
   };
+
+  const handleSkip = ()=>{
+    router.push(`/connections`)
+  }
+
+  // Saving a New Connection (/connection-save)
+  // const handleSaveConnection = async (formData) => {
+  //   const payload = {
+  //     p_inserted_by: 1,
+  //     p_modified_by: 1,
+  //     p_connection_name: formData.connectionName,
+  //     p_database_type: "PostgreSQL",
+  //     p_server_name: formData.hostName,
+  //     p_port_number: parseInt(formData.portNumber, 10),
+  //     p_database_name: formData.databaseName,
+  //     p_server_login: formData.userName,
+  //     p_password: formData.password,
+  //     p_filepath: "/path/to/database/file",
+  //     p_is_cloud: false,
+  //     p_is_onpremise: true,
+  //     p_is_connection_encrypted: true,
+  //     p_is_active: true,
+  //     p_is_deleted: false,
+  //     p_expiry_date: "2025-12-31T23:59:59.999Z",
+  //   };
+
+  //   try {
+  //     const response = await fetch(`${baseURL}/connection-save`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(payload),
+  //     });
+
+  //     if (response.status === 200) {
+  //       toast({
+  //         title: "Saving Connection",
+  //         description: "Connection details saved successfully",
+  //       });
+
+  //       setShowConnectionForm(false);
+  //       router.push(`/configurations`);
+  //     } else if (response.status === 400) {
+  //       toast({
+  //         variant: "destructive",
+  //         title: "Error",
+  //         description: "Connection already exists",
+  //       });
+  //     } else if (response.status === 500) {
+  //       toast({
+  //         variant: "destructive",
+  //         title: "Error",
+  //         description: "Invalid connection",
+  //       });
+  //     } else {
+  //       throw new Error("Unexpected error");
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Error",
+  //       description: "Failed to save connection",
+  //     });
+  //   }
+  // };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const formErrors = validateForm();
+  //   if (Object.keys(formErrors).length > 0) {
+  //     setErrors(formErrors);
+  //     return;
+  //   }
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+
+  //   await handleSaveConnection(newConnectionData);
+
+  //   setIsSubmitting(false);
+  //   setNewConnectionData({
+  //     connectionName: "",
+  //     hostName: "",
+  //     portNumber: "",
+  //     databaseName: "",
+  //     userName: "",
+  //     password: "",
+  //   });
+  //   setErrors({});
+  // };
 
   return (
     <div className="relative">
@@ -81,9 +272,7 @@ export default function AddConnection({ onSaveConnection, onSkip }) {
         </h1>
         <form
           className="space-y-6"
-          onSubmit={() => {
-            handleSubmit;
-          }}
+          onSubmit={handleSubmit}
         >
           {/* Connection Name */}
           <div>
@@ -204,7 +393,7 @@ export default function AddConnection({ onSaveConnection, onSkip }) {
               type="button"
               variant="destructive"
               className="bg-gray-500 hover:bg-gray-700 text-white font-medium px-6 py-2 rounded-lg shadow-sm"
-              onClick={onSkip}
+              onClick={handleSkip}
             >
               Skip & Continue
             </Button>
