@@ -51,6 +51,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { connection } from "next/server";
+import BackButton from "@/components/BackButton";
+import { useToast } from "@/hooks/use-toast";
 
 // API Setup
 const host = process.env.NEXT_PUBLIC_API_HOST;
@@ -62,6 +64,8 @@ export default function ConnectionPage() {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { toast } = useToast();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
@@ -142,11 +146,10 @@ export default function ConnectionPage() {
     setCurrentPage(pageNumber);
   };
 
-
   //Handle add
-  const handleAdd = () =>{
+  const handleAdd = () => {
     router.push(`/connections/add`);
-  }
+  };
 
   // Handle edit
   const handleEdit = (id) => {
@@ -154,8 +157,55 @@ export default function ConnectionPage() {
   };
 
   // Handle delete
-  const handleDelete = (id) => {
-    alert(`Connection with ID deleted ${id}`);
+  const handleDelete = async (id) => {
+    // Confirmation dialog before deletion
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this connection?"
+    );
+
+    if (!isConfirmed) {
+      return; // Exit if user cancels
+    }
+
+    try {
+      const response = await fetch(
+        `${baseURL}/connection-delete?conn_id=${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        
+        toast({
+          title: "Deleting Connection",
+          description: "Connection deleted successfully",
+        });
+
+        // Refresh the page after successful deletion
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+
+
+      } else {
+        const errorData = await response.json();
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: `Error: ${errorData.detail}`,
+        });
+      }
+    } catch (error) {
+      toast({
+          variant: "destructive",
+          title: "Network error:",
+          description: `Error: ${error}`,
+        });
+    }
   };
 
   // Generate pagination items
@@ -174,7 +224,11 @@ export default function ConnectionPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col ">
+    <div className="relative space-y-5 flex min-h-screen flex-col ">
+      {/* Back Button */}
+      <div className="absolute top-0 left-0">
+        <BackButton />
+      </div>
       <div className="p-6">
         <Card className="w-full shadow-md rounded-md">
           {/* Header */}
@@ -187,7 +241,9 @@ export default function ConnectionPage() {
             </div>
             <div>
               <Button
-                onClick={() => {handleAdd()}}
+                onClick={() => {
+                  handleAdd();
+                }}
                 className="shadow-sm bg-blue-500 hover:bg-blue-600 rounded-full px-4 py-2 transition"
               >
                 <PlusCircle className="mr-1 h-4 w-4" />
