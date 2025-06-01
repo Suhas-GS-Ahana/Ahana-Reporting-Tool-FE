@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +32,10 @@ const host = process.env.NEXT_PUBLIC_API_HOST;
 const port = process.env.NEXT_PUBLIC_API_PORT;
 const baseURL = `http://${host}:${port}`;
 
+
+
+
+
 // This component allows users to: Create a new process with a name, Add multiple subprocesses to the process,
 // Add multiple steps to each subprocess, Configure each step with different types and properties,
 // Save the entire process structure to an API endpoint
@@ -51,6 +55,17 @@ export default function CreateProcess() {
     message: "",
     type: "",
   }); //Boolean flag for tracking API call status
+
+  const router = useRouter();
+
+  const LoadingOverlay = () => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 flex flex-col items-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+      <p className="text-lg font-medium">Process getting saved...</p>
+    </div>
+  </div>
+);
 
   // To run fetchConnections function on load
   useEffect(() => {
@@ -364,7 +379,7 @@ export default function CreateProcess() {
                         table_name
                       );
 
-                      return [sourceColumns, destColumns];
+                      return [sourceColumns];
                     }
                   )
                 );
@@ -396,7 +411,7 @@ export default function CreateProcess() {
                       is_table_exist: false,
                     })
                   ),
-                  table_config: step.selected_tables.flatMap(
+                  table_config: step.selected_tables.map(
                     ({ schema_name, table_name }) => [
                       {
                         p_inserted_by: 1,
@@ -595,57 +610,63 @@ export default function CreateProcess() {
 
     setLoading(true);
 
-    setNotification({
-      show: true,
-      message: JSON.stringify(formattedData),
-      type: "error",
-    });
+    // setNotification({
+    //   show: true,
+    //   message: JSON.stringify(formattedData),
+    //   type: "error",
+    // });
 
-    setLoading(false);
+    // setLoading(false);
 
-    // try {
-    //   // Replace with your actual API endpoint
-    //   const response = await fetch(`${baseURL}/process-hierarchy`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(formattedData),
-    //   });
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch(`${baseURL}/process-hierarchy`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formattedData),
+      });
 
-    //   if (response.ok) {
-    //     setNotification({
-    //       show: true,
-    //       message: "Process created successfully!",
-    //       type: "success",
-    //     });
-    //     // Optional: Reset form or redirect
-    //   } else {
-    //     const errorData = await response.json();
-    //     setNotification({
-    //       show: true,
-    //       message: errorData.message || "Failed to create process",
-    //       type: "error",
-    //     });
-    //   }
-    // } catch (error) {
-    //   console.error("Error creating process:", error);
-    //   setNotification({
-    //     show: true,
-    //     message: "An error occurred while saving the process",
-    //     type: "error",
-    //   });
-    // } finally {
-    //   setLoading(false);
-    //   // Hide notification after 5 seconds
-    //   setTimeout(() => {
-    //     setNotification({ show: false, message: "", type: "" });
-    //   }, 5000);
-    // }
+      if (response.ok) {
+        setNotification({
+          show: true,
+          message: "Process created successfully!",
+          type: "success",
+        });
+
+        setTimeout(() => {
+          router.push("/process");
+        }, 500); // Redirect after 1.5 seconds
+        // Optional: Reset form or redirect
+      } else {
+        const errorData = await response.json();
+        setNotification({
+          show: true,
+          message: errorData.message || "Failed to create process",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating process:", error);
+      setNotification({
+        show: true,
+        message: "An error occurred while saving the process",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+      // Hide notification after 5 seconds
+      // setTimeout(() => {
+      //   setNotification({ show: false, message: "", type: "" });
+      // }, 5000);
+    }
   };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
+      {loading && <LoadingOverlay />}
+
       {/* Header - function called - saveProcess */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Create New Process</h1>
@@ -1317,5 +1338,3 @@ function ExportStepContent({ step, subprocessId, stepId, updateStep }) {
 }
 
 // ----------------------------------------------------------------------------
-
-
