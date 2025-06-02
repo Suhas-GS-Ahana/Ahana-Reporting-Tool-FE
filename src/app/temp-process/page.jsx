@@ -32,10 +32,6 @@ const host = process.env.NEXT_PUBLIC_API_HOST;
 const port = process.env.NEXT_PUBLIC_API_PORT;
 const baseURL = `http://${host}:${port}`;
 
-
-
-
-
 // This component allows users to: Create a new process with a name, Add multiple subprocesses to the process,
 // Add multiple steps to each subprocess, Configure each step with different types and properties,
 // Save the entire process structure to an API endpoint
@@ -502,6 +498,9 @@ export default function CreateProcess() {
       destinationSchema
     );
 
+    console.log(formattedData);
+    
+
     //end---------------------------------------------------------------------------------
 
     // const formattedData = {
@@ -629,6 +628,7 @@ export default function CreateProcess() {
       });
 
       if (response.ok) {
+        console.log(formattedData);
         setNotification({
           show: true,
           message: "Process created successfully!",

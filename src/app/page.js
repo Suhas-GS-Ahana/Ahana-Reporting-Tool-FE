@@ -20,3 +20,4 @@ import Configurations from "./configurations/page";
 export default function Home() {
   return <HomePage />;
 }
+
