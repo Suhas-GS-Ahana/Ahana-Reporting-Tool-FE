@@ -609,63 +609,63 @@ export default function CreateProcess() {
 
     setLoading(true);
 
-    // setNotification({
-    //   show: true,
-    //   message: JSON.stringify(formattedData),
-    //   type: "error",
-    // });
+    setNotification({
+      show: true,
+      message: JSON.stringify(formattedData),
+      type: "error",
+    });
 
-    // setLoading(false);
+    setLoading(false);
 
-    try {
-      // Replace with your actual API endpoint
-      const response = await fetch(`${baseURL}/process-hierarchy`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formattedData),
-      });
+    // try {
+    //   // Replace with your actual API endpoint
+    //   const response = await fetch(`${baseURL}/process-hierarchy`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(formattedData),
+    //   });
 
-      if (response.ok) {
-        console.log(formattedData);
-        setNotification({
-          show: true,
-          message: "Process created successfully!",
-          type: "success",
-        });
+    //   if (response.ok) {
+    //     console.log(formattedData);
+    //     setNotification({
+    //       show: true,
+    //       message: "Process created successfully!",
+    //       type: "success",
+    //     });
 
-        setTimeout(() => {
-          router.push("/process");
-        }, 500); // Redirect after 1.5 seconds
-        // Optional: Reset form or redirect
-      } else {
-        const errorData = await response.json();
-        setNotification({
-          show: true,
-          message: errorData.message || "Failed to create process",
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error creating process:", error);
-      setNotification({
-        show: true,
-        message: "An error occurred while saving the process",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
-      // Hide notification after 5 seconds
-      // setTimeout(() => {
-      //   setNotification({ show: false, message: "", type: "" });
-      // }, 5000);
-    }
+    //     setTimeout(() => {
+    //       router.push("/process");
+    //     }, 500); // Redirect after 1.5 seconds
+    //     // Optional: Reset form or redirect
+    //   } else {
+    //     const errorData = await response.json();
+    //     setNotification({
+    //       show: true,
+    //       message: errorData.message || "Failed to create process",
+    //       type: "error",
+    //     });
+    //   }
+    // } catch (error) {
+    //   console.error("Error creating process:", error);
+    //   setNotification({
+    //     show: true,
+    //     message: "An error occurred while saving the process",
+    //     type: "error",
+    //   });
+    // } finally {
+    //   setLoading(false);
+    //   // Hide notification after 5 seconds
+    //   // setTimeout(() => {
+    //   //   setNotification({ show: false, message: "", type: "" });
+    //   // }, 5000);
+    // }
   };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      {loading && <LoadingOverlay />}
+      {/* {loading && <LoadingOverlay />} */}
 
       {/* Header - function called - saveProcess */}
       <div className="flex justify-between items-center mb-8">
@@ -704,7 +704,7 @@ export default function CreateProcess() {
                 className="w-full"
               />
             </div>
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">
                 Connection ID
               </label>
@@ -713,7 +713,7 @@ export default function CreateProcess() {
                 disabled
                 className="w-full bg-gray-50"
               />
-            </div>
+            </div> */}
           </div>
         </CardContent>
         <CardFooter>
