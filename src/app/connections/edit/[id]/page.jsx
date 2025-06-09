@@ -127,7 +127,7 @@ export default function EditConnection() {
       const response = await fetch(
         `${baseURL}/connection-update?con_id=${connectionId}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },

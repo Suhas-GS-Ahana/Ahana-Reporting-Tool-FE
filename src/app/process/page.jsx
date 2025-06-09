@@ -39,6 +39,10 @@ import {
   Loader2,
   Loader,
   LoaderPinwheel,
+  Trash,
+  PowerOff,
+  Ban,
+  XCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -59,15 +63,15 @@ export default function ProcessPage() {
   const [processes, setProcesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
   const [itemsPerPage, setItemsPerPage] = useState(5); // Number of items per page
-  
+
   // Sorting state
   const [sortField, setSortField] = useState("process_name"); // Field to sort by
   const [sortDirection, setSortDirection] = useState("asc"); // Sort direction (asc/desc)
-  
+
   // Filter state
   const [searchTerm, setSearchTerm] = useState(""); // Search/filter text
 
@@ -76,7 +80,7 @@ export default function ProcessPage() {
   useEffect(() => {
     fetchProcesses();
   }, []);
-  
+
   const fetchProcesses = async () => {
     try {
       setLoading(true);
@@ -96,7 +100,7 @@ export default function ProcessPage() {
       setLoading(false);
     }
   };
-  
+
   // Handle sort
   const handleSort = (field) => {
     if (sortField === field) {
@@ -114,21 +118,24 @@ export default function ProcessPage() {
         ? new Date(a[sortField]) - new Date(b[sortField])
         : new Date(b[sortField]) - new Date(a[sortField]);
     }
-    
+
     if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1;
     if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
 
   // Filter processes
-  const filteredProcesses = sortedProcesses.filter(process => 
+  const filteredProcesses = sortedProcesses.filter((process) =>
     process.process_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredProcesses.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredProcesses.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(filteredProcesses.length / itemsPerPage);
 
   // Handle page change
@@ -146,6 +153,22 @@ export default function ProcessPage() {
     router.push(`/process/execute/${id}`);
   };
 
+  // Handle disable
+  const handleDisable = (id) =>{
+    const confirmed = window.confirm(`Are you sure you want to disable process ${id}`);
+    if (confirmed) {
+      alert(`Process ${id} disabled`)
+    }
+  }
+
+  // handle delete
+  const handleDelete = (id) => {
+    const confirmed = window.confirm(`Are you sure you want to delete process ${id}`);
+    if (confirmed) {
+      alert(`Process ${id} deleted`)
+    }
+  }
+
   // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -157,7 +180,7 @@ export default function ProcessPage() {
   for (let i = 1; i <= totalPages; i++) {
     paginationItems.push(
       <PaginationItem key={i}>
-        <PaginationLink 
+        <PaginationLink
           isActive={currentPage === i}
           onClick={() => handlePageChange(i)}
         >
@@ -174,9 +197,7 @@ export default function ProcessPage() {
           {/* Header */}
           <CardHeader className="bg-gray-1 rounded-t-md">
             <CardTitle className="text-xl">Process Management</CardTitle>
-            <CardDescription>
-              View, edit and execute processes
-            </CardDescription>
+            <CardDescription>View, edit and execute processes</CardDescription>
           </CardHeader>
 
           {/* Main Content */}
@@ -195,7 +216,10 @@ export default function ProcessPage() {
               </div>
               {/* Set page row limit */}
               <div className="flex gap-2">
-                <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => setItemsPerPage(Number(value))}
+                >
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Items per page" />
                   </SelectTrigger>
@@ -228,74 +252,94 @@ export default function ProcessPage() {
                 {/* Process table */}
                 <div className="overflow-x-auto">
                   <Table className="w-full">
+                    {/* Header */}
                     <TableHeader className="bg-gray-100">
                       <TableRow>
-                        <TableHead 
+                        <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("process_name")}
                         >
                           Process Name
-                          {sortField === "process_name" && (
-                            sortDirection === "asc" ? 
-                            <ChevronUp className="inline ml-1 h-4 w-4" /> : 
-                            <ChevronDown className="inline ml-1 h-4 w-4" />
-                          )}
+                          {sortField === "process_name" &&
+                            (sortDirection === "asc" ? (
+                              <ChevronUp className="inline ml-1 h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="inline ml-1 h-4 w-4" />
+                            ))}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("process_version")}
                         >
                           Version
-                          {sortField === "process_version" && (
-                            sortDirection === "asc" ? 
-                            <ChevronUp className="inline ml-1 h-4 w-4" /> : 
-                            <ChevronDown className="inline ml-1 h-4 w-4" />
-                          )}
+                          {sortField === "process_version" &&
+                            (sortDirection === "asc" ? (
+                              <ChevronUp className="inline ml-1 h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="inline ml-1 h-4 w-4" />
+                            ))}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("inserted_date")}
                         >
                           Created Date
-                          {sortField === "inserted_date" && (
-                            sortDirection === "asc" ? 
-                            <ChevronUp className="inline ml-1 h-4 w-4" /> : 
-                            <ChevronDown className="inline ml-1 h-4 w-4" />
-                          )}
+                          {sortField === "inserted_date" &&
+                            (sortDirection === "asc" ? (
+                              <ChevronUp className="inline ml-1 h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="inline ml-1 h-4 w-4" />
+                            ))}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("modified_date")}
                         >
                           Modified Date
-                          {sortField === "modified_date" && (
-                            sortDirection === "asc" ? 
-                            <ChevronUp className="inline ml-1 h-4 w-4" /> : 
-                            <ChevronDown className="inline ml-1 h-4 w-4" />
-                          )}
+                          {sortField === "modified_date" &&
+                            (sortDirection === "asc" ? (
+                              <ChevronUp className="inline ml-1 h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="inline ml-1 h-4 w-4" />
+                            ))}
                         </TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
+                    {/* Body */}
                     <TableBody>
                       {currentItems.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                          <TableCell
+                            colSpan={6}
+                            className="text-center py-10 text-gray-500"
+                          >
                             No processes found
                           </TableCell>
                         </TableRow>
                       ) : (
                         currentItems.map((process) => (
-                          <TableRow key={process.process_master_id} className="hover:bg-gray-50">
-                            <TableCell className="font-medium">{process.process_name}</TableCell>
+                          <TableRow
+                            key={process.process_master_id}
+                            className="hover:bg-gray-50"
+                          >
+                            <TableCell className="font-medium">
+                              {process.process_name}
+                            </TableCell>
                             <TableCell>{process.process_version}</TableCell>
-                            <TableCell>{formatDate(process.inserted_date)}</TableCell>
-                            <TableCell>{formatDate(process.modified_date)}</TableCell>
                             <TableCell>
-                              <span 
+                              {formatDate(process.inserted_date)}
+                            </TableCell>
+                            <TableCell>
+                              {formatDate(process.modified_date)}
+                            </TableCell>
+                            <TableCell>
+                              <span
                                 className={`px-2 py-1 rounded-full text-xs ${
-                                  process.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                  process.is_active
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
                                 }`}
                               >
                                 {process.is_active ? "Active" : "Inactive"}
@@ -303,20 +347,42 @@ export default function ProcessPage() {
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
+                                <Button
+                                  size="sm"
+                                  variant="outline"
                                   className="h-8 px-2"
-                                  onClick={() => handleEdit(process.process_master_id)}
+                                  onClick={() =>
+                                    handleEdit(process.process_master_id)
+                                  }
                                 >
                                   <Edit className="h-4 w-4 mr-1" /> Edit
                                 </Button>
-                                <Button 
-                                  size="sm" 
+                                <Button
+                                  size="sm"
                                   className="h-8 px-2 bg-blue-500 hover:bg-blue-600"
-                                  onClick={() => handleExecute(process.process_master_id)}
+                                  onClick={() =>
+                                    handleExecute(process.process_master_id)
+                                  }
                                 >
                                   <Play className="h-4 w-4 mr-1" /> Execute
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="h-8 px-2 bg-gray-500 hover:bg-gray-600"
+                                  onClick={() =>
+                                    handleDisable(process.process_master_id)
+                                  }
+                                >
+                                  <XCircle className="h-4 w-4 mr-1" /> Disable
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="h-8 px-2 bg-red-500 hover:bg-red-600"
+                                  onClick={() =>
+                                    handleDelete(process.process_master_id)
+                                  }
+                                >
+                                  <Trash className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>
@@ -333,18 +399,32 @@ export default function ProcessPage() {
                     <Pagination>
                       <PaginationContent>
                         <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                          <PaginationPrevious
+                            onClick={() =>
+                              handlePageChange(Math.max(1, currentPage - 1))
+                            }
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
                           />
                         </PaginationItem>
-                        
+
                         {paginationItems}
-                        
+
                         <PaginationItem>
-                          <PaginationNext 
-                            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                          <PaginationNext
+                            onClick={() =>
+                              handlePageChange(
+                                Math.min(totalPages, currentPage + 1)
+                              )
+                            }
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
                           />
                         </PaginationItem>
                       </PaginationContent>
