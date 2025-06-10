@@ -49,7 +49,7 @@ export default function EditConnection() {
               hostName: result.data.server_name || "",
               portNumber: result.data.port_number?.toString() || "",
               databaseName: result.data.database_name || "",
-              userName: "", // Username not returned by API, keep empty
+              userName: result.data.username || "",
               password: "",
             });
           }
@@ -137,26 +137,19 @@ export default function EditConnection() {
 
       if (response.status === 200) {
         toast({
-          title: "Connection Updated",
+          title: "Updating Connection",
           description: "Connection details updated successfully",
         });
 
         router.push(`/connections`);
         return; // Success - no error thrown
-      } else if (response.status === 400) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Invalid connection data",
-        });
-        throw new Error("Invalid connection data");
       } else if (response.status === 500) {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to update connection",
+          description: "Invalid connection",
         });
-        throw new Error("Failed to update connection");
+        throw new Error("Invalid connection");
       } else {
         toast({
           variant: "destructive",
@@ -169,7 +162,6 @@ export default function EditConnection() {
       // Handle network errors or re-throw API errors
       if (
         error.message.includes("Invalid connection data") ||
-        error.message.includes("Failed to update connection") ||
         error.message.includes("Unexpected error")
       ) {
         throw error; // Re-throw API errors

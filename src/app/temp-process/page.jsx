@@ -20,11 +20,10 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash, ChevronRight, Component, Trash2 } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "react-toastify";
 
 // API Setup
@@ -34,15 +33,14 @@ const baseURL = `http://${host}:${port}`;
 
 // This component allows users to: Create a new process with a name, Add multiple subprocesses to the process,
 // Add multiple steps to each subprocess, Configure each step with different types and properties,
-// Save the entire process structure to an API endpoint
+// Save the entire process structure to an API endpoint (/process-hierarchy)
 export default function CreateProcess() {
   //to get the connection ID
   const searchParams = useSearchParams();
   const connectionId = searchParams.get("connectionName");
-  // const connectionId = Number(connectionId1)
 
+  // state variables
   const [connectionsDetails, setConnectionsDetails] = useState(null); // selected connection details
-
   const [processName, setProcessName] = useState(""); //Stores the name of the overall process
   const [subprocesses, setSubprocesses] = useState([]); //An array that contains all subprocess objects
   const [loading, setLoading] = useState(false); //Boolean flag for tracking API call status
@@ -54,16 +52,17 @@ export default function CreateProcess() {
 
   const router = useRouter();
 
+  // loading screen while process saving
   const LoadingOverlay = () => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-6 flex flex-col items-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
-      <p className="text-lg font-medium">Process getting saved...</p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 flex flex-col items-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-lg font-medium">Process getting saved...</p>
+      </div>
     </div>
-  </div>
-);
+  );
 
-  // To run fetchConnections function on load
+  // To run fetchConnection function on load
   useEffect(() => {
     fetchConnection(connectionId);
   }, []);
@@ -499,7 +498,6 @@ export default function CreateProcess() {
     );
 
     console.log(formattedData);
-    
 
     //end---------------------------------------------------------------------------------
 
@@ -661,6 +659,8 @@ export default function CreateProcess() {
     //   //   setNotification({ show: false, message: "", type: "" });
     //   // }, 5000);
     // }
+
+    
   };
 
   return (
