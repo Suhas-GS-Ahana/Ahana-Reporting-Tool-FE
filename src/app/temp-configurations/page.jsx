@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,73 +19,81 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash, ChevronRight, Component, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Trash,
+  ChevronRight,
+  Component,
+  Trash2,
+  Loader2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "react-toastify";
+import { toast } from "@/hooks/use-toast";
 
 // API Setup
 const host = process.env.NEXT_PUBLIC_API_HOST;
 const port = process.env.NEXT_PUBLIC_API_PORT;
 const baseURL = `http://${host}:${port}`;
 
+// on overlay UI to show while laoding
+const LoadingOverlay = () => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 flex flex-col items-center">
+      <Loader2 className="h-8 w-8 mb-4 animate-spin text-blue-600" />
+      <p className="text-lg font-medium">Loading...</p>
+    </div>
+  </div>
+);
+
+// This component allows users to: Create a new process with a name, Add multiple subprocesses to the process,
+// Add multiple steps to each subprocess, Configure each step with different types and properties,
+// Save the entire process structure to an API endpoint (/process-hierarchy)
 export default function CreateProcess() {
-  const [processName, setProcessName] = useState("");
-  const [subprocesses, setSubprocesses] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // state variables
+  const [processName, setProcessName] = useState(""); //Stores the name of the overall process
+  const [subprocesses, setSubprocesses] = useState([]); //An array that contains all subprocess objects
+  const [loading, setLoading] = useState(false); //to handle loading state while API calls
+  const [loadingSave, setLoadingSave] = useState(false); //to handle loading state while saving the process
+  const [connections, setConnections] = useState([]); //An array of objects to store the connections (data sources)
   const [notification, setNotification] = useState({
     show: false,
     message: "",
     type: "",
-  });
-  const [connections, setConnections] = useState([]);
+  }); // for displaying notification msgs
 
-  const router = useRouter();
+  // const {toast} = useToast();
 
-  const LoadingOverlay = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 flex flex-col items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-lg font-medium">Process getting saved...</p>
-      </div>
-    </div>
-  );
-
-  // Fetch connections on component mount
+  // run fetchConnections on load
   useEffect(() => {
     fetchConnections();
   }, []);
 
-  // Fetch all connections
+  //to fetch all available connections (/connection)
   const fetchConnections = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`${baseURL}/connection`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === "success") {
-          setConnections(data.data);
-        }
+      if (!response.ok) {
+        throw new Error("Failed to fetch connections");
       }
+      const { data } = await response.json();
+      setConnections(data);
     } catch (error) {
-      console.error("Error fetching connections:", error);
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to fetch connections",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Get connection details by ID
-  const getConnectionById = (connectionId) => {
-    return connections.find(
-      (conn) => conn.data_sources_id === parseInt(connectionId)
-    );
-  };
+  //Subprocess Management - addSubprocess, updateSubprocessName, deleteSubprocess
 
-  // Subprocess Management
+  // Function to add a new subprocess
   const addSubprocess = () => {
     const newSubprocess = {
       id: Date.now(),
@@ -97,6 +104,7 @@ export default function CreateProcess() {
     setSubprocesses([...subprocesses, newSubprocess]);
   };
 
+  // Function to update subprocess name
   const updateSubprocessName = (subprocessId, name) => {
     setSubprocesses(
       subprocesses.map((subprocess) =>
@@ -107,13 +115,16 @@ export default function CreateProcess() {
     );
   };
 
+  // Function to delete subprocess
   const deleteSubprocess = (subprocessId) => {
     setSubprocesses(
       subprocesses.filter((subprocess) => subprocess.id !== subprocessId)
     );
   };
 
-  // Step Management
+  // Step Management - addStep, updateStep, deleteStep
+
+  // Function to add a step to a subprocess
   const addStep = (subprocessId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
@@ -124,8 +135,8 @@ export default function CreateProcess() {
         id: Date.now(),
         step_no: newSteps.length + 1,
         step_type: "",
-        connection_id: "", // Add connection_id field
-        destination_connection_id: "", // Add destination_connection_id field for import steps
+        connection_id: "", //
+        destination_connection_id: "", //
         source_tables: [],
         destination_tables: [],
         selected_tables: [],
@@ -141,6 +152,7 @@ export default function CreateProcess() {
     }
   };
 
+  // Function to update step details
   const updateStep = (subprocessId, stepId, field, value) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
@@ -157,6 +169,7 @@ export default function CreateProcess() {
     }
   };
 
+  // Function to delete a step
   const deleteStep = (subprocessId, stepId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
@@ -176,24 +189,34 @@ export default function CreateProcess() {
     }
   };
 
-  // Save process function (simplified for now)
+  // Helper function to get connection details by ID
+  const getConnectionDetails = (connectionId) => {
+    return connections.find(
+      (conn) => conn.data_sources_id.toString() === connectionId.toString()
+    );
+  };
+
+  // Save Process function
   const saveProcess = async () => {
     if (!processName.trim()) {
       setNotification({
         show: true,
         message: "Please enter a process name",
-        type: "default",
+        type: "error",
       });
       return;
     }
 
-    // Validate that all steps have connection IDs
+    // Validate that all steps have required connections
     for (const subprocess of subprocesses) {
       for (const step of subprocess.steps) {
         if (!step.connection_id) {
           setNotification({
             show: true,
-            message: "Please select a connection for all steps",
+            message: `Please select a connection for all steps in ${
+              subprocess.subprocess_name ||
+              "Subprocess " + subprocess.subprocess_no
+            }`,
             type: "error",
           });
           return;
@@ -201,8 +224,10 @@ export default function CreateProcess() {
         if (step.step_type === "import" && !step.destination_connection_id) {
           setNotification({
             show: true,
-            message:
-              "Please select a destination connection for all import steps",
+            message: `Please select a destination connection for import steps in ${
+              subprocess.subprocess_name ||
+              "Subprocess " + subprocess.subprocess_no
+            }`,
             type: "error",
           });
           return;
@@ -210,119 +235,42 @@ export default function CreateProcess() {
       }
     }
 
+    const formattedData = {
+      process: processName,
+      subprocess: subprocesses,
+    };
+
     setLoading(true);
 
-    try {
-      // Create the formatted data structure
-      const formattedData = {
-        process: {
-          p_inserted_by: 1,
-          p_modified_by: 1,
-          p_process_name: processName,
-          p_process_version: 1,
-          p_rerun: true,
-        },
-        subprocesses: subprocesses.map((sp) => ({
-          subprocess_data: {
-            p_inserted_by: 1,
-            p_modified_by: 1,
-            p_sub_process_order: sp.subprocess_no,
-            p_sub_process_name: sp.subprocess_name,
-          },
-          steps: sp.steps.map((step) => {
-            const baseStep = {
-              p_inserted_by: 1,
-              p_modified_by: 1,
-              p_data_source_id: Number(step.connection_id),
-              p_process_step_order: step.step_no,
-              p_process_step_action: step.step_type,
-            };
+    setNotification({
+      show: true,
+      message: JSON.stringify(formattedData),
+      type: "error",
+    });
 
-            if (step.step_type === "import") {
-              return {
-                steps: baseStep,
-                create_table: step.selected_tables.map(
-                  ({ schema_name, table_name }) => ({
-                    table_name: table_name,
-                    schema_name: schema_name,
-                    is_table_exist: false,
-                  })
-                ),
-                table_config: [],
-                table_config_details: [],
-                table_mapping: [],
-              };
-            } else if (step.step_type === "process-query") {
-              return {
-                steps: {
-                  ...baseStep,
-                  p_process_step_description: step.pq_description,
-                  p_process_step_query: step.pq_query,
-                },
-                create_table: [],
-                table_config: [],
-                table_config_details: [],
-                table_mapping: [],
-              };
-            } else {
-              return {
-                steps: {
-                  ...baseStep,
-                  p_process_step_description: step.ex_description,
-                  p_process_step_query: step.ex_query.join(","),
-                },
-                create_table: [],
-                table_config: [],
-                table_config_details: [],
-                table_mapping: [],
-              };
-            }
-          }),
-        })),
-      };
+    setLoading(false);
 
-      const response = await fetch(`${baseURL}/process-hierarchy`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formattedData),
-      });
+    // Simulate API call
+    // setTimeout(() => {
+    //   setNotification({
+    //     show: true,
+    //     message: "Process created successfully!",
+    //     type: "success",
+    //   });
+    //   setLoading(false);
 
-      if (response.ok) {
-        setNotification({
-          show: true,
-          message: "Process created successfully!",
-          type: "success",
-        });
-
-        setTimeout(() => {
-          router.push("/process");
-        }, 500);
-      } else {
-        const errorData = await response.json();
-        setNotification({
-          show: true,
-          message: errorData.message || "Failed to create process",
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error creating process:", error);
-      setNotification({
-        show: true,
-        message: "An error occurred while saving the process",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
+    //   // Reset form
+    //   setProcessName("");
+    //   setSubprocesses([]);
+    // }, 2000);
   };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
+      {/* Loading Screen */}
       {loading && <LoadingOverlay />}
 
+      {/* Header - function called - saveProcess */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Create New Process</h1>
         <Button onClick={saveProcess} disabled={loading}>
@@ -330,16 +278,26 @@ export default function CreateProcess() {
         </Button>
       </div>
 
+      {/* Notification */}
       {notification.show && (
         <Alert
           className={`mb-6 ${
-            notification.type === "error" ? "bg-red-50" : "bg-green-50"
+            notification.type === "error"
+              ? "bg-red-50 border-red-200"
+              : "bg-green-50 border-green-200"
           }`}
         >
-          <AlertDescription>{notification.message}</AlertDescription>
+          <AlertDescription
+            className={
+              notification.type === "error" ? "text-red-700" : "text-green-700"
+            }
+          >
+            {notification.message}
+          </AlertDescription>
         </Alert>
       )}
 
+      {/* Main Process Card - function called - addSubprocess */}
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Process Details</CardTitle>
@@ -366,12 +324,12 @@ export default function CreateProcess() {
         </CardFooter>
       </Card>
 
+      {/* Subprocess Card */}
       {subprocesses.map((subprocess) => (
         <SubprocessCard
           key={subprocess.id}
           subprocess={subprocess}
           connections={connections}
-          getConnectionById={getConnectionById}
           updateSubprocessName={updateSubprocessName}
           deleteSubprocess={deleteSubprocess}
           addStep={addStep}
@@ -383,10 +341,10 @@ export default function CreateProcess() {
   );
 }
 
+//this component receives several props for displaying and managing a subprocess and its steps
 function SubprocessCard({
   subprocess,
   connections,
-  getConnectionById,
   updateSubprocessName,
   deleteSubprocess,
   addStep,
@@ -395,9 +353,10 @@ function SubprocessCard({
 }) {
   return (
     <Card className="mb-6">
+      {/* function called - updateSubprocessName, deleteSubprocess */}
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <div className="w-full">
+          <div className="flex-1 mr-4">
             <label className="block text-sm font-medium mb-1">
               Subprocess Name
             </label>
@@ -414,13 +373,14 @@ function SubprocessCard({
             variant="ghost"
             size="icon"
             onClick={() => deleteSubprocess(subprocess.id)}
-            className="ml-2 text-red-500 hover:text-red-700"
+            className="text-red-500 hover:text-red-700"
           >
             <Trash className="h-5 w-5" />
           </Button>
         </div>
       </CardHeader>
 
+      {/* Steps Cards will appear here */}
       <CardContent>
         <div className="space-y-4">
           {subprocess.steps.map((step) => (
@@ -429,7 +389,6 @@ function SubprocessCard({
               step={step}
               subprocessId={subprocess.id}
               connections={connections}
-              getConnectionById={getConnectionById}
               updateStep={updateStep}
               deleteStep={deleteStep}
             />
@@ -437,6 +396,7 @@ function SubprocessCard({
         </div>
       </CardContent>
 
+      {/* function called - addStep */}
       <CardFooter>
         <Button
           onClick={() => addStep(subprocess.id)}
@@ -450,16 +410,13 @@ function SubprocessCard({
   );
 }
 
-function StepCard({
-  step,
-  subprocessId,
-  connections,
-  getConnectionById,
-  updateStep,
-  deleteStep,
-}) {
+// The StepCard component displays and manages a single step in the process management interface.
+// It provides controls for selecting the step type and deleting the step, and renders different
+// content based on the step type.
+function StepCard({ step, subprocessId, connections, updateStep, deleteStep }) {
   return (
     <Card className="border border-gray-200">
+      {/* function called - updatedStep, deleteStep */}
       <CardHeader className="pb-2 bg-gray-50">
         <div className="flex justify-between items-center">
           <CardTitle className="text-md font-medium">
@@ -493,6 +450,7 @@ function StepCard({
         </div>
       </CardHeader>
 
+      {/* renders step cards */}
       <CardContent className="pt-4">
         {step.step_type === "import" ? (
           <ImportStepContent
@@ -500,7 +458,6 @@ function StepCard({
             subprocessId={subprocessId}
             stepId={step.id}
             connections={connections}
-            getConnectionById={getConnectionById}
             updateStep={updateStep}
           />
         ) : step.step_type === "process-query" ? (
@@ -531,22 +488,23 @@ function StepCard({
   );
 }
 
+// This Component manages the selection of database tables for an import operation. It allows users to:
+// Select a schema from a source database, select tables from that schema to import
+// Automatically mirror those selections to a destination database
 function ImportStepContent({
   step,
   subprocessId,
   stepId,
   connections,
-  getConnectionById,
   updateStep,
 }) {
-  const [sourceSchemas, setSourceSchemas] = useState([]);
-  const [selectedSourceSchema, setSelectedSourceSchema] = useState("");
-  const [sourceTables, setSourceTables] = useState([]);
-  const [destinationSchemas, setDestinationSchemas] = useState([]);
-  const [selectedDestinationSchema, setSelectedDestinationSchema] =
-    useState("");
+  const [sourceSchemas, setSourceSchemas] = useState([]); //an array to store objects of source schema
+  const [selectedSourceSchema, setSelectedSourceSchema] = useState(""); //stores currently selected source schema in dropdown
+  const [sourceTables, setSourceTables] = useState([]); //an array to store objects of tables from selected source schema
+  const [destinationSchemas, setDestinationSchemas] = useState([]); //an array to store objects of destination schema
+  const [selectedDestinationSchema, setSelectedDestinationSchema] = useState(""); //stores currently selected destination schema in dropdown
+  const [loading, setLoading] = useState(false); // loading state to manage API calls
   const [destinationTables, setDestinationTables] = useState([]); //
-  const [loading, setLoading] = useState(false);
 
   // Fetch source schemas when source connection changes
   useEffect(() => {
@@ -583,6 +541,7 @@ function ImportStepContent({
       fetchDestinationTables();
     }
   }, [selectedDestinationSchema, step.destination_connection_id]);
+
 
   const fetchSourceSchemas = async () => {
     setLoading(true);
@@ -659,12 +618,14 @@ function ImportStepContent({
       setLoading(false);
     }
   };
+  // ------------
 
   const handleSourceSchemaChange = (schema) => {
     setSelectedSourceSchema(schema);
-    // Reset selected tables when schema changes
-    updateStep(subprocessId, stepId, "source_tables", []);
+    // reset selected tables when schema changes
     updateStep(subprocessId, stepId, "selected_tables", []);
+    updateStep(subprocessId, stepId, "source_tables", []);
+    updateStep(subprocessId, stepId, "destination_tables", []);
   };
 
   const handleDestinationSchemaChange = (schema) => {
@@ -692,6 +653,7 @@ function ImportStepContent({
         updatedSelectedTables.push({
           table_name: tableName,
           schema_name: selectedSourceSchema,
+          dest_schema_name: selectedDestinationSchema,
         });
       }
     } else {
@@ -706,17 +668,14 @@ function ImportStepContent({
     }
 
     updateStep(subprocessId, stepId, "source_tables", updatedTables);
-    updateStep(subprocessId, stepId, "selected_tables", updatedSelectedTables);
-
-    // Auto-copy to destination tables
     updateStep(subprocessId, stepId, "destination_tables", [...updatedTables]);
+    updateStep(subprocessId, stepId, "selected_tables", updatedSelectedTables);
   };
 
   const isTableSelected = (tableName) => {
     if (step.source_tables && step.source_tables.includes(tableName)) {
       return true;
     }
-
     if (step.selected_tables) {
       return step.selected_tables.some(
         (item) =>
@@ -724,12 +683,14 @@ function ImportStepContent({
           item.schema_name === selectedSourceSchema
       );
     }
-
     return false;
   };
 
   return (
     <div className="space-y-6">
+      {/* Loading Screen */}
+      {loading && <LoadingOverlay />}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Source Database Section */}
         <Card className="border border-blue-200">
@@ -753,19 +714,19 @@ function ImportStepContent({
                     <SelectValue placeholder="Select source connection" />
                   </SelectTrigger>
                   <SelectContent>
-                    {connections.map((connection) => (
+                    {connections.map((conn) => (
                       <SelectItem
-                        key={connection.data_sources_id}
-                        value={connection.data_sources_id.toString()}
+                        key={conn.data_sources_id}
+                        value={conn.data_sources_id.toString()}
                       >
-                        {connection.connection_name}
+                        {conn.connection_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Source Schema Dropdown */}
+              {/* Source Schema Dropdown - function called - handleSourceSchemaChange */}
               {step.connection_id && (
                 <div>
                   <label className="block text-sm font-medium mb-1">
@@ -893,12 +854,12 @@ function ImportStepContent({
                     <SelectValue placeholder="Select destination connection" />
                   </SelectTrigger>
                   <SelectContent>
-                    {connections.map((connection) => (
+                    {connections.map((conn) => (
                       <SelectItem
-                        key={connection.data_sources_id}
-                        value={connection.data_sources_id.toString()}
+                        key={conn.data_sources_id}
+                        value={conn.data_sources_id.toString()}
                       >
-                        {connection.connection_name}
+                        {conn.connection_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -933,12 +894,13 @@ function ImportStepContent({
                 </div>
               )}
 
-              {/* Destination Tables Display */}
+              {/* Selected Tables Display */}
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Selected Tables
                 </label>
-                {step.destination_tables.length > 0 ? (
+                {step.destination_tables &&
+                step.destination_tables.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {step.destination_tables.map((tableName) => (
                       <Badge
@@ -962,125 +924,211 @@ function ImportStepContent({
           </CardContent>
         </Card>
       </div>
+
+      {/* Selected Tables Summary */}
+      {step.selected_tables && step.selected_tables.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Selected Tables Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {step.selected_tables.map((table, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center space-x-4">
+                    <Component className="h-4 w-4 text-blue-500" />
+                    <span className="font-medium">{table.table_name}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <span>{table.schema_name}</span>
+                    <ChevronRight className="h-4 w-4" />
+                    <span>{table.dest_schema_name || "Not selected"}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
 
-function QueryStepContent({ step, subprocessId, stepId, updateStep }) {
+function QueryStepContent({
+  step,
+  subprocessId,
+  stepId,
+  connections,
+  updateStep,
+}) {
   return (
     <div className="space-y-4">
+      {/* Connection Selection */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Connection</label>
+        <Select
+          value={step.connection_id}
+          onValueChange={(value) =>
+            updateStep(subprocessId, stepId, "connection_id", value)
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select connection" />
+          </SelectTrigger>
+          <SelectContent>
+            {connections.map((conn) => (
+              <SelectItem
+                key={conn.data_sources_id}
+                value={conn.data_sources_id.toString()}
+              >
+                {conn.connection_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Description */}
       <div>
         <label className="block text-sm font-medium mb-1">Description</label>
-        <Input
+        <Textarea
           value={step.pq_description}
           onChange={(e) =>
             updateStep(subprocessId, stepId, "pq_description", e.target.value)
           }
-          placeholder="Enter step description"
+          placeholder="Describe what this query does..."
+          rows={3}
         />
       </div>
 
       {/* Query */}
       <div>
-        <label className="block text-sm font-medium mb-1">Query</label>
+        <label className="block text-sm font-medium mb-1">SQL Query</label>
         <Textarea
           value={step.pq_query}
           onChange={(e) =>
             updateStep(subprocessId, stepId, "pq_query", e.target.value)
           }
-          placeholder="Enter SQL query"
-          className="min-h-[150px]"
+          placeholder="Enter your SQL query here..."
+          rows={8}
+          className="font-mono text-sm"
         />
       </div>
     </div>
   );
 }
 
-function ExportStepContent({ step, subprocessId, stepId, updateStep }) {
-  // Use useEffect to initialize queries if needed
-  useEffect(() => {
-    if (!Array.isArray(step.ex_query) || step.ex_query.length === 0) {
-      updateStep(subprocessId, stepId, "ex_query", [""]);
-    }
-  }, [step.ex_query, subprocessId, stepId, updateStep]);
+function ExportStepContent({
+  step,
+  subprocessId,
+  stepId,
+  connections,
+  updateStep,
+}) {
+  const [queryList, setQueryList] = useState(step.ex_query || []);
 
-  // Handler for updating a specific query by index
-  const updateQuery = (index, value) => {
-    const updatedQueries = [...step.ex_query];
-    updatedQueries[index] = value;
-    updateStep(subprocessId, stepId, "ex_query", updatedQueries);
-  };
-
-  // Handler for adding a new query
   const addQuery = () => {
-    const updatedQueries = [...step.ex_query, ""];
+    const newQuery = "";
+    const updatedQueries = [...queryList, newQuery];
+    setQueryList(updatedQueries);
     updateStep(subprocessId, stepId, "ex_query", updatedQueries);
   };
 
-  // Handler for removing a query by index
-  const removeQuery = (index) => {
-    // Prevent removing if it's the last query
-    if (step.ex_query.length <= 1) return;
+  const updateQuery = (index, value) => {
+    const updatedQueries = [...queryList];
+    updatedQueries[index] = value;
+    setQueryList(updatedQueries);
+    updateStep(subprocessId, stepId, "ex_query", updatedQueries);
+  };
 
-    const updatedQueries = step.ex_query.filter((_, i) => i !== index);
+  const removeQuery = (index) => {
+    const updatedQueries = queryList.filter((_, i) => i !== index);
+    setQueryList(updatedQueries);
     updateStep(subprocessId, stepId, "ex_query", updatedQueries);
   };
 
   return (
     <div className="space-y-4">
+      {/* Connection Selection */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Connection</label>
+        <Select
+          value={step.connection_id}
+          onValueChange={(value) =>
+            updateStep(subprocessId, stepId, "connection_id", value)
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select connection" />
+          </SelectTrigger>
+          <SelectContent>
+            {connections.map((conn) => (
+              <SelectItem
+                key={conn.data_sources_id}
+                value={conn.data_sources_id.toString()}
+              >
+                {conn.connection_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Description */}
       <div>
         <label className="block text-sm font-medium mb-1">Description</label>
-        <Input
-          value={step.ex_description || ""}
+        <Textarea
+          value={step.ex_description}
           onChange={(e) =>
             updateStep(subprocessId, stepId, "ex_description", e.target.value)
           }
-          placeholder="Enter step description"
+          placeholder="Describe what this export does..."
+          rows={3}
         />
       </div>
 
       {/* Queries */}
       <div>
-        <div className="flex justify-between items-center mb-1">
-          <label className="block text-sm font-medium">Queries</label>
-          <Button
-            onClick={addQuery}
-            variant="outline"
-            // className="h-8"
-          >
-            <Plus className="mr-2 h-4 w-4" />
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-medium">Export Queries</label>
+          <Button onClick={addQuery} size="sm" variant="outline">
+            <Plus className="h-4 w-4 mr-1" />
             Add Query
           </Button>
         </div>
 
         <div className="space-y-3">
-          {Array.isArray(step.ex_query) &&
-            step.ex_query.map((query, index) => (
-              <div key={index} className="flex gap-2">
-                <div className="flex-grow">
-                  <Textarea
-                    value={query}
-                    onChange={(e) => updateQuery(index, e.target.value)}
-                    placeholder={`Enter query ${index + 1}`}
-                    className="min-h-[100px]"
-                  />
-                </div>
-
-                {/* Only show delete button if there's more than one query */}
-                {step.ex_query.length > 1 && (
-                  <Button
-                    onClick={() => removeQuery(index)}
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-500 hover:text-red-700 transisition"
-                  >
-                    <Trash size={18} />
-                  </Button>
-                )}
+          {queryList.map((query, index) => (
+            <div key={index} className="border rounded-lg p-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Query {index + 1}</span>
+                <Button
+                  onClick={() => removeQuery(index)}
+                  size="sm"
+                  variant="ghost"
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-            ))}
+              <Textarea
+                value={query}
+                onChange={(e) => updateQuery(index, e.target.value)}
+                placeholder="Enter your export query here..."
+                rows={4}
+                className="font-mono text-sm"
+              />
+            </div>
+          ))}
+
+          {queryList.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No queries added yet. Click "Add Query" to start.
+            </div>
+          )}
         </div>
       </div>
     </div>

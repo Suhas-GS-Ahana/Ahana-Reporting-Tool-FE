@@ -3195,3 +3195,41 @@ const temp2 = {
     },
   ],
 };
+
+const temp3 = {
+  process: "p1",
+  subprocess: [
+    {
+      id: 1749724554226,
+      subprocess_no: 1,
+      subprocess_name: "s1",
+      steps: [
+        {
+          id: 1749724556836,
+          step_no: 1,
+          step_type: "import",
+          connection_id: "14",
+          destination_connection_id: "15",
+          source_tables: ["psl_nonpsl_accounts", "reg_product_master"],
+          destination_tables: ["psl_nonpsl_accounts", "reg_product_master"],
+          selected_tables: [
+            {
+              table_name: "psl_nonpsl_accounts",
+              schema_name: "source_schema",
+              dest_schema_name: "process",
+            },
+            {
+              table_name: "reg_product_master",
+              schema_name: "source_schema",
+              dest_schema_name: "process",
+            },
+          ],
+          pq_description: "",
+          pq_query: "",
+          ex_description: "",
+          ex_query: [],
+        },
+      ],
+    },
+  ],
+};
