@@ -1163,6 +1163,7 @@ const temp2 = {
             {
               table_name: "reg_product_master",
               schema_name: "source_schema",
+              //
               is_table_exist: false,
             },
             {
@@ -1228,6 +1229,7 @@ const temp2 = {
           ],
           //
           table_config_details: [
+            //2x
             [
               {
                 p_inserted_by: 1,
@@ -3222,6 +3224,54 @@ const temp3 = {
               table_name: "reg_product_master",
               schema_name: "source_schema",
               dest_schema_name: "process",
+            },
+          ],
+          pq_description: "",
+          pq_query: "",
+          ex_description: "",
+          ex_query: [],
+        },
+      ],
+    },
+  ],
+};
+
+const temp4 = {
+  process: "p1",
+  subprocesses: [
+    {
+      id: 1749809382606,
+      subprocess_no: 1,
+      subprocess_name: "s1",
+      steps: [
+        {
+          id: 1749809385605,
+          step_no: 1,
+          step_type: "import",
+          connection_id: "1",
+          destination_connection_id: "2",
+          source_tables: ["transactions"],
+          destination_tables: ["transactions"],
+          selected_tables: [
+            {
+              table_name: "users",
+              schema_name: "public",
+              dest_schema_name: "warehouse",
+            },
+            {
+              table_name: "orders",
+              schema_name: "analytics",
+              dest_schema_name: "warehouse",
+            },
+            {
+              table_name: "products",
+              schema_name: "analytics",
+              dest_schema_name: "warehouse",
+            },
+            {
+              table_name: "transactions",
+              schema_name: "staging",
+              dest_schema_name: "warehouse",
             },
           ],
           pq_description: "",
