@@ -143,6 +143,8 @@ export default function CreateProcess() {
         pq_query: "",
         ex_description: "",
         ex_query: [],
+        source_details: null,
+        destination_details: null,
       });
 
       const updatedSubprocesses = [...subprocesses];
@@ -490,6 +492,490 @@ function StepCard({ step, subprocessId, connections, updateStep, deleteStep }) {
 // This Component manages the selection of database tables for an import operation. It allows users to:
 // Select a schema from a source database, select tables from that schema to import
 // Automatically mirror those selections to a destination database
+// function ImportStepContent({
+//   step,
+//   subprocessId,
+//   stepId,
+//   connections,
+//   updateStep,
+// }) {
+//   const [sourceSchemas, setSourceSchemas] = useState([]); //an array to store objects of source schema
+//   const [selectedSourceSchema, setSelectedSourceSchema] = useState(""); //stores currently selected source schema in dropdown
+//   const [sourceTables, setSourceTables] = useState([]); //an array to store objects of tables from selected source schema
+//   const [destinationSchemas, setDestinationSchemas] = useState([]); //an array to store objects of destination schema
+//   const [selectedDestinationSchema, setSelectedDestinationSchema] =
+//     useState(""); //stores currently selected destination schema in dropdown
+//   const [loading, setLoading] = useState(false); // loading state to manage API calls
+//   const [destinationTables, setDestinationTables] = useState([]); //
+
+//   // Fetch source schemas when source connection changes
+//   useEffect(() => {
+//     if (step.connection_id) {
+//       fetchSourceSchemas();
+//     } else {
+//       setSourceSchemas([]);
+//       setSelectedSourceSchema("");
+//       setSourceTables([]);
+//     }
+//   }, [step.connection_id]);
+
+//   // Fetch destination schemas when destination connection changes
+//   useEffect(() => {
+//     if (step.destination_connection_id) {
+//       fetchDestinationSchemas();
+//     } else {
+//       setDestinationSchemas([]);
+//       setSelectedDestinationSchema("");
+//       setDestinationTables([]);
+//     }
+//   }, [step.destination_connection_id]);
+
+//   // Fetch source tables when source schema changes
+//   useEffect(() => {
+//     if (selectedSourceSchema && step.connection_id) {
+//       fetchSourceTables();
+//     }
+//   }, [selectedSourceSchema, step.connection_id]);
+
+//   // Fetch destination tables when destination schema changes
+//   useEffect(() => {
+//     if (selectedDestinationSchema && step.destination_connection_id) {
+//       fetchDestinationTables();
+//     }
+//   }, [selectedDestinationSchema, step.destination_connection_id]);
+
+//   const fetchSourceSchemas = async () => {
+//     setLoading(true);
+//     try {
+//       const response = await fetch(
+//         `${baseURL}/connection-schema?conn_id=${step.connection_id}`
+//       );
+//       if (response.ok) {
+//         const data = await response.json();
+//         if (data.status === "success") {
+//           setSourceSchemas(data.data);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching source schemas:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const fetchDestinationSchemas = async () => {
+//     setLoading(true);
+//     try {
+//       const response = await fetch(
+//         `${baseURL}/connection-schema?conn_id=${step.destination_connection_id}`
+//       );
+//       if (response.ok) {
+//         const data = await response.json();
+//         if (data.status === "success") {
+//           setDestinationSchemas(data.data);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching destination schemas:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const fetchSourceTables = async () => {
+//     setLoading(true);
+//     try {
+//       const response = await fetch(
+//         `${baseURL}/connection-tables?conn_id=${step.connection_id}&schema_name=${selectedSourceSchema}`
+//       );
+//       if (response.ok) {
+//         const data = await response.json();
+//         if (data.status === "success") {
+//           setSourceTables(data.data);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching source tables:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const fetchDestinationTables = async () => {
+//     setLoading(true);
+//     try {
+//       const response = await fetch(
+//         `${baseURL}/connection-tables?conn_id=${step.destination_connection_id}&schema_name=${selectedDestinationSchema}`
+//       );
+//       if (response.ok) {
+//         const data = await response.json();
+//         if (data.status === "success") {
+//           setDestinationTables(data.data);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching destination tables:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   //---
+//   // Check if any tables are selected
+//   const hasSelectedTables =
+//     step.selected_tables && step.selected_tables.length > 0;
+
+//   const handleSourceSchemaChange = (schema) => {
+//     setSelectedSourceSchema(schema);
+//     // updateStep(subprocessId, stepId, "selected_tables", []);
+//     updateStep(subprocessId, stepId, "source_tables", []);
+//     // updateStep(subprocessId, stepId, "destination_tables", []);
+//   };
+
+//   const handleDestSchemaChange = (schema) => {
+//     setSelectedDestinationSchema(schema);
+//   };
+
+//   const handleSourceTableChange = (tableName, isChecked) => {
+//     let updatedTables = [...step.source_tables];
+//     let updatedSelectedTables = [...(step.selected_tables || [])];
+
+//     if (isChecked) {
+//       if (!updatedTables.includes(tableName)) {
+//         updatedTables.push(tableName);
+//       }
+
+//       const tableExists = updatedSelectedTables.some(
+//         (item) =>
+//           item.table_name === tableName &&
+//           item.schema_name === selectedSourceSchema
+//       );
+
+//       if (!tableExists) {
+//         updatedSelectedTables.push({
+//           table_name: tableName,
+//           schema_name: selectedSourceSchema,
+//           dest_schema_name: selectedDestinationSchema,
+//         });
+//       }
+//     } else {
+//       updatedTables = updatedTables.filter((table) => table !== tableName);
+//       updatedSelectedTables = updatedSelectedTables.filter(
+//         (item) =>
+//           !(
+//             item.table_name === tableName &&
+//             item.schema_name === selectedSourceSchema
+//           )
+//       );
+//     }
+
+//     updateStep(subprocessId, stepId, "source_tables", updatedTables);
+//     updateStep(subprocessId, stepId, "destination_tables", [...updatedTables]);
+//     updateStep(subprocessId, stepId, "selected_tables", updatedSelectedTables);
+//   };
+
+//   const isTableSelected = (tableName) => {
+//     if (step.source_tables && step.source_tables.includes(tableName)) {
+//       return true;
+//     }
+//     if (step.selected_tables) {
+//       return step.selected_tables.some(
+//         (item) =>
+//           item.table_name === tableName &&
+//           item.schema_name === selectedSourceSchema
+//       );
+//     }
+//     return false;
+//   };
+
+//   // Check if table selection should be available
+//   const isTableSelectionAvailable =
+//     step.connection_id &&
+//     selectedSourceSchema &&
+//     step.destination_connection_id &&
+//     selectedDestinationSchema;
+
+//   return (
+//     <div className="space-y-6">
+//       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//         {/* Source Database Section */}
+//         <Card className="border border-blue-200">
+//           <CardHeader className="bg-blue-50">
+//             <CardTitle className="text-blue-700">Source Database</CardTitle>
+//           </CardHeader>
+//           <CardContent className="pt-4">
+//             <div className="space-y-4">
+//               {/* Source Connection Dropdown */}
+//               <div>
+//                 <label className="block text-sm font-medium mb-1">
+//                   Connection
+//                 </label>
+//                 <Select
+//                   value={step.connection_id}
+//                   onValueChange={(value) =>
+//                     updateStep(subprocessId, stepId, "connection_id", value)
+//                   }
+//                   disabled={hasSelectedTables}
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Select source connection" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     {connections
+//                       .filter(
+//                         (conn) =>
+//                           conn.data_sources_id.toString() !==
+//                           step.destination_connection_id
+//                       )
+//                       .map((conn) => (
+//                         <SelectItem
+//                           key={conn.data_sources_id}
+//                           value={conn.data_sources_id.toString()}
+//                         >
+//                           {conn.connection_name}
+//                         </SelectItem>
+//                       ))}
+//                   </SelectContent>
+//                 </Select>
+//                 {hasSelectedTables && (
+//                   <p className="text-xs text-amber-600 mt-1">
+//                     Uncheck all tables to change connection
+//                   </p>
+//                 )}
+//               </div>
+
+//               {/* Source Schema Dropdown */}
+//               <div>
+//                 <label className="block text-sm font-medium mb-1">Schema</label>
+//                 <Select
+//                   value={selectedSourceSchema}
+//                   onValueChange={handleSourceSchemaChange}
+//                   //   disabled={!step.connection_id || loading || hasSelectedTables}
+//                   disabled={!step.connection_id || loading}
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Select schema" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     {sourceSchemas.map((schema) => (
+//                       <SelectItem
+//                         key={schema.schema_name}
+//                         value={schema.schema_name}
+//                       >
+//                         {schema.schema_name}
+//                       </SelectItem>
+//                     ))}
+//                   </SelectContent>
+//                 </Select>
+//                 {hasSelectedTables && (
+//                   <p className="text-xs text-amber-600 mt-1">
+//                     Uncheck all tables to change schema
+//                   </p>
+//                 )}
+//               </div>
+
+//               {/* Source Tables */}
+//               {selectedSourceSchema && (
+//                 <div>
+//                   <label className="block text-sm font-medium mb-2">
+//                     Tables
+//                   </label>
+//                   {!isTableSelectionAvailable ? (
+//                     <div className="py-3 px-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
+//                       Please select both source and destination connections and
+//                       schemas to view tables
+//                     </div>
+//                   ) : loading ? (
+//                     <div className="text-center py-4">Loading tables...</div>
+//                   ) : (
+//                     <>
+//                       {sourceTables.length > 0 ? (
+//                         <ScrollArea className="h-60 border rounded-md p-4">
+//                           <div className="space-y-2">
+//                             {sourceTables.map((table) => (
+//                               <div
+//                                 key={table.table_name}
+//                                 className="flex items-center space-x-2"
+//                               >
+//                                 <Checkbox
+//                                   id={`source-${table.table_name}`}
+//                                   checked={isTableSelected(table.table_name)}
+//                                   onCheckedChange={(checked) =>
+//                                     handleSourceTableChange(
+//                                       table.table_name,
+//                                       checked
+//                                     )
+//                                   }
+//                                 />
+//                                 <label
+//                                   htmlFor={`source-${table.table_name}`}
+//                                   className="text-sm cursor-pointer"
+//                                 >
+//                                   {table.table_name}
+//                                 </label>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         </ScrollArea>
+//                       ) : (
+//                         <div className="py-3 px-4 bg-gray-100 rounded text-gray-600 text-sm">
+//                           No tables exist in this schema
+//                         </div>
+//                       )}
+//                     </>
+//                   )}
+//                 </div>
+//               )}
+//             </div>
+//           </CardContent>
+//         </Card>
+
+//         {/* Destination Database Section */}
+//         <Card className="border border-green-200">
+//           <CardHeader className="bg-green-50">
+//             <CardTitle className="text-green-700">
+//               Destination Database
+//             </CardTitle>
+//           </CardHeader>
+//           <CardContent className="pt-4">
+//             <div className="space-y-4">
+//               {/* Destination Connection Dropdown */}
+//               <div>
+//                 <label className="block text-sm font-medium mb-1">
+//                   Connection
+//                 </label>
+//                 <Select
+//                   value={step.destination_connection_id}
+//                   onValueChange={(value) =>
+//                     updateStep(
+//                       subprocessId,
+//                       stepId,
+//                       "destination_connection_id",
+//                       value
+//                     )
+//                   }
+//                   disabled={hasSelectedTables}
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Select destination connection" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     {connections
+//                       .filter(
+//                         (conn) =>
+//                           conn.data_sources_id.toString() !== step.connection_id
+//                       )
+//                       .map((conn) => (
+//                         <SelectItem
+//                           key={conn.data_sources_id}
+//                           value={conn.data_sources_id.toString()}
+//                         >
+//                           {conn.connection_name}
+//                         </SelectItem>
+//                       ))}
+//                   </SelectContent>
+//                 </Select>
+//                 {hasSelectedTables && (
+//                   <p className="text-xs text-amber-600 mt-1">
+//                     Uncheck all tables to change connection
+//                   </p>
+//                 )}
+//               </div>
+
+//               {/* Destination Schema Dropdown */}
+//               <div>
+//                 <label className="block text-sm font-medium mb-1">Schema</label>
+//                 <Select
+//                   value={selectedDestinationSchema}
+//                   onValueChange={handleDestSchemaChange}
+//                   disabled={
+//                     !step.destination_connection_id ||
+//                     loading ||
+//                     hasSelectedTables
+//                   }
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Select schema" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     {destinationSchemas.map((schema) => (
+//                       <SelectItem
+//                         key={schema.schema_name}
+//                         value={schema.schema_name}
+//                       >
+//                         {schema.schema_name}
+//                       </SelectItem>
+//                     ))}
+//                   </SelectContent>
+//                 </Select>
+//                 {hasSelectedTables && (
+//                   <p className="text-xs text-amber-600 mt-1">
+//                     Uncheck all tables to change schema
+//                   </p>
+//                 )}
+//               </div>
+
+//               {/* Selected Tables Display */}
+//               <div>
+//                 <label className="block text-sm font-medium mb-2">
+//                   Selected Tables
+//                 </label>
+//                 {step.selected_tables && step.selected_tables.length > 0 ? (
+//                   <div className="flex flex-wrap gap-2">
+//                     {step.selected_tables.map((table, index) => (
+//                       <Badge
+//                         key={index}
+//                         variant="outline"
+//                         className="bg-green-50"
+//                       >
+//                         {selectedDestinationSchema
+//                           ? `${selectedDestinationSchema}.${table.table_name}`
+//                           : table.table_name}
+//                       </Badge>
+//                     ))}
+//                   </div>
+//                 ) : (
+//                   <div className="text-sm text-gray-500 italic">
+//                     Tables will mirror your source selection
+//                   </div>
+//                 )}
+//               </div>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       {/* Selected Tables Summary */}
+//       {step.selected_tables && step.selected_tables.length > 0 && (
+//         <Card>
+//           <CardHeader>
+//             <CardTitle className="text-lg">Selected Tables Summary</CardTitle>
+//           </CardHeader>
+//           <CardContent>
+//             <div className="space-y-2">
+//               {step.selected_tables.map((table, index) => (
+//                 <div
+//                   key={index}
+//                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+//                 >
+//                   <div className="flex items-center space-x-4">
+//                     <Component className="h-4 w-4 text-blue-500" />
+//                     <span className="font-medium">{table.table_name}</span>
+//                   </div>
+//                   <div className="flex items-center space-x-2 text-sm text-gray-600">
+//                     <span>{table.schema_name}</span>
+//                     <ChevronRight className="h-4 w-4" />
+//                     <span>{table.dest_schema_name || "Not selected"}</span>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           </CardContent>
+//         </Card>
+//       )}
+//     </div>
+//   );
+// }
 function ImportStepContent({
   step,
   subprocessId,
@@ -497,13 +983,45 @@ function ImportStepContent({
   connections,
   updateStep,
 }) {
-  const [sourceSchemas, setSourceSchemas] = useState([]); //an array to store objects of source schema
-  const [selectedSourceSchema, setSelectedSourceSchema] = useState(""); //stores currently selected source schema in dropdown
-  const [sourceTables, setSourceTables] = useState([]); //an array to store objects of tables from selected source schema
-  const [destinationSchemas, setDestinationSchemas] = useState([]); //an array to store objects of destination schema
-  const [selectedDestinationSchema, setSelectedDestinationSchema] = useState(""); //stores currently selected destination schema in dropdown
-  const [loading, setLoading] = useState(false); // loading state to manage API calls
-  const [destinationTables, setDestinationTables] = useState([]); //
+  const [sourceSchemas, setSourceSchemas] = useState([]);
+  const [selectedSourceSchema, setSelectedSourceSchema] = useState("");
+  const [sourceTables, setSourceTables] = useState([]);
+  const [destinationSchemas, setDestinationSchemas] = useState([]);
+  const [selectedDestinationSchema, setSelectedDestinationSchema] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [destinationTables, setDestinationTables] = useState([]);
+
+  // Handle source connection change with connection details fetch
+  const handleSourceConnectionChange = async (connectionId) => {
+    try {
+      // Update connection_id
+      updateStep(subprocessId, stepId, "connection_id", connectionId);
+      
+      // Fetch and store source connection details
+      const response = await fetch(`${baseURL}/connection-view?conn_id=${connectionId}`);
+      const data = await response.json();
+      updateStep(subprocessId, stepId, "source_details", data.data);
+      
+    } catch (error) {
+      console.error('Error fetching source connection details:', error);
+    }
+  };
+
+  // Handle destination connection change with connection details fetch
+  const handleDestinationConnectionChange = async (connectionId) => {
+    try {
+      // Update destination_connection_id
+      updateStep(subprocessId, stepId, "destination_connection_id", connectionId);
+      
+      // Fetch and store destination connection details
+      const response = await fetch(`${baseURL}/connection-view?conn_id=${connectionId}`);
+      const data = await response.json();
+      updateStep(subprocessId, stepId, "destination_details", data.data);
+      
+    } catch (error) {
+      console.error('Error fetching destination connection details:', error);
+    }
+  };
 
   // Fetch source schemas when source connection changes
   useEffect(() => {
@@ -617,17 +1135,13 @@ function ImportStepContent({
     }
   };
 
-
-  //---
   // Check if any tables are selected
   const hasSelectedTables =
     step.selected_tables && step.selected_tables.length > 0;
 
   const handleSourceSchemaChange = (schema) => {
     setSelectedSourceSchema(schema);
-    // updateStep(subprocessId, stepId, "selected_tables", []);
     updateStep(subprocessId, stepId, "source_tables", []);
-    // updateStep(subprocessId, stepId, "destination_tables", []);
   };
 
   const handleDestSchemaChange = (schema) => {
@@ -710,9 +1224,7 @@ function ImportStepContent({
                 </label>
                 <Select
                   value={step.connection_id}
-                  onValueChange={(value) =>
-                    updateStep(subprocessId, stepId, "connection_id", value)
-                  }
+                  onValueChange={handleSourceConnectionChange}
                   disabled={hasSelectedTables}
                 >
                   <SelectTrigger>
@@ -742,13 +1254,24 @@ function ImportStepContent({
                 )}
               </div>
 
+              {/* Display Source Connection Details */}
+              {step.source_details && (
+                <div className="bg-blue-50 p-3 rounded-md">
+                  <h4 className="text-sm font-medium mb-2 text-blue-700">Source Connection Details:</h4>
+                  <div className="text-sm text-blue-600 space-y-1">
+                    <p><span className="font-medium">Database:</span> {step.source_details.database_name}</p>
+                    <p><span className="font-medium">Server:</span> {step.source_details.server_name}:{step.source_details.port_number}</p>
+                    <p><span className="font-medium">Type:</span> {step.source_details.database_type}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Source Schema Dropdown */}
               <div>
                 <label className="block text-sm font-medium mb-1">Schema</label>
                 <Select
                   value={selectedSourceSchema}
                   onValueChange={handleSourceSchemaChange}
-                  //   disabled={!step.connection_id || loading || hasSelectedTables}
                   disabled={!step.connection_id || loading}
                 >
                   <SelectTrigger>
@@ -844,14 +1367,7 @@ function ImportStepContent({
                 </label>
                 <Select
                   value={step.destination_connection_id}
-                  onValueChange={(value) =>
-                    updateStep(
-                      subprocessId,
-                      stepId,
-                      "destination_connection_id",
-                      value
-                    )
-                  }
+                  onValueChange={handleDestinationConnectionChange}
                   disabled={hasSelectedTables}
                 >
                   <SelectTrigger>
@@ -879,6 +1395,18 @@ function ImportStepContent({
                   </p>
                 )}
               </div>
+
+              {/* Display Destination Connection Details */}
+              {step.destination_details && (
+                <div className="bg-green-50 p-3 rounded-md">
+                  <h4 className="text-sm font-medium mb-2 text-green-700">Destination Connection Details:</h4>
+                  <div className="text-sm text-green-600 space-y-1">
+                    <p><span className="font-medium">Database:</span> {step.destination_details.database_name}</p>
+                    <p><span className="font-medium">Server:</span> {step.destination_details.server_name}:{step.destination_details.port_number}</p>
+                    <p><span className="font-medium">Type:</span> {step.destination_details.database_type}</p>
+                  </div>
+                </div>
+              )}
 
               {/* Destination Schema Dropdown */}
               <div>
@@ -975,6 +1503,8 @@ function ImportStepContent({
   );
 }
 
+
+// This component manages the query, description & connection of a process query step
 function QueryStepContent({
   step,
   subprocessId,
@@ -982,6 +1512,23 @@ function QueryStepContent({
   connections,
   updateStep,
 }) {
+  // Handle connection selection and fetch details
+  const handleConnectionChange = async (connectionId) => {
+    try {
+      // Update the connection_id first
+      updateStep(subprocessId, stepId, "connection_id", connectionId);
+
+      // Fetch connection details from API
+      const response = await fetch(`${baseURL}/connection-view?conn_id=${connectionId}`);
+      const data = await response.json();
+
+      // Update source_details with the fetched data
+      updateStep(subprocessId, stepId, "source_details", data.data);
+    } catch (error) {
+      console.error("Error fetching connection details:", error);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Connection Selection */}
@@ -989,9 +1536,7 @@ function QueryStepContent({
         <label className="block text-sm font-medium mb-1">Connection</label>
         <Select
           value={step.connection_id}
-          onValueChange={(value) =>
-            updateStep(subprocessId, stepId, "connection_id", value)
-          }
+           onValueChange={handleConnectionChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select connection" />
@@ -1008,6 +1553,19 @@ function QueryStepContent({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Display Connection Details (if available) */}
+      {step.source_details && (
+        <div className="bg-gray-50 p-3 rounded-md">
+          <h4 className="text-sm font-medium mb-2">Connection Details:</h4>
+          <div className="text-sm text-gray-600 space-y-1">
+            <p><span className="font-medium">Database:</span> {step.source_details.database_name}</p>
+            <p><span className="font-medium">Server:</span> {step.source_details.server_name}:{step.source_details.port_number}</p>
+            <p><span className="font-medium">Type:</span> {step.source_details.database_type}</p>
+          </div>
+        </div>
+      )}
+
 
       {/* Description */}
       <div>
@@ -1039,6 +1597,7 @@ function QueryStepContent({
   );
 }
 
+// This component manages the queries, description & connection of a export step
 function ExportStepContent({
   step,
   subprocessId,
@@ -1068,6 +1627,23 @@ function ExportStepContent({
     updateStep(subprocessId, stepId, "ex_query", updatedQueries);
   };
 
+  // Handle connection selection and fetch details
+  const handleConnectionChange = async (connectionId) => {
+    try {
+      // Update the connection_id first
+      updateStep(subprocessId, stepId, "connection_id", connectionId);
+
+      // Fetch connection details from API
+      const response = await fetch(`${baseURL}/connection-view?conn_id=${connectionId}`);
+      const data = await response.json();
+
+      // Update source_details with the fetched data
+      updateStep(subprocessId, stepId, "source_details", data.data);
+    } catch (error) {
+      console.error("Error fetching connection details:", error);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Connection Selection */}
@@ -1075,9 +1651,7 @@ function ExportStepContent({
         <label className="block text-sm font-medium mb-1">Connection</label>
         <Select
           value={step.connection_id}
-          onValueChange={(value) =>
-            updateStep(subprocessId, stepId, "connection_id", value)
-          }
+          onValueChange={handleConnectionChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select connection" />
@@ -1094,6 +1668,18 @@ function ExportStepContent({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Display Connection Details (if available) */}
+      {step.source_details && (
+        <div className="bg-gray-50 p-3 rounded-md">
+          <h4 className="text-sm font-medium mb-2">Connection Details:</h4>
+          <div className="text-sm text-gray-600 space-y-1">
+            <p><span className="font-medium">Database:</span> {step.source_details.database_name}</p>
+            <p><span className="font-medium">Server:</span> {step.source_details.server_name}:{step.source_details.port_number}</p>
+            <p><span className="font-medium">Type:</span> {step.source_details.database_type}</p>
+          </div>
+        </div>
+      )}
 
       {/* Description */}
       <div>
