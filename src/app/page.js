@@ -3319,3 +3319,205 @@ const temp4 = {
     },
   ],
 };
+
+const temp5 = {
+  process: "p1",
+  subprocesses: [
+    {
+      id: 1750137360199,
+      subprocess_no: 1,
+      subprocess_name: "s1",
+      steps: [
+        {
+          id: 1750137364313,
+          step_no: 1,
+          step_type: "import",
+          connection_id: "14",
+          destination_connection_id: "15",
+          source_tables: ["psl_nonpsl_accounts", "reg_product_master"],
+          destination_tables: ["psl_nonpsl_accounts", "reg_product_master"],
+          selected_tables: [
+            {
+              table_name: "psl_nonpsl_accounts",
+              schema_name: "source_schema",
+              dest_schema_name: "config",
+            },
+            {
+              table_name: "reg_product_master",
+              schema_name: "source_schema",
+              dest_schema_name: "config",
+            },
+          ],
+          pq_description: "",
+          pq_query: "",
+          ex_description: "",
+          ex_query: [],
+          source_details: {
+            connection_name: "Test Connection",
+            server_name: "localhost",
+            port_number: 5432,
+            database_type: "PostgreSQL",
+            database_name: "SourceDB",
+            username: "postgres",
+          },
+          destination_details: {
+            connection_name: "New Connection",
+            server_name: "localhost",
+            port_number: 5432,
+            database_type: "PostgreSQL",
+            database_name: "reportingtool",
+            username: "postgres",
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const temp6 = {
+  process: "p1",
+  subprocesses: [
+    {
+      id: 1750141865596,
+      subprocess_no: 1,
+      subprocess_name: "s1",
+      steps: [
+        {
+          id: 1750141867870,
+          step_no: 1,
+          step_type: "import",
+          connection_id: "3",
+          destination_connection_id: "16",
+          source_tables: [],
+          destination_tables: [
+            "process_execution_log",
+            "process_master",
+            "process_master_checklist",
+            "process_output_config",
+            "sub_process",
+            "process_step",
+          ],
+          selected_tables: [
+            { table_name: "data_sources", schema_name: "config" },
+            { table_name: "config_queries", schema_name: "config" },
+          ],
+          pq_description: "",
+          pq_query: "",
+          ex_description: "",
+          ex_query: [],
+          source_details: {
+            connection_name: "ReportingToolDB",
+            server_name: "localhost",
+            port_number: 5432,
+            database_type: "PostgreSQL",
+            database_name: "ReportingToolDEV",
+            username: "postgres",
+          },
+          destination_details: {
+            connection_name: "Demo Connection",
+            server_name: "localhost",
+            port_number: 5432,
+            database_type: "PostgreSQL",
+            database_name: "ReportingToolDEV",
+            username: "postgres",
+          },
+          create_table: [
+            {
+              table_name: "data_sources",
+              schema_name: "config",
+              dest_schema_name: "process",
+              is_table_exist: false,
+            },
+            {
+              table_name: "config_queries",
+              schema_name: "config",
+              dest_schema_name: "process",
+              is_table_exist: false,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+const temp7 = {
+  process: "p1",
+  subprocesses: [
+    {
+      id: 1750142347521,
+      subprocess_no: 1,
+      subprocess_name: "s1",
+      steps: [
+        {
+          id: 1750142359976,
+          step_no: 1,
+          step_type: "import",
+          connection_id: "15",
+          destination_connection_id: "16",
+          source_tables: [],
+          destination_tables: [
+            "process_execution_log",
+            "process_master",
+            "process_master_checklist",
+            "process_output_config",
+            "sub_process",
+            "process_step",
+          ],
+          selected_tables: [
+            { table_name: "process_execution_log", schema_name: "process" },
+            { table_name: "data_sources", schema_name: "config" },
+            { table_name: "object_details", schema_name: "config" },
+            { table_name: "process_output_config", schema_name: "process" },
+          ],
+          pq_description: "",
+          pq_query: "",
+          ex_description: "",
+          ex_query: [],
+          source_details: {
+            connection_name: "New Connection",
+            server_name: "localhost",
+            port_number: 5432,
+            database_type: "PostgreSQL",
+            database_name: "reportingtool",
+            username: "postgres",
+          },
+          destination_details: {
+            connection_name: "Demo Connection",
+            server_name: "localhost",
+            port_number: 5432,
+            database_type: "PostgreSQL",
+            database_name: "ReportingToolDEV",
+            username: "postgres",
+          },
+          create_table: [
+            {
+              table_name: "process_execution_log",
+              schema_name: "process",
+              dest_schema_name: "process",
+              is_table_exist: true,
+            },
+            {
+              table_name: "data_sources",
+              schema_name: "config",
+              dest_schema_name: "process",
+              is_table_exist: false,
+            },
+            {
+              table_name: "object_details",
+              schema_name: "config",
+              dest_schema_name: "process",
+              is_table_exist: false,
+            },
+            {
+              table_name: "process_output_config",
+              schema_name: "process",
+              dest_schema_name: "process",
+              is_table_exist: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
