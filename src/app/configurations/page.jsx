@@ -198,7 +198,6 @@ export default function CreateProcess() {
     );
   };
 
-  // Function to save the entire process
  // Function to save the entire process
 const saveProcess = async () => {
   // Validates that a process name is provided
@@ -368,7 +367,7 @@ const saveProcess = async () => {
                 create_table: createTableData.map(
                   ({ schema_name, table_name, dest_schema_name, is_table_exist }) => ({
                     table_name: table_name,
-                    schema_name: schema_name,
+                    source_schema_name: schema_name,
                     dest_schema_name: dest_schema_name,
                     is_table_exist: is_table_exist,
                   })
@@ -432,7 +431,7 @@ const saveProcess = async () => {
                   p_process_step_order: step.step_no,
                   p_process_step_action: "export",
                   p_process_step_description: step.ex_description,
-                  p_process_step_query: step.ex_query.join(","),
+                  p_process_step_query: step.ex_query,
                 },
                 create_table: [],
                 table_config: [],
@@ -479,7 +478,7 @@ const saveProcess = async () => {
 
   // try {
   //   // Replace with your actual API endpoint
-  //   const response = await fetch(`${baseURL}/process-hierarchy`, {
+  //   const response = await fetch(`${baseURL}/process-hierarchy-upsert`, {
   //     method: "POST",
   //     headers: {
   //       "Content-Type": "application/json",

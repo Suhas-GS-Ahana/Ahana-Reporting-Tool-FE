@@ -145,7 +145,7 @@ export default function ProcessPage() {
 
   // Handle edit
   const handleEdit = (id) => {
-    router.push(`/process/edit-process?processId=${id}&connectionName=${1}`);
+    router.push(`/process/edit-process?id=${id}`);
   };
 
   // Handle execute
@@ -303,6 +303,7 @@ export default function ProcessPage() {
                               <ChevronDown className="inline ml-1 h-4 w-4" />
                             ))}
                         </TableHead>
+                        <TableHead>ID</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
@@ -333,6 +334,9 @@ export default function ProcessPage() {
                             </TableCell>
                             <TableCell>
                               {formatDate(process.modified_date)}
+                            </TableCell>
+                            <TableCell>
+                              {process.process_master_id}
                             </TableCell>
                             <TableCell>
                               <span
