@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
-import { Home, Cog, FileSliders, Network, VaultIcon, BoxIcon, BotIcon, CatIcon } from "lucide-react"
+import { Home, Cog, FileSliders, Network, VaultIcon, BoxIcon, BotIcon, CatIcon, DogIcon } from "lucide-react"
 
 // Utility Function for Class Names
 // To cleanly combine Tailwind CSS class names — handling conditional logic, deduplication,
@@ -35,6 +35,11 @@ export const sidebarItems = [
     title: "New Configurations",
     href: "/new-config",
     icon: CatIcon,
-  }
+  },
+  {
+    title: "New Configurations2",
+    href: "/new-config2",
+    icon: DogIcon,
+  },
   
 ]
