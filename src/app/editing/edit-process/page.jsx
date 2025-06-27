@@ -47,9 +47,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import  {useSortable}  from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // API Setup
 const host = process.env.NEXT_PUBLIC_API_HOST;
@@ -66,20 +67,25 @@ const LoadingOverlay = () => (
   </div>
 );
 
-// This component allows users to: Create a new process with a name, Add multiple subprocesses to the process,
-// Add multiple steps to each subprocess, Configure each step with different types and properties,
-// Save the entire process structure to an API endpoint (/process-hierarchy)
-export default function CreateProcess() {
-  const [processName, setProcessName] = useState(""); //Stores the name of the overall process
-  const [subprocesses, setSubprocesses] = useState([]); //An array that contains all subprocess objects
-  const [loading, setLoading] = useState(false); //to handle loading state while API calls
-  const [loadingSave, setLoadingSave] = useState(false); //to handle loading state while saving the process
-  const [connections, setConnections] = useState([]); //An array of objects to store the connections (data sources)
+export default function EditProcess() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
+  const processId = id
+
+  const [processName, setProcessName] = useState("");
+  const [processMasterId, setProcessMasterId] = useState(null);
+  const [subprocesses, setSubprocesses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [connections, setConnections] = useState([]);
   const [notification, setNotification] = useState({
     show: false,
     message: "",
     type: "",
-  }); // for displaying notification msgs
+  });
 
   const { toast } = useToast();
 
@@ -90,6 +96,981 @@ export default function CreateProcess() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+ 
+  const mockData = {
+    process: {
+      process_master_id: 8,
+      process_master_guid: "01e54ae6-b17f-4f37-b8f1-e3bc72531231",
+      inserted_by: 1,
+      modified_by: 1,
+      inserted_date: "2025-06-26T15:41:06.351001",
+      modified_date: "2025-06-26T15:41:06.351001",
+      process_name: "Process for Edit",
+      is_active: true,
+      is_deleted: false,
+      process_version: 1,
+      rerun: true,
+    },
+    subprocesses: [
+      {
+        subprocess_data: {
+          sub_process_id: 31,
+          sub_process_guid: "d3abebb4-d217-476f-929b-b84fe3adf1df",
+          inserted_by: 1,
+          modified_by: 1,
+          inserted_date: "2025-06-26T15:41:06.503954",
+          modified_date: "2025-06-26T15:41:06.503954",
+          process_master_id: 8,
+          sub_process_order: 1,
+          sub_process_name: "Sub1",
+          is_active: true,
+          is_deleted: false,
+        },
+        steps: [
+          {
+            steps: {
+              process_step_id: 69,
+              process_step_guid: "7c311e4c-b8f8-4ca3-b66f-6784e0b33870",
+              inserted_by: 1,
+              modified_by: 1,
+              inserted_date: "2025-06-26T15:41:06.646289",
+              modified_date: "2025-06-26T15:41:06.646289",
+              process_master_id: 8,
+              sub_process_id: 31,
+              process_step_order: 1,
+              process_step_query: [],
+              process_table_name: null,
+              where_clause: null,
+              joining_condition: null,
+              process_step_action: "import",
+              process_select: null,
+              update_columns: null,
+              insert_columns: null,
+              is_active: true,
+              is_deleted: false,
+              process_step_description: null,
+              source_conn_id: 4,
+              dest_conn_id: 5,
+            },
+            create_table: [],
+            table_config: [
+              [
+                {
+                  table_config_id: 56,
+                  table_config_guid: "04a334c6-8871-4e1b-8503-3107287237bf",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:06.794041",
+                  modified_date: "2025-06-26T15:41:06.794041",
+                  process_step_id: 69,
+                  data_source_id: 4,
+                  schema_name: "public",
+                  table_name: "exception_master",
+                  is_temporary_table: false,
+                  table_type: "source",
+                  table_category: "import",
+                  is_partitioning: false,
+                  is_column_store: false,
+                  is_reload: false,
+                  is_incremental_load: false,
+                  database_name: "JanaBank",
+                  is_imported: false,
+                  is_exported: false,
+                  is_active: true,
+                  is_deleted: false,
+                  is_upsert: false,
+                },
+                {
+                  table_config_id: 57,
+                  table_config_guid: "7c5541c9-2ec9-4432-b4a1-215fc290ff75",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:06.924119",
+                  modified_date: "2025-06-26T15:41:06.924119",
+                  process_step_id: 69,
+                  data_source_id: 5,
+                  schema_name: "source_schema",
+                  table_name: "exception_master",
+                  is_temporary_table: false,
+                  table_type: "destination",
+                  table_category: "import",
+                  is_partitioning: false,
+                  is_column_store: false,
+                  is_reload: false,
+                  is_incremental_load: false,
+                  database_name: "DestinationDB",
+                  is_imported: false,
+                  is_exported: false,
+                  is_active: true,
+                  is_deleted: false,
+                  is_upsert: true,
+                },
+              ],
+              [
+                {
+                  table_config_id: 58,
+                  table_config_guid: "07152567-10ba-4068-b7ae-e49a929a541a",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:07.047289",
+                  modified_date: "2025-06-26T15:41:07.047289",
+                  process_step_id: 69,
+                  data_source_id: 4,
+                  schema_name: "public",
+                  table_name: "npa_auto_tech_write_off",
+                  is_temporary_table: false,
+                  table_type: "source",
+                  table_category: "import",
+                  is_partitioning: false,
+                  is_column_store: false,
+                  is_reload: false,
+                  is_incremental_load: false,
+                  database_name: "JanaBank",
+                  is_imported: false,
+                  is_exported: false,
+                  is_active: true,
+                  is_deleted: false,
+                  is_upsert: false,
+                },
+                {
+                  table_config_id: 59,
+                  table_config_guid: "c8ec80bd-e752-4cec-be23-8cc355ab2644",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:07.198508",
+                  modified_date: "2025-06-26T15:41:07.198508",
+                  process_step_id: 69,
+                  data_source_id: 5,
+                  schema_name: "source_schema",
+                  table_name: "npa_auto_tech_write_off",
+                  is_temporary_table: false,
+                  table_type: "destination",
+                  table_category: "import",
+                  is_partitioning: false,
+                  is_column_store: false,
+                  is_reload: false,
+                  is_incremental_load: false,
+                  database_name: "DestinationDB",
+                  is_imported: false,
+                  is_exported: false,
+                  is_active: true,
+                  is_deleted: false,
+                  is_upsert: true,
+                },
+              ],
+            ],
+            table_config_details: [
+              [
+                [
+                  {
+                    table_config_detail_id: 967,
+                    table_config_detail_guid:
+                      "3e8a7420-56c6-4f93-8071-3ae85f312b7c",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:07.328678",
+                    modified_date: "2025-06-26T15:41:07.328678",
+                    process_step_id: 69,
+                    table_config_id: 56,
+                    column_name: "row_id",
+                    datatype: "numeric",
+                    length: null,
+                    precision: 10,
+                    scale: 0,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 1,
+                    nullable: false,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 968,
+                    table_config_detail_guid:
+                      "f625be8c-169d-4878-9cea-68d7296e540b",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:07.478006",
+                    modified_date: "2025-06-26T15:41:07.478006",
+                    process_step_id: 69,
+                    table_config_id: 56,
+                    column_name: "account_number",
+                    datatype: "numeric",
+                    length: null,
+                    precision: 20,
+                    scale: 0,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 2,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 969,
+                    table_config_detail_guid:
+                      "3b392ec4-f0ba-4eac-8dc2-43a9718f1ab3",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:07.618864",
+                    modified_date: "2025-06-26T15:41:07.618864",
+                    process_step_id: 69,
+                    table_config_id: 56,
+                    column_name: "cbs_restructured_date",
+                    datatype: "character varying",
+                    length: 40,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 3,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 970,
+                    table_config_detail_guid:
+                      "d111988c-289a-435c-9c93-6c8e7b19d1c3",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:07.729903",
+                    modified_date: "2025-06-26T15:41:07.729903",
+                    process_step_id: 69,
+                    table_config_id: 56,
+                    column_name: "cm_accrual",
+                    datatype: "character varying",
+                    length: 2,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 4,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 971,
+                    table_config_detail_guid:
+                      "48a0c497-53d2-43d1-9ef5-ddfb9c610dcf",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:07.866655",
+                    modified_date: "2025-06-26T15:41:07.866655",
+                    process_step_id: 69,
+                    table_config_id: 56,
+                    column_name: "npa_date",
+                    datatype: "timestamp without time zone",
+                    length: null,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 5,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 972,
+                    table_config_detail_guid:
+                      "3f0ab40c-a58b-446c-be62-507c60cd322d",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:07.993301",
+                    modified_date: "2025-06-26T15:41:07.993301",
+                    process_step_id: 69,
+                    table_config_id: 56,
+                    column_name: "business_date",
+                    datatype: "timestamp without time zone",
+                    length: null,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 6,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                ],
+                [
+                  {
+                    table_config_detail_id: 973,
+                    table_config_detail_guid:
+                      "36048425-3c13-43e2-9949-d0b122a786fc",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:08.127804",
+                    modified_date: "2025-06-26T15:41:08.127804",
+                    process_step_id: 69,
+                    table_config_id: 57,
+                    column_name: "row_id",
+                    datatype: "numeric",
+                    length: null,
+                    precision: 10,
+                    scale: 0,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 1,
+                    nullable: false,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 974,
+                    table_config_detail_guid:
+                      "6da80f80-0bf9-4359-beb5-0cb09e4a9322",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:08.261619",
+                    modified_date: "2025-06-26T15:41:08.261619",
+                    process_step_id: 69,
+                    table_config_id: 57,
+                    column_name: "account_number",
+                    datatype: "numeric",
+                    length: null,
+                    precision: 20,
+                    scale: 0,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 2,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 975,
+                    table_config_detail_guid:
+                      "8b1b1182-c3b2-48e9-9d5f-641348963fb4",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:08.400908",
+                    modified_date: "2025-06-26T15:41:08.400908",
+                    process_step_id: 69,
+                    table_config_id: 57,
+                    column_name: "cbs_restructured_date",
+                    datatype: "character varying",
+                    length: 40,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 3,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 976,
+                    table_config_detail_guid:
+                      "5873cb0b-fb06-454d-aef1-e9a68829abf7",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:08.535501",
+                    modified_date: "2025-06-26T15:41:08.535501",
+                    process_step_id: 69,
+                    table_config_id: 57,
+                    column_name: "cm_accrual",
+                    datatype: "character varying",
+                    length: 2,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 4,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 977,
+                    table_config_detail_guid:
+                      "f353b809-655c-4f3c-ad8e-6d5e6cc81618",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:08.676859",
+                    modified_date: "2025-06-26T15:41:08.676859",
+                    process_step_id: 69,
+                    table_config_id: 57,
+                    column_name: "npa_date",
+                    datatype: "timestamp without time zone",
+                    length: null,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 5,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 978,
+                    table_config_detail_guid:
+                      "471567ec-8df4-4789-8a89-ff7ee2751806",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:08.843762",
+                    modified_date: "2025-06-26T15:41:08.843762",
+                    process_step_id: 69,
+                    table_config_id: 57,
+                    column_name: "business_date",
+                    datatype: "timestamp without time zone",
+                    length: null,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 6,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                ],
+              ],
+              [
+                [
+                  {
+                    table_config_detail_id: 979,
+                    table_config_detail_guid:
+                      "b53c76d3-21a6-4d7f-907b-bdebdaea5342",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:09.000962",
+                    modified_date: "2025-06-26T15:41:09.000962",
+                    process_step_id: 69,
+                    table_config_id: 58,
+                    column_name: "row_id",
+                    datatype: "numeric",
+                    length: null,
+                    precision: 38,
+                    scale: 0,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 1,
+                    nullable: false,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 980,
+                    table_config_detail_guid:
+                      "2246863b-afd5-4379-add3-5cefd6e01d01",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:09.179677",
+                    modified_date: "2025-06-26T15:41:09.179677",
+                    process_step_id: 69,
+                    table_config_id: 58,
+                    column_name: "createddate",
+                    datatype: "timestamp without time zone",
+                    length: null,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 2,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 981,
+                    table_config_detail_guid:
+                      "11a78615-31c1-4ee6-b2c2-a4a9b1d79662",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:09.321223",
+                    modified_date: "2025-06-26T15:41:09.321223",
+                    process_step_id: 69,
+                    table_config_id: 58,
+                    column_name: "account_number",
+                    datatype: "character varying",
+                    length: 255,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 3,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 982,
+                    table_config_detail_guid:
+                      "cbfadff3-417d-4485-8215-a3638db8f762",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:09.495946",
+                    modified_date: "2025-06-26T15:41:09.495946",
+                    process_step_id: 69,
+                    table_config_id: 58,
+                    column_name: "write_off_month",
+                    datatype: "character varying",
+                    length: 255,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 4,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                ],
+                [
+                  {
+                    table_config_detail_id: 983,
+                    table_config_detail_guid:
+                      "1d032324-7d76-4265-b9cc-233692996b36",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:09.649660",
+                    modified_date: "2025-06-26T15:41:09.649660",
+                    process_step_id: 69,
+                    table_config_id: 59,
+                    column_name: "row_id",
+                    datatype: "numeric",
+                    length: null,
+                    precision: 38,
+                    scale: 0,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 1,
+                    nullable: false,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 984,
+                    table_config_detail_guid:
+                      "cf384a33-ceb7-40a6-a9ad-c766e2155b2b",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:09.783100",
+                    modified_date: "2025-06-26T15:41:09.783100",
+                    process_step_id: 69,
+                    table_config_id: 59,
+                    column_name: "createddate",
+                    datatype: "timestamp without time zone",
+                    length: null,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 2,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 985,
+                    table_config_detail_guid:
+                      "52b8a8e0-e6bc-4807-8b20-a5e3b1c33047",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:09.930746",
+                    modified_date: "2025-06-26T15:41:09.930746",
+                    process_step_id: 69,
+                    table_config_id: 59,
+                    column_name: "account_number",
+                    datatype: "character varying",
+                    length: 255,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 3,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                  {
+                    table_config_detail_id: 986,
+                    table_config_detail_guid:
+                      "f6f4d6a2-3fb3-4ec1-a143-e2a72440a65c",
+                    inserted_by: 1,
+                    modified_by: 1,
+                    inserted_date: "2025-06-26T15:41:10.087863",
+                    modified_date: "2025-06-26T15:41:10.087863",
+                    process_step_id: 69,
+                    table_config_id: 59,
+                    column_name: "write_off_month",
+                    datatype: "character varying",
+                    length: 255,
+                    precision: null,
+                    scale: null,
+                    is_primary_key: false,
+                    is_autogenerated: false,
+                    ordinal_position: 4,
+                    nullable: true,
+                    is_deleted: false,
+                    is_active: true,
+                  },
+                ],
+              ],
+            ],
+            table_mapping: [
+              [
+                {
+                  table_mapping_id: 484,
+                  table_mapping_guid: "0da07028-86dc-4827-bda6-ab22e3306bb3",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:10.211187",
+                  modified_date: "2025-06-26T15:41:10.211187",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "exception_master",
+                  source_column: "row_id",
+                  source_data_type: "numeric",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "exception_master",
+                  dest_column: "row_id",
+                  dest_data_type: "numeric",
+                  ordinal_position: 1,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 485,
+                  table_mapping_guid: "c74320fb-638a-48f1-9760-d989be5f505f",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:10.356740",
+                  modified_date: "2025-06-26T15:41:10.356740",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "exception_master",
+                  source_column: "account_number",
+                  source_data_type: "numeric",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "exception_master",
+                  dest_column: "account_number",
+                  dest_data_type: "numeric",
+                  ordinal_position: 2,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 486,
+                  table_mapping_guid: "dbb5d3fd-baaa-44bc-a00f-6975ec9602a4",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:10.518855",
+                  modified_date: "2025-06-26T15:41:10.518855",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "exception_master",
+                  source_column: "cbs_restructured_date",
+                  source_data_type: "character varying",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "exception_master",
+                  dest_column: "cbs_restructured_date",
+                  dest_data_type: "character varying",
+                  ordinal_position: 3,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 487,
+                  table_mapping_guid: "b911aee5-88f4-4718-8bd6-3bdaa62ca240",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:10.638233",
+                  modified_date: "2025-06-26T15:41:10.638233",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "exception_master",
+                  source_column: "cm_accrual",
+                  source_data_type: "character varying",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "exception_master",
+                  dest_column: "cm_accrual",
+                  dest_data_type: "character varying",
+                  ordinal_position: 4,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 488,
+                  table_mapping_guid: "20ea5631-66c3-4657-a748-454ff67090b5",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:10.750090",
+                  modified_date: "2025-06-26T15:41:10.750090",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "exception_master",
+                  source_column: "npa_date",
+                  source_data_type: "timestamp without time zone",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "exception_master",
+                  dest_column: "npa_date",
+                  dest_data_type: "timestamp without time zone",
+                  ordinal_position: 5,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 489,
+                  table_mapping_guid: "fbc8522e-4b02-4900-9f25-757b7cfc523a",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:10.885672",
+                  modified_date: "2025-06-26T15:41:10.885672",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "exception_master",
+                  source_column: "business_date",
+                  source_data_type: "timestamp without time zone",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "exception_master",
+                  dest_column: "business_date",
+                  dest_data_type: "timestamp without time zone",
+                  ordinal_position: 6,
+                  is_active: true,
+                  is_deleted: false,
+                },
+              ],
+              [
+                {
+                  table_mapping_id: 490,
+                  table_mapping_guid: "b2b127bd-9820-4c93-94c7-52581bfa1d6b",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:11.062783",
+                  modified_date: "2025-06-26T15:41:11.062783",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "npa_auto_tech_write_off",
+                  source_column: "row_id",
+                  source_data_type: "numeric",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "npa_auto_tech_write_off",
+                  dest_column: "row_id",
+                  dest_data_type: "numeric",
+                  ordinal_position: 1,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 491,
+                  table_mapping_guid: "22076a2f-e002-443a-a44b-d46f5f2ba635",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:11.178898",
+                  modified_date: "2025-06-26T15:41:11.178898",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "npa_auto_tech_write_off",
+                  source_column: "createddate",
+                  source_data_type: "timestamp without time zone",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "npa_auto_tech_write_off",
+                  dest_column: "createddate",
+                  dest_data_type: "timestamp without time zone",
+                  ordinal_position: 2,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 492,
+                  table_mapping_guid: "ea6d9f9d-200a-452e-b0ef-cc22849a158c",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:11.281585",
+                  modified_date: "2025-06-26T15:41:11.281585",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "npa_auto_tech_write_off",
+                  source_column: "account_number",
+                  source_data_type: "character varying",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "npa_auto_tech_write_off",
+                  dest_column: "account_number",
+                  dest_data_type: "character varying",
+                  ordinal_position: 3,
+                  is_active: true,
+                  is_deleted: false,
+                },
+                {
+                  table_mapping_id: 493,
+                  table_mapping_guid: "8e6e30b4-3775-4fd9-a629-c0fb859021b6",
+                  inserted_by: 1,
+                  modified_by: 1,
+                  inserted_date: "2025-06-26T15:41:11.411494",
+                  modified_date: "2025-06-26T15:41:11.411494",
+                  process_step_id: 69,
+                  source_conn_id: 4,
+                  source_db: "JanaBank",
+                  source_schema: "public",
+                  source_table: "npa_auto_tech_write_off",
+                  source_column: "write_off_month",
+                  source_data_type: "character varying",
+                  dest_conn_id: 5,
+                  dest_db: "DestinationDB",
+                  dest_schema: "source_schema",
+                  dest_table: "npa_auto_tech_write_off",
+                  dest_column: "write_off_month",
+                  dest_data_type: "character varying",
+                  ordinal_position: 4,
+                  is_active: true,
+                  is_deleted: false,
+                },
+              ],
+            ],
+          },
+          {
+            steps: {
+              process_step_id: 70,
+              process_step_guid: "5a7af963-fb57-4b29-8c2d-7bba6faea97a",
+              inserted_by: 1,
+              modified_by: 1,
+              inserted_date: "2025-06-26T15:41:11.557998",
+              modified_date: "2025-06-26T15:41:11.557998",
+              process_master_id: 8,
+              sub_process_id: 31,
+              process_step_order: 2,
+              process_step_query: ["Subprocess 1 query"],
+              process_table_name: null,
+              where_clause: null,
+              joining_condition: null,
+              process_step_action: "process-query",
+              process_select: null,
+              update_columns: null,
+              insert_columns: null,
+              is_active: true,
+              is_deleted: false,
+              process_step_description: "Subprocess 1 description",
+              source_conn_id: 5,
+              dest_conn_id: null,
+            },
+            create_table: [],
+            table_config: [],
+            table_config_details: [],
+            table_mapping: [],
+          },
+          {
+            steps: {
+              process_step_id: 71,
+              process_step_guid: "f757dc87-556f-4248-b12d-7bad160a9451",
+              inserted_by: 1,
+              modified_by: 1,
+              inserted_date: "2025-06-26T15:41:11.709142",
+              modified_date: "2025-06-26T15:41:11.709142",
+              process_master_id: 8,
+              sub_process_id: 31,
+              process_step_order: 3,
+              process_step_query: ["ex query1", "ex query2"],
+              process_table_name: null,
+              where_clause: null,
+              joining_condition: null,
+              process_step_action: "export",
+              process_select: null,
+              update_columns: null,
+              insert_columns: null,
+              is_active: true,
+              is_deleted: false,
+              process_step_description: "export description",
+              source_conn_id: 4,
+              dest_conn_id: null,
+            },
+            create_table: [],
+            table_config: [],
+            table_config_details: [],
+            table_mapping: [],
+          },
+        ],
+      },
+      {
+        subprocess_data: {
+          sub_process_id: 32,
+          sub_process_guid: "51f5ae90-c05b-495a-b348-e21752ce48dd",
+          inserted_by: 1,
+          modified_by: 1,
+          inserted_date: "2025-06-26T15:41:11.811824",
+          modified_date: "2025-06-26T15:41:11.811824",
+          process_master_id: 8,
+          sub_process_order: 2,
+          sub_process_name: "Sub2",
+          is_active: true,
+          is_deleted: false,
+        },
+        steps: [
+          {
+            steps: {
+              process_step_id: 72,
+              process_step_guid: "0ac070b5-9529-43cd-971f-9086da5382d8",
+              inserted_by: 1,
+              modified_by: 1,
+              inserted_date: "2025-06-26T15:41:11.915566",
+              modified_date: "2025-06-26T15:41:11.915566",
+              process_master_id: 8,
+              sub_process_id: 32,
+              process_step_order: 1,
+              process_step_query: ["Subprocess 2 query"],
+              process_table_name: null,
+              where_clause: null,
+              joining_condition: null,
+              process_step_action: "process-query",
+              process_select: null,
+              update_columns: null,
+              insert_columns: null,
+              is_active: true,
+              is_deleted: false,
+              process_step_description: "Subprocess 2 description",
+              source_conn_id: 6,
+              dest_conn_id: null,
+            },
+            create_table: [],
+            table_config: [],
+            table_config_details: [],
+            table_mapping: [],
+          },
+        ],
+      },
+    ],
+  };
 
   // run fetchConnections on load
   useEffect(() => {
@@ -117,12 +1098,117 @@ export default function CreateProcess() {
     }
   };
 
-  //Subprocess Management - addSubprocess, updateSubprocessName, deleteSubprocess
+  // Load mock data on component mount
+  useEffect(() => {
+    if (id) {
+      loadMockData();
+    }
+  }, []);
 
-  // Function to add a new subprocess
+  // Helper function to fetch connection details
+const fetchConnectionDetails = async (connectionId, baseURL) => {
+  if (!connectionId) return null;
+  
+  try {
+    const response = await fetch(`${baseURL}/connection-view?conn_id=${connectionId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch connection details for ID: ${connectionId}`);
+      return null;
+    }
+    const {data} = await response.json();
+    return {
+      connection_name: data.connection_name || "",
+      server_name: data.server_name || "",
+      port_number: data.port_number || "",
+      database_type: data.database_type || "",
+      database_name: data.database_name || "",
+      username: data.username || "",
+    };
+  } catch (error) {
+    console.error(`Error fetching connection details for ID ${connectionId}:`, error);
+    return null;
+  }
+};
+
+const loadMockData = async () => {
+  setLoadingData(true);
+
+  // Simulate loading delay
+  setTimeout(async () => {
+    try {
+      const processData = mockData;
+
+      // Set process details
+      setProcessName(processData.process.process_name);
+      setProcessMasterId(processData.process.process_master_id);
+
+      // Transform and set subprocesses data with connection details
+      const transformedSubprocesses = await Promise.all(
+        processData.subprocesses.map(async (sp, spIndex) => ({
+          id: sp.subprocess_data.sub_process_id || Date.now() + spIndex,
+          sub_process_id: sp.subprocess_data.sub_process_id,
+          subprocess_no: sp.subprocess_data.sub_process_order,
+          subprocess_name: sp.subprocess_data.sub_process_name,
+          steps: await Promise.all(
+            sp.steps.map(async (step, stepIndex) => {
+              const sourceConnectionId = step.steps.source_conn_id?.toString();
+              const destConnectionId = step.steps.dest_conn_id?.toString();
+
+              // Fetch connection details in parallel
+              const [sourceDetails, destinationDetails] = await Promise.all([
+                fetchConnectionDetails(sourceConnectionId, baseURL),
+                fetchConnectionDetails(destConnectionId, baseURL)
+              ]);
+
+              return {
+                id: step.steps.process_step_id || Date.now() + stepIndex,
+                process_step_id: step.steps.process_step_id,
+                step_no: step.steps.process_step_order,
+                step_type: step.steps.process_step_action,
+                connection_id: sourceConnectionId || "",
+                destination_connection_id: destConnectionId || "",
+                source_tables: [],
+                destination_tables: [],
+                selected_tables: [],
+                pq_description: step.steps.process_step_description || "",
+                pq_query: step.steps.process_step_query || [],
+                ex_description: step.steps.process_step_description || "",
+                ex_query: step.steps.process_step_query || [],
+                source_details: sourceDetails,
+                destination_details: destinationDetails,
+                create_table:
+                  step.table_config?.map(([first, second]) => ({
+                    table_name: first.table_name,
+                    source_schema_name: first.schema_name,
+                    dest_schema_name: second.schema_name,
+                    is_table_exist: true,
+                  })) || [],
+              };
+            })
+          ),
+        }))
+      );
+
+      setSubprocesses(transformedSubprocesses);
+      // setConnections(mockConnections);
+    } catch (error) {
+      console.error("Error loading mock data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load process data",
+      });
+    } finally {
+      setLoadingData(false);
+    }
+  }, 500); // Simulate 500ms loading time
+};
+
+  // Subprocess Management Functions
   const addSubprocess = () => {
     const newSubprocess = {
       id: Date.now(),
+      sub_process_id: null, // New subprocess, no existing ID
       subprocess_no: subprocesses.length + 1,
       subprocess_name: "",
       steps: [],
@@ -130,7 +1216,6 @@ export default function CreateProcess() {
     setSubprocesses([...subprocesses, newSubprocess]);
   };
 
-  // Function to update subprocess name
   const updateSubprocessName = (subprocessId, name) => {
     setSubprocesses(
       subprocesses.map((subprocess) =>
@@ -141,41 +1226,43 @@ export default function CreateProcess() {
     );
   };
 
-  // Function to delete subprocess
   const deleteSubprocess = (subprocessId) => {
-    const updatedSubprocesses = subprocesses.filter((subprocess) => subprocess.id !== subprocessId);
-    // Update subprocess numbers after deletion
-    const renumberedSubprocesses = updatedSubprocesses.map((subprocess, index) => ({
-      ...subprocess,
-      subprocess_no: index + 1,
-    }));
+    const updatedSubprocesses = subprocesses.filter(
+      (subprocess) => subprocess.id !== subprocessId
+    );
+    const renumberedSubprocesses = updatedSubprocesses.map(
+      (subprocess, index) => ({
+        ...subprocess,
+        subprocess_no: index + 1,
+      })
+    );
     setSubprocesses(renumberedSubprocesses);
   };
 
-  // Function to handle subprocess drag end
   const handleSubprocessDragEnd = (event) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = subprocesses.findIndex(subprocess => subprocess.id === active.id);
-      const newIndex = subprocesses.findIndex(subprocess => subprocess.id === over.id);
-      
-      // Reorder the subprocesses array
+      const oldIndex = subprocesses.findIndex(
+        (subprocess) => subprocess.id === active.id
+      );
+      const newIndex = subprocesses.findIndex(
+        (subprocess) => subprocess.id === over.id
+      );
+
       const reorderedSubprocesses = arrayMove(subprocesses, oldIndex, newIndex);
-      
-      // Update subprocess numbers based on new positions
-      const updatedSubprocesses = reorderedSubprocesses.map((subprocess, index) => ({
-        ...subprocess,
-        subprocess_no: index + 1
-      }));
+      const updatedSubprocesses = reorderedSubprocesses.map(
+        (subprocess, index) => ({
+          ...subprocess,
+          subprocess_no: index + 1,
+        })
+      );
 
       setSubprocesses(updatedSubprocesses);
     }
   };
 
-  // Step Management - addStep, updateStep, deleteStep
-
-  // Function to add a step to a subprocess
+  // Step Management Functions
   const addStep = (subprocessId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
@@ -184,6 +1271,7 @@ export default function CreateProcess() {
       const newSteps = [...subprocesses[subprocessIndex].steps];
       newSteps.push({
         id: Date.now(),
+        process_step_id: null, // New step, no existing ID
         step_no: newSteps.length + 1,
         step_type: "",
         connection_id: "",
@@ -217,7 +1305,6 @@ export default function CreateProcess() {
       if (stepIndex !== -1) {
         const updatedSubprocesses = [...subprocesses];
 
-        // Special handling for pq_query to ensure it's always an array
         if (field === "pq_query") {
           updatedSubprocesses[subprocessIndex].steps[stepIndex][field] =
             Array.isArray(value) ? value : [value];
@@ -230,7 +1317,6 @@ export default function CreateProcess() {
     }
   };
 
-  // Function to delete a step
   const deleteStep = (subprocessId, stepId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
@@ -250,7 +1336,6 @@ export default function CreateProcess() {
     }
   };
 
-  // Function to update entire subprocess steps array (for drag and drop reordering)
   const updateSubprocessSteps = (subprocessId, newSteps) => {
     setSubprocesses(
       subprocesses.map((subprocess) =>
@@ -261,14 +1346,13 @@ export default function CreateProcess() {
     );
   };
 
-  // Helper function to get connection details by ID
   const getConnectionDetails = (connectionId) => {
     return connections.find(
       (conn) => conn.data_sources_id.toString() === connectionId.toString()
     );
   };
 
-  // Function to save the entire process
+  // Save/Update Process Function (Mock implementation)
   const saveProcess = async () => {
     // Validates that a process name is provided
     if (!processName.trim()) {
@@ -283,10 +1367,10 @@ export default function CreateProcess() {
     //begin-------------------------------------------------------------------------------
 
     // Helper function to fetch column details for a table
-    const fetchColumnDetails = async (connectionId, schemaName, tableName) => {
+    const fetchColumnDetails = async (connectionId, source_schema_name, tableName) => {
       try {
         const response = await fetch(
-          `${baseURL}/connection-columns?conn_id=${connectionId}&schema_name=${schemaName}&table_name=${tableName}`
+          `${baseURL}/connection-columns?conn_id=${connectionId}&schema_name=${source_schema_name}&table_name=${tableName}`
         );
         const result = await response.json();
 
@@ -325,15 +1409,15 @@ export default function CreateProcess() {
     ) => {
       const tableMappings = await Promise.all(
         createTableData.map(
-          async ({ schema_name, table_name, dest_schema_name }) => {
+          async ({ source_schema_name, table_name, dest_schema_name }) => {
             // Fetch source columns
             const sourceColumns = await fetchColumnDetails(
               sourceConnectionId,
-              schema_name,
+              source_schema_name,
               table_name
             );
 
-            // Fetch destination columns (only if table exists)
+            // Fetch destination csolumns (only if table exists)
             const destColumns = await fetchColumnDetails(
               destinationConnectionId,
               dest_schema_name,
@@ -357,7 +1441,7 @@ export default function CreateProcess() {
                 p_modified_by: 1,
                 p_source_conn_id: Number(sourceConnectionId),
                 p_source_db: sourceConnectionDetails.database_name,
-                p_source_schema: schema_name,
+                p_source_schema: source_schema_name,
                 p_source_table: table_name,
                 p_source_column: sourceCol.p_column_name,
                 p_source_data_type: sourceCol.p_datatype,
@@ -402,17 +1486,17 @@ export default function CreateProcess() {
                 // Fetch column details for each table - create pairs for source and destination
                 const tableConfigDetails = await Promise.all(
                   createTableData.map(
-                    async ({ schema_name, table_name, dest_schema_name }) => [
+                    async ({ source_schema_name, table_name, dest_schema_name }) => [
                       // First entry for source table
                       await fetchColumnDetails(
                         step.connection_id,
-                        schema_name,
+                        source_schema_name,
                         table_name
                       ),
                       // Second entry for destination table (or same source table if needed)
                       await fetchColumnDetails(
                         step.connection_id,
-                        schema_name,
+                        source_schema_name,
                         table_name
                       ),
                     ]
@@ -439,26 +1523,26 @@ export default function CreateProcess() {
                   },
                   create_table: createTableData.map(
                     ({
-                      schema_name,
+                      source_schema_name,
                       table_name,
                       dest_schema_name,
                       is_table_exist,
                     }) => ({
                       table_name: table_name,
-                      source_schema_name: schema_name,
+                      source_schema_name: source_schema_name,
                       dest_schema_name: dest_schema_name,
                       is_table_exist: is_table_exist,
                     })
                   ),
                   table_config: createTableData.map(
-                    ({ schema_name, table_name, dest_schema_name }) => [
+                    ({ source_schema_name, table_name, dest_schema_name }) => [
                       // Source table config
                       {
                         p_inserted_by: 1,
                         p_modified_by: 1,
                         p_connection_name: step.source_details.connection_name,
                         p_database_name: step.source_details.database_name,
-                        p_schema_name: schema_name,
+                        p_schema_name: source_schema_name,
                         p_table_name: table_name,
                         p_is_temp_table: false,
                         p_table_type: "source",
@@ -594,17 +1678,33 @@ export default function CreateProcess() {
     // }
   };
 
+
+  // Show loading screen while loading initial data
+  if (loadingData) {
+    return <LoadingOverlay />;
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       {/* Loading Screen */}
-      {loading && <LoadingOverlay />}
-      {/* Header - function called - saveProcess */}
+      {(loading || loadingSave) && <LoadingOverlay />}
+
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Create New Process</h1>
-        <Button onClick={saveProcess} disabled={loading}>
-          {loading ? "Saving..." : "Save Process"}
-        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Edit Process</h1>
+          <p className="text-gray-600 mt-1">Process ID: {id}</p>
+        </div>
+        <div className="flex space-x-3">
+          <Button variant="outline" onClick={() => router.push("/process")}>
+            Cancel
+          </Button>
+          <Button onClick={saveProcess} disabled={loadingSave}>
+            {loadingSave ? "Updating..." : "Update Process"}
+          </Button>
+        </div>
       </div>
+
       {/* Notification */}
       {notification.show && (
         <Alert
@@ -623,7 +1723,8 @@ export default function CreateProcess() {
           </AlertDescription>
         </Alert>
       )}
-      {/* Main Process Card - function called - addSubprocess */}
+
+      {/* Main Process Card */}
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Process Details</CardTitle>
@@ -643,11 +1744,6 @@ export default function CreateProcess() {
             </div>
           </div>
         </CardContent>
-        {/* <CardFooter>
-          <Button onClick={addSubprocess} className="w-full" variant="outline">
-            <Plus className="mr-2 h-4 w-4" /> Add Subprocess
-          </Button>
-        </CardFooter> */}
       </Card>
 
       {/* Draggable Subprocess Cards */}
@@ -657,7 +1753,7 @@ export default function CreateProcess() {
         onDragEnd={handleSubprocessDragEnd}
       >
         <SortableContext
-          items={subprocesses.map(subprocess => subprocess.id)}
+          items={subprocesses.map((subprocess) => subprocess.id)}
           strategy={verticalListSortingStrategy}
         >
           {subprocesses.map((subprocess) => (
@@ -677,8 +1773,8 @@ export default function CreateProcess() {
       </DndContext>
 
       <Button onClick={addSubprocess} className="w-full" variant="outline">
-            <Plus className="mr-2 h-4 w-4" /> Add Subprocess
-          </Button>
+        <Plus className="mr-2 h-4 w-4" /> Add Subprocess
+      </Button>
     </div>
   );
 }
@@ -721,16 +1817,20 @@ function DraggableSubprocessCard({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = subprocess.steps.findIndex(step => step.id === active.id);
-      const newIndex = subprocess.steps.findIndex(step => step.id === over.id);
-      
+      const oldIndex = subprocess.steps.findIndex(
+        (step) => step.id === active.id
+      );
+      const newIndex = subprocess.steps.findIndex(
+        (step) => step.id === over.id
+      );
+
       // Reorder the steps array
       const reorderedSteps = arrayMove(subprocess.steps, oldIndex, newIndex);
-      
+
       // Update step numbers based on new positions
       const updatedSteps = reorderedSteps.map((step, index) => ({
         ...step,
-        step_no: index + 1
+        step_no: index + 1,
       }));
 
       // Update the subprocess with new step order
@@ -740,7 +1840,7 @@ function DraggableSubprocessCard({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`mb-6 ${isDragging ? 'shadow-lg' : ''}`}>
+      <Card className={`mb-6 ${isDragging ? "shadow-lg" : ""}`}>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2 flex-1 mr-4">
@@ -785,7 +1885,7 @@ function DraggableSubprocessCard({
               onDragEnd={handleStepDragEnd}
             >
               <SortableContext
-                items={subprocess.steps.map(step => step.id)}
+                items={subprocess.steps.map((step) => step.id)}
                 strategy={verticalListSortingStrategy}
               >
                 {subprocess.steps.map((step) => (
@@ -818,7 +1918,13 @@ function DraggableSubprocessCard({
 }
 
 // New Draggable StepCard component
-function DraggableStepCard({ step, subprocessId, connections, updateStep, deleteStep }) {
+function DraggableStepCard({
+  step,
+  subprocessId,
+  connections,
+  updateStep,
+  deleteStep,
+}) {
   const {
     attributes,
     listeners,
@@ -836,7 +1942,9 @@ function DraggableStepCard({ step, subprocessId, connections, updateStep, delete
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`border border-gray-200 ${isDragging ? 'shadow-lg' : ''}`}>
+      <Card
+        className={`border border-gray-200 ${isDragging ? "shadow-lg" : ""}`}
+      >
         <CardHeader className="pb-2 bg-gray-50">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
@@ -858,6 +1966,7 @@ function DraggableStepCard({ step, subprocessId, connections, updateStep, delete
                 onValueChange={(value) =>
                   updateStep(subprocessId, step.id, "step_type", value)
                 }
+                disabled={step.process_step_id != null}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select" />
@@ -1099,7 +2208,7 @@ function ImportStepContent({
     if (step.selected_tables && step.selected_tables.length > 0) {
       const createTableData = step.selected_tables.map((selectedTable) => ({
         table_name: selectedTable.table_name,
-        schema_name: selectedTable.schema_name,
+        source_schema_name: selectedTable.schema_name,
         dest_schema_name: selectedDestinationSchema,
         is_table_exist: step.destination_tables.includes(
           selectedTable.table_name
@@ -1200,7 +2309,7 @@ function ImportStepContent({
                 <Select
                   value={step.connection_id}
                   onValueChange={handleSourceConnectionChange}
-                  disabled={hasSelectedTables}
+                  disabled={hasSelectedTables || step.process_step_id != null}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select source connection" />
@@ -1259,7 +2368,11 @@ function ImportStepContent({
                 <Select
                   value={selectedSourceSchema}
                   onValueChange={handleSourceSchemaChange}
-                  disabled={!step.connection_id || loading}
+                  disabled={
+                    !step.connection_id ||
+                    loading ||
+                    step.process_step_id != null
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select schema" />
@@ -1355,7 +2468,7 @@ function ImportStepContent({
                 <Select
                   value={step.destination_connection_id}
                   onValueChange={handleDestinationConnectionChange}
-                  disabled={hasSelectedTables}
+                  disabled={hasSelectedTables || step.process_step_id != null}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select destination connection" />
@@ -1416,7 +2529,8 @@ function ImportStepContent({
                   disabled={
                     !step.destination_connection_id ||
                     loading ||
-                    hasSelectedTables
+                    hasSelectedTables ||
+                    step.process_step_id != null
                   }
                 >
                   <SelectTrigger>
@@ -1441,33 +2555,37 @@ function ImportStepContent({
               </div>
 
               {/* Destination Tables Display */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Available Tables in Destination Schema
-                </label>
-                {destinationTables.length > 0 ? (
-                  <ScrollArea className="h-40 border rounded-md p-4">
-                    <div className="space-y-1">
-                      {destinationTables.map((table) => (
-                        <div
-                          key={table.table_name}
-                          className="text-sm text-gray-600"
-                        >
-                          {table.table_name}
-                        </div>
-                      ))}
+              {step.process_step_id != null ? (
+                <div>Skibdi</div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Available Tables in Destination Schema
+                  </label>
+                  {destinationTables.length > 0 ? (
+                    <ScrollArea className="h-40 border rounded-md p-4">
+                      <div className="space-y-1">
+                        {destinationTables.map((table) => (
+                          <div
+                            key={table.table_name}
+                            className="text-sm text-gray-600"
+                          >
+                            {table.table_name}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  ) : selectedDestinationSchema ? (
+                    <div className="py-3 px-4 bg-gray-100 rounded text-gray-600 text-sm">
+                      No tables exist in this destination schema
                     </div>
-                  </ScrollArea>
-                ) : selectedDestinationSchema ? (
-                  <div className="py-3 px-4 bg-gray-100 rounded text-gray-600 text-sm">
-                    No tables exist in this destination schema
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-500 italic">
-                    Select a destination schema to view available tables
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 italic">
+                      Select a destination schema to view available tables
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Selected Tables Display */}
               <div>
