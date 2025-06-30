@@ -31,20 +31,4 @@ export const sidebarItems = [
     href: "/process",
     icon: FileSliders,
   },
-  {
-    title: "New Configurations",
-    href: "/new-config",
-    icon: CatIcon,
-  },
-  {
-    title: "New Configurations2",
-    href: "/new-config2",
-    icon: DogIcon,
-  },
-  {
-    title: "Edit Page",
-    href: "/editing",
-    icon: CarIcon,
-  },
-  
 ]
