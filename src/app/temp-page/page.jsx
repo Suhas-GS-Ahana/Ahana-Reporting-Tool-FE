@@ -10,6 +10,7 @@ export default function TemPage() {
     const handleClick = () => {
         router.push(`/temp-page/temp-edit?id=${id}`);
     }
+    
   return (
     <div>
         <h1>Edit button for ID: {id}</h1>

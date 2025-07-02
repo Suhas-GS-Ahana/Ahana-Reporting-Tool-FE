@@ -1,5 +1,4 @@
 export default function EditProcess() {
-
   // Add sensors for subprocess drag and drop
   const subprocessSensors = useSensors(
     useSensor(PointerSensor),
@@ -8,158 +7,188 @@ export default function EditProcess() {
     })
   );
 
-  // Subprocess Management Functions
-  const addSubprocess = () => {
-    const newSubprocess = {
-      id: Date.now(),
-      sub_process_id: null, // New subprocess, no existing ID
-      subprocess_no: subprocesses.length + 1,
-      subprocess_name: "",
-      is_deleted:false,
-      steps: [],
-    };
-    setSubprocesses([...subprocesses, newSubprocess]);
+  // Step Management Functions
+  const addStep = (subprocessId) => {
+    const subprocessIndex = subprocesses.findIndex(
+      (sp) => sp.id === subprocessId
+    );
+    if (subprocessIndex !== -1) {
+      const newSteps = [...subprocesses[subprocessIndex].steps];
+      newSteps.push({
+        id: Date.now(),
+        process_step_id: null, // New step, no existing ID
+        step_no: newSteps.length + 1,
+        step_type: "",
+        connection_id: "",
+        destination_connection_id: "",
+        source_tables: [],
+        destination_tables: [],
+        selected_tables: [],
+        pq_description: "",
+        pq_query: [],
+        ex_description: "",
+        ex_query: [],
+        source_details: null,
+        destination_details: null,
+        create_table: [],
+        is_deleted:false,
+      });
+
+      const updatedSubprocesses = [...subprocesses];
+      updatedSubprocesses[subprocessIndex].steps = newSteps;
+      setSubprocesses(updatedSubprocesses);
+    }
   };
 
-  const updateSubprocessName = (subprocessId, name) => {
+  const updateStep = (subprocessId, stepId, field, value) => {
+    const subprocessIndex = subprocesses.findIndex(
+      (sp) => sp.id === subprocessId
+    );
+    if (subprocessIndex !== -1) {
+      const stepIndex = subprocesses[subprocessIndex].steps.findIndex(
+        (step) => step.id === stepId
+      );
+      if (stepIndex !== -1) {
+        const updatedSubprocesses = [...subprocesses];
+
+        if (field === "pq_query") {
+          updatedSubprocesses[subprocessIndex].steps[stepIndex][field] =
+            Array.isArray(value) ? value : [value];
+        } else {
+          updatedSubprocesses[subprocessIndex].steps[stepIndex][field] = value;
+        }
+
+        setSubprocesses(updatedSubprocesses);
+      }
+    }
+  };
+
+  const deleteStep = (subprocessId, stepId) => {
+    const subprocessIndex = subprocesses.findIndex(
+      (sp) => sp.id === subprocessId
+    );
+    if (subprocessIndex !== -1) {
+      const updatedSteps = subprocesses[subprocessIndex].steps.filter(
+        (step) => step.id !== stepId
+      );
+      const renamedSteps = updatedSteps.map((step, index) => ({
+        ...step,
+        step_no: index + 1,
+      }));
+
+      const updatedSubprocesses = [...subprocesses];
+      updatedSubprocesses[subprocessIndex].steps = renamedSteps;
+      setSubprocesses(updatedSubprocesses);
+    }
+  };
+
+  const updateSubprocessSteps = (subprocessId, newSteps) => {
     setSubprocesses(
       subprocesses.map((subprocess) =>
         subprocess.id === subprocessId
-          ? { ...subprocess, subprocess_name: name }
+          ? { ...subprocess, steps: newSteps }
           : subprocess
       )
     );
   };
 
-  const deleteSubprocess = (subprocessId) => {
-    const updatedSubprocesses = subprocesses.filter(
-      (subprocess) => subprocess.id !== subprocessId
-    );
-    const renumberedSubprocesses = updatedSubprocesses.map(
-      (subprocess, index) => ({
-        ...subprocess,
-        subprocess_no: index + 1,
-      })
-    );
-    setSubprocesses(renumberedSubprocesses);
-  };
-
-  const handleSubprocessDragEnd = (event) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = subprocesses.findIndex(
-        (subprocess) => subprocess.id === active.id
-      );
-      const newIndex = subprocesses.findIndex(
-        (subprocess) => subprocess.id === over.id
-      );
-
-      const reorderedSubprocesses = arrayMove(subprocesses, oldIndex, newIndex);
-      const updatedSubprocesses = reorderedSubprocesses.map(
-        (subprocess, index) => ({
-          ...subprocess,
-          subprocess_no: index + 1,
-        })
-      );
-
-      setSubprocesses(updatedSubprocesses);
-    }
-  };
-
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      {/* Loading Screen */}
-      {(loading || loadingSave) && <LoadingOverlay />}
-
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Edit Process</h1>
-          <p className="text-gray-600 mt-1">Process ID: {id}</p>
-        </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" onClick={() => router.push("/process")}>
-            Cancel
-          </Button>
-          <Button onClick={saveProcess} disabled={loadingSave}>
-            {loadingSave ? "Updating..." : "Update Process"}
-          </Button>
-        </div>
-      </div>
-
-      {/* Notification */}
-      {notification.show && (
-        <Alert
-          className={`mb-6 ${
-            notification.type === "error"
-              ? "bg-red-50 border-red-200"
-              : "bg-green-50 border-green-200"
-          }`}
-        >
-          <AlertDescription
-            className={
-              notification.type === "error" ? "text-red-700" : "text-green-700"
-            }
-          >
-            {notification.message}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Main Process Card */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Process Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Process Name
-              </label>
-              <Input
-                value={processName}
-                onChange={(e) => setProcessName(e.target.value)}
-                placeholder="Enter process name"
-                className="w-full"
-              />
-            </div>
+      <div className="container mx-auto p-6 max-w-7xl">
+        {/* Loading Screen */}
+        {(loading || loadingSave) && <LoadingOverlay />}
+  
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Edit Process</h1>
+            <p className="text-gray-600 mt-1">Process ID: {id}</p>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Draggable Subprocess Cards */}
-      <DndContext
-        sensors={subprocessSensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleSubprocessDragEnd}
-      >
-        <SortableContext
-          items={subprocesses.map((subprocess) => subprocess.id)}
-          strategy={verticalListSortingStrategy}
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => router.push("/process")}>
+              Cancel
+            </Button>
+            <Button onClick={saveProcess} disabled={loadingSave}>
+              {loadingSave ? "Updating..." : "Update Process"}
+            </Button>
+          </div>
+        </div>
+  
+        {/* Notification */}
+        {notification.show && (
+          <Alert
+            className={`mb-6 ${
+              notification.type === "error"
+                ? "bg-red-50 border-red-200"
+                : "bg-green-50 border-green-200"
+            }`}
+          >
+            <AlertDescription
+              className={
+                notification.type === "error" ? "text-red-700" : "text-green-700"
+              }
+            >
+              {notification.message}
+            </AlertDescription>
+          </Alert>
+        )}
+  
+        {/* Main Process Card */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Process Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Process Name
+                </label>
+                <Input
+                  value={processName}
+                  onChange={(e) => setProcessName(e.target.value)}
+                  placeholder="Enter process name"
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+  
+        {/* Draggable Subprocess Cards */}
+        <DndContext
+          sensors={subprocessSensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleSubprocessDragEnd}
         >
-          {subprocesses.map((subprocess) => (
-            <DraggableSubprocessCard
-              key={subprocess.id}
-              subprocess={subprocess}
-              connections={connections}
-              updateSubprocessName={updateSubprocessName}
-              deleteSubprocess={deleteSubprocess}
-              addStep={addStep}
-              updateStep={updateStep}
-              deleteStep={deleteStep}
-              updateSubprocessSteps={updateSubprocessSteps}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
-
-      <Button onClick={addSubprocess} className="w-full" variant="outline">
-        <Plus className="mr-2 h-4 w-4" /> Add Subprocess
-      </Button>
-    </div>
-  );
+          <SortableContext
+            items={subprocesses
+              .filter((subprocess) => !subprocess.is_deleted)
+              .map((subprocess) => subprocess.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {subprocesses
+              .filter((subprocess) => !subprocess.is_deleted)
+              .map((subprocess) => (
+                <DraggableSubprocessCard
+                  key={subprocess.id}
+                  subprocess={subprocess}
+                  connections={connections}
+                  updateSubprocessName={updateSubprocessName}
+                  deleteSubprocess={deleteSubprocess}
+                  addStep={addStep}
+                  updateStep={updateStep}
+                  deleteStep={deleteStep}
+                  updateSubprocessSteps={updateSubprocessSteps}
+                />
+              ))}
+          </SortableContext>
+        </DndContext>
+  
+        <Button onClick={addSubprocess} className="w-full" variant="outline">
+          <Plus className="mr-2 h-4 w-4" /> Add Subprocess
+        </Button>
+      </div>
+    );
 }
 
 function DraggableSubprocessCard({

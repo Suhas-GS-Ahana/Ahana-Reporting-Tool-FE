@@ -350,16 +350,20 @@ export default function EditProcess() {
   };
 
   // Step Management Functions
+  // Also update the addStep function to count only active steps
   const addStep = (subprocessId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
     );
     if (subprocessIndex !== -1) {
-      const newSteps = [...subprocesses[subprocessIndex].steps];
+      const currentSteps = subprocesses[subprocessIndex].steps;
+      const activeSteps = currentSteps.filter((step) => !step.is_deleted);
+
+      const newSteps = [...currentSteps];
       newSteps.push({
         id: Date.now(),
         process_step_id: null, // New step, no existing ID
-        step_no: newSteps.length + 1,
+        step_no: activeSteps.length + 1,
         step_type: "",
         connection_id: "",
         destination_connection_id: "",
@@ -373,6 +377,7 @@ export default function EditProcess() {
         source_details: null,
         destination_details: null,
         create_table: [],
+        is_deleted: false,
       });
 
       const updatedSubprocesses = [...subprocesses];
@@ -404,21 +409,39 @@ export default function EditProcess() {
     }
   };
 
+  // Modified deleteStep function for soft deletion
   const deleteStep = (subprocessId, stepId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
     );
     if (subprocessIndex !== -1) {
-      const updatedSteps = subprocesses[subprocessIndex].steps.filter(
-        (step) => step.id !== stepId
+      // Mark the step as deleted (soft delete)
+      const updatedSteps = subprocesses[subprocessIndex].steps.map((step) =>
+        step.id === stepId ? { ...step, is_deleted: true } : step
       );
-      const renamedSteps = updatedSteps.map((step, index) => ({
-        ...step,
-        step_no: index + 1,
-      }));
+
+      // Filter out deleted steps for renumbering
+      const activeSteps = updatedSteps.filter((step) => !step.is_deleted);
+
+      // Renumber only the active (non-deleted) steps
+      const renumberedSteps = updatedSteps.map((step) => {
+        if (step.is_deleted) {
+          return step; // Keep deleted step as is
+        }
+
+        // Find the index among active steps only
+        const activeIndex = activeSteps.findIndex(
+          (activeStep) => activeStep.id === step.id
+        );
+
+        return {
+          ...step,
+          step_no: activeIndex + 1,
+        };
+      });
 
       const updatedSubprocesses = [...subprocesses];
-      updatedSubprocesses[subprocessIndex].steps = renamedSteps;
+      updatedSubprocesses[subprocessIndex].steps = renumberedSteps;
       setSubprocesses(updatedSubprocesses);
     }
   };
@@ -1030,19 +1053,23 @@ function DraggableSubprocessCard({
               onDragEnd={handleStepDragEnd}
             >
               <SortableContext
-                items={subprocess.steps.map((step) => step.id)}
+                items={subprocess.steps
+                  .filter((step) => !step.is_deleted)
+                  .map((step) => step.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {subprocess.steps.map((step) => (
-                  <DraggableStepCard
-                    key={step.id}
-                    step={step}
-                    subprocessId={subprocess.id}
-                    connections={connections}
-                    updateStep={updateStep}
-                    deleteStep={deleteStep}
-                  />
-                ))}
+                {subprocess.steps
+                  .filter((step) => !step.is_deleted)
+                  .map((step) => (
+                    <DraggableStepCard
+                      key={step.id}
+                      step={step}
+                      subprocessId={subprocess.id}
+                      connections={connections}
+                      updateStep={updateStep}
+                      deleteStep={deleteStep}
+                    />
+                  ))}
               </SortableContext>
             </DndContext>
           </div>
@@ -2061,23 +2088,6 @@ function ExportStepContent({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
