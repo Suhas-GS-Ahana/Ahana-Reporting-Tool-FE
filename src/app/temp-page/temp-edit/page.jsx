@@ -47,10 +47,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import  {useSortable}  from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // API Setup
 const host = process.env.NEXT_PUBLIC_API_HOST;
@@ -67,21 +67,24 @@ const LoadingOverlay = () => (
   </div>
 );
 
-// This component allows users to: Create a new process with a name, Add multiple subprocesses to the process,
-// Add multiple steps to each subprocess, Configure each step with different types and properties,
-// Save the entire process structure to an API endpoint (/process-hierarchy)
-export default function CreateProcess() {
+export default function EditProcess() {
   const router = useRouter();
-  const [processName, setProcessName] = useState(""); //Stores the name of the overall process
-  const [subprocesses, setSubprocesses] = useState([]); //An array that contains all subprocess objects
-  const [loading, setLoading] = useState(false); //to handle loading state while API calls
-  const [loadingSave, setLoadingSave] = useState(false); //to handle loading state while saving the process
-  const [connections, setConnections] = useState([]); //An array of objects to store the connections (data sources)
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
+  const [processName, setProcessName] = useState("");
+  const [processMasterId, setProcessMasterId] = useState(null);
+  const [subprocesses, setSubprocesses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [connections, setConnections] = useState([]);
   const [notification, setNotification] = useState({
     show: false,
     message: "",
     type: "",
-  }); // for displaying notification msgs
+  });
+  const [mockData, setMockData] = useState(null);
 
   const { toast } = useToast();
 
@@ -92,11 +95,6 @@ export default function CreateProcess() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
-  // run fetchConnections on load
-  useEffect(() => {
-    fetchConnections();
-  }, []);
 
   //to fetch all available connections (/connection)
   const fetchConnections = async () => {
@@ -119,20 +117,171 @@ export default function CreateProcess() {
     }
   };
 
-  //Subprocess Management - addSubprocess, updateSubprocessName, deleteSubprocess
+  //
+  const fetchConnectionDetails = async (connectionId, baseURL) => {
+    if (!connectionId) return null;
 
-  // Function to add a new subprocess
+    try {
+      const response = await fetch(
+        `${baseURL}/connection-view?conn_id=${connectionId}`
+      );
+      if (!response.ok) {
+        console.error(
+          `Failed to fetch connection details for ID: ${connectionId}`
+        );
+        return null;
+      }
+      const { data } = await response.json();
+      return {
+        connection_name: data.connection_name || "",
+        server_name: data.server_name || "",
+        port_number: data.port_number || "",
+        database_type: data.database_type || "",
+        database_name: data.database_name || "",
+        username: data.username || "",
+      };
+    } catch (error) {
+      console.error(
+        `Error fetching connection details for ID ${connectionId}:`,
+        error
+      );
+      return null;
+    }
+  };
+
+  // load the data
+  const loadMockData = async () => {
+    setLoadingData(true);
+
+    // Simulate loading delay
+    setTimeout(async () => {
+      try {
+        const processData = mockData;
+
+        // Set process details
+        setProcessName(processData.process.process_name);
+        setProcessMasterId(processData.process.process_master_id);
+
+        // Transform and set subprocesses data with connection details
+        const transformedSubprocesses = await Promise.all(
+          processData.subprocesses.map(async (sp, spIndex) => ({
+            id: Date.now() + spIndex,
+            sub_process_id: sp.subprocess_data.sub_process_id,
+            subprocess_no: sp.subprocess_data.sub_process_order,
+            subprocess_name: sp.subprocess_data.sub_process_name,
+            is_deleted: sp.subprocess_data.is_deleted,
+            steps: await Promise.all(
+              sp.steps.map(async (step, stepIndex) => {
+                const sourceConnectionId =
+                  step.steps.source_conn_id?.toString();
+                const destConnectionId = step.steps.dest_conn_id?.toString();
+
+                // Fetch connection details in parallel
+                const [sourceDetails, destinationDetails] = await Promise.all([
+                  fetchConnectionDetails(sourceConnectionId, baseURL),
+                  fetchConnectionDetails(destConnectionId, baseURL),
+                ]);
+
+                return {
+                  id: Date.now() + stepIndex,
+                  process_step_id: step.steps.process_step_id,
+                  step_no: step.steps.process_step_order,
+                  step_type: step.steps.process_step_action,
+                  connection_id: sourceConnectionId || "",
+                  destination_connection_id: destConnectionId || "",
+                  source_tables: [],
+                  destination_tables: [],
+                  selected_tables: [],
+                  pq_description: step.steps.process_step_description || "",
+                  pq_query: step.steps.process_step_query || [],
+                  ex_description: step.steps.process_step_description || "",
+                  ex_query: step.steps.process_step_query || [],
+                  source_details: sourceDetails,
+                  destination_details: destinationDetails,
+                  create_table:
+                    step.table_config?.map(([first, second]) => ({
+                      table_name: first.table_name,
+                      source_schema_name: first.schema_name,
+                      dest_schema_name: second.schema_name,
+                      is_table_exist: true,
+                    })) || [],
+                  is_deleted: step.steps.is_deleted,
+                };
+              })
+            ),
+          }))
+        );
+
+        setSubprocesses(transformedSubprocesses);
+        // setConnections(mockConnections);
+      } catch (error) {
+        console.error("Error loading mock data:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load process data",
+        });
+      } finally {
+        setLoadingData(false);
+      }
+    }, 500); // Simulate 500ms loading time
+  };
+
+  const fetchHierarchyData = async () => {
+    try {
+      setLoadingData(true);
+      const response = await fetch(`${baseURL}/get-full-hierarchy/${id}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Store data in mockData state
+      setMockData(data);
+    } catch (err) {
+      console.error("Error fetching hierarchy data:", err);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConnections();
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      fetchHierarchyData();
+    }
+  }, [id, baseURL]);
+
+  // Call loadMockData after mockData is set
+  useEffect(() => {
+    if (mockData) {
+      loadMockData();
+    }
+  }, [mockData]);
+
+  // Subprocess Management Functions
+  // Also update the addSubprocess function to count only active subprocesses
   const addSubprocess = () => {
+    const activeSubprocesses = subprocesses.filter(
+      (subprocess) => !subprocess.is_deleted
+    );
+
     const newSubprocess = {
       id: Date.now(),
-      subprocess_no: subprocesses.length + 1,
+      sub_process_id: null, // New subprocess, no existing ID
+      subprocess_no: activeSubprocesses.length + 1,
       subprocess_name: "",
+      is_deleted: false,
       steps: [],
     };
     setSubprocesses([...subprocesses, newSubprocess]);
   };
 
-  // Function to update subprocess name
   const updateSubprocessName = (subprocessId, name) => {
     setSubprocesses(
       subprocesses.map((subprocess) =>
@@ -143,41 +292,64 @@ export default function CreateProcess() {
     );
   };
 
-  // Function to delete subprocess
+  // Modified deleteSubprocess function for soft deletion
   const deleteSubprocess = (subprocessId) => {
-    const updatedSubprocesses = subprocesses.filter((subprocess) => subprocess.id !== subprocessId);
-    // Update subprocess numbers after deletion
-    const renumberedSubprocesses = updatedSubprocesses.map((subprocess, index) => ({
-      ...subprocess,
-      subprocess_no: index + 1,
-    }));
+    // Mark the subprocess as deleted (soft delete)
+    const updatedSubprocesses = subprocesses.map((subprocess) =>
+      subprocess.id === subprocessId
+        ? { ...subprocess, is_deleted: true }
+        : subprocess
+    );
+
+    // Filter out deleted subprocesses for renumbering
+    const activeSubprocesses = updatedSubprocesses.filter(
+      (subprocess) => !subprocess.is_deleted
+    );
+
+    // Renumber only the active (non-deleted) subprocesses
+    const renumberedSubprocesses = updatedSubprocesses.map((subprocess) => {
+      if (subprocess.is_deleted) {
+        return subprocess; // Keep deleted subprocess as is
+      }
+
+      // Find the index among active subprocesses only
+      const activeIndex = activeSubprocesses.findIndex(
+        (activeSubprocess) => activeSubprocess.id === subprocess.id
+      );
+
+      return {
+        ...subprocess,
+        subprocess_no: activeIndex + 1,
+      };
+    });
+
     setSubprocesses(renumberedSubprocesses);
   };
 
-  // Function to handle subprocess drag end
   const handleSubprocessDragEnd = (event) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = subprocesses.findIndex(subprocess => subprocess.id === active.id);
-      const newIndex = subprocesses.findIndex(subprocess => subprocess.id === over.id);
-      
-      // Reorder the subprocesses array
+      const oldIndex = subprocesses.findIndex(
+        (subprocess) => subprocess.id === active.id
+      );
+      const newIndex = subprocesses.findIndex(
+        (subprocess) => subprocess.id === over.id
+      );
+
       const reorderedSubprocesses = arrayMove(subprocesses, oldIndex, newIndex);
-      
-      // Update subprocess numbers based on new positions
-      const updatedSubprocesses = reorderedSubprocesses.map((subprocess, index) => ({
-        ...subprocess,
-        subprocess_no: index + 1
-      }));
+      const updatedSubprocesses = reorderedSubprocesses.map(
+        (subprocess, index) => ({
+          ...subprocess,
+          subprocess_no: index + 1,
+        })
+      );
 
       setSubprocesses(updatedSubprocesses);
     }
   };
 
-  // Step Management - addStep, updateStep, deleteStep
-
-  // Function to add a step to a subprocess
+  // Step Management Functions
   const addStep = (subprocessId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
@@ -186,6 +358,7 @@ export default function CreateProcess() {
       const newSteps = [...subprocesses[subprocessIndex].steps];
       newSteps.push({
         id: Date.now(),
+        process_step_id: null, // New step, no existing ID
         step_no: newSteps.length + 1,
         step_type: "",
         connection_id: "",
@@ -219,7 +392,6 @@ export default function CreateProcess() {
       if (stepIndex !== -1) {
         const updatedSubprocesses = [...subprocesses];
 
-        // Special handling for pq_query to ensure it's always an array
         if (field === "pq_query") {
           updatedSubprocesses[subprocessIndex].steps[stepIndex][field] =
             Array.isArray(value) ? value : [value];
@@ -232,7 +404,6 @@ export default function CreateProcess() {
     }
   };
 
-  // Function to delete a step
   const deleteStep = (subprocessId, stepId) => {
     const subprocessIndex = subprocesses.findIndex(
       (sp) => sp.id === subprocessId
@@ -252,7 +423,6 @@ export default function CreateProcess() {
     }
   };
 
-  // Function to update entire subprocess steps array (for drag and drop reordering)
   const updateSubprocessSteps = (subprocessId, newSteps) => {
     setSubprocesses(
       subprocesses.map((subprocess) =>
@@ -263,14 +433,13 @@ export default function CreateProcess() {
     );
   };
 
-  // Helper function to get connection details by ID
   const getConnectionDetails = (connectionId) => {
     return connections.find(
       (conn) => conn.data_sources_id.toString() === connectionId.toString()
     );
   };
 
-  // Function to save the entire process
+  // Save/Update Process Function (Mock implementation)
   const saveProcess = async () => {
     // Validates that a process name is provided
     if (!processName.trim()) {
@@ -282,24 +451,17 @@ export default function CreateProcess() {
       return;
     }
 
-    // Validates if atleast one subprocess is there and it should have 
-    if (!processName.trim()) {
-      setNotification({
-        show: true,
-        message: "Please enter a process name",
-        type: "default",
-      });
-      return;
-    }
-
-  
     //begin-------------------------------------------------------------------------------
 
     // Helper function to fetch column details for a table
-    const fetchColumnDetails = async (connectionId, schemaName, tableName) => {
+    const fetchColumnDetails = async (
+      connectionId,
+      source_schema_name,
+      tableName
+    ) => {
       try {
         const response = await fetch(
-          `${baseURL}/connection-columns?conn_id=${connectionId}&schema_name=${schemaName}&table_name=${tableName}`
+          `${baseURL}/connection-columns?conn_id=${connectionId}&schema_name=${source_schema_name}&table_name=${tableName}`
         );
         const result = await response.json();
 
@@ -338,15 +500,15 @@ export default function CreateProcess() {
     ) => {
       const tableMappings = await Promise.all(
         createTableData.map(
-          async ({ schema_name, table_name, dest_schema_name }) => {
+          async ({ source_schema_name, table_name, dest_schema_name }) => {
             // Fetch source columns
             const sourceColumns = await fetchColumnDetails(
               sourceConnectionId,
-              schema_name,
+              source_schema_name,
               table_name
             );
 
-            // Fetch destination columns (only if table exists)
+            // Fetch destination csolumns (only if table exists)
             const destColumns = await fetchColumnDetails(
               destinationConnectionId,
               dest_schema_name,
@@ -370,7 +532,7 @@ export default function CreateProcess() {
                 p_modified_by: 1,
                 p_source_conn_id: Number(sourceConnectionId),
                 p_source_db: sourceConnectionDetails.database_name,
-                p_source_schema: schema_name,
+                p_source_schema: source_schema_name,
                 p_source_table: table_name,
                 p_source_column: sourceCol.p_column_name,
                 p_source_data_type: sourceCol.p_datatype,
@@ -397,17 +559,37 @@ export default function CreateProcess() {
     };
 
     // Main function to format data
-    const formatDataWithConfigDetails = async (processName, subprocesses) => {
+    const formatDataWithConfigDetails = async (
+      processName,
+      subprocesses,
+      processMasterId
+    ) => {
       const formattedSubprocesses = await Promise.all(
-        subprocesses.map(async (sp) => ({
-          subprocess_data: {
-            p_inserted_by: 1,
-            p_modified_by: 1,
-            p_sub_process_order: sp.subprocess_no,
-            p_sub_process_name: sp.subprocess_name,
-          },
-          steps: await Promise.all(
+        subprocesses.map(async (sp) => {
+          // If subprocess is deleted, return only minimal data
+          if (sp.is_deleted === true) {
+            return {
+              subprocess_data: {
+                p_sub_process_id: sp.sub_process_id,
+                p_is_deleted: sp.is_deleted,
+              },
+            };
+          }
+
+          // If subprocess is not deleted, process steps
+          const processedSteps = await Promise.all(
             sp.steps.map(async (step) => {
+              // If step is deleted, return only minimal data
+              if (step.is_deleted === true) {
+                return {
+                  steps: {
+                    p_process_step_id: step.process_step_id,
+                    p_is_deleted: step.is_deleted,
+                  },
+                };
+              }
+
+              // Process non-deleted steps normally
               if (step.step_type === "import") {
                 // Use create_table data which contains the complete mapping info
                 const createTableData = step.create_table || [];
@@ -415,17 +597,21 @@ export default function CreateProcess() {
                 // Fetch column details for each table - create pairs for source and destination
                 const tableConfigDetails = await Promise.all(
                   createTableData.map(
-                    async ({ schema_name, table_name, dest_schema_name }) => [
+                    async ({
+                      source_schema_name,
+                      table_name,
+                      dest_schema_name,
+                    }) => [
                       // First entry for source table
                       await fetchColumnDetails(
                         step.connection_id,
-                        schema_name,
+                        source_schema_name,
                         table_name
                       ),
                       // Second entry for destination table (or same source table if needed)
                       await fetchColumnDetails(
                         step.connection_id,
-                        schema_name,
+                        source_schema_name,
                         table_name
                       ),
                     ]
@@ -445,33 +631,37 @@ export default function CreateProcess() {
                   steps: {
                     p_inserted_by: 1,
                     p_modified_by: 1,
+                    p_process_step_id: step.process_step_id,
+                    p_process_master_id: processMasterId,
+                    p_sub_process_id: sp.sub_process_id,
                     p_process_step_order: step.step_no,
                     p_process_step_action: step.step_type,
                     p_source_conn_id: Number(step.connection_id),
                     p_dest_conn_id: Number(step.destination_connection_id),
+                    p_is_deleted: step.is_deleted,
                   },
                   create_table: createTableData.map(
                     ({
-                      schema_name,
+                      source_schema_name,
                       table_name,
                       dest_schema_name,
                       is_table_exist,
                     }) => ({
                       table_name: table_name,
-                      source_schema_name: schema_name,
+                      source_schema_name: source_schema_name,
                       dest_schema_name: dest_schema_name,
                       is_table_exist: is_table_exist,
                     })
                   ),
                   table_config: createTableData.map(
-                    ({ schema_name, table_name, dest_schema_name }) => [
+                    ({ source_schema_name, table_name, dest_schema_name }) => [
                       // Source table config
                       {
                         p_inserted_by: 1,
                         p_modified_by: 1,
                         p_connection_name: step.source_details.connection_name,
                         p_database_name: step.source_details.database_name,
-                        p_schema_name: schema_name,
+                        p_schema_name: source_schema_name,
                         p_table_name: table_name,
                         p_is_temp_table: false,
                         p_table_type: "source",
@@ -502,11 +692,15 @@ export default function CreateProcess() {
                   steps: {
                     p_inserted_by: 1,
                     p_modified_by: 1,
+                    p_process_step_id: step.process_step_id,
+                    p_process_master_id: processMasterId,
+                    p_sub_process_id: sp.sub_process_id,
                     p_process_step_order: step.step_no,
                     p_process_step_action: "process-query",
                     p_process_step_description: step.pq_description,
                     p_process_step_query: step.pq_query,
                     p_source_conn_id: Number(step.connection_id),
+                    p_is_deleted: step.is_deleted,
                   },
                   create_table: [],
                   table_config: [],
@@ -519,11 +713,15 @@ export default function CreateProcess() {
                   steps: {
                     p_inserted_by: 1,
                     p_modified_by: 1,
+                    p_process_step_id: step.process_step_id,
+                    p_process_master_id: processMasterId,
+                    p_sub_process_id: sp.sub_process_id,
                     p_process_step_order: step.step_no,
                     p_process_step_action: "export",
                     p_process_step_description: step.ex_description,
                     p_process_step_query: step.ex_query,
                     p_source_conn_id: Number(step.connection_id),
+                    p_is_deleted: step.is_deleted,
                   },
                   create_table: [],
                   table_config: [],
@@ -532,14 +730,28 @@ export default function CreateProcess() {
                 };
               }
             })
-          ),
-        }))
+          );
+
+          return {
+            subprocess_data: {
+              p_inserted_by: 1,
+              p_modified_by: 1,
+              p_process_master_id: processMasterId,
+              p_sub_process_id: sp.sub_process_id,
+              p_sub_process_order: sp.subprocess_no,
+              p_sub_process_name: sp.subprocess_name,
+              p_is_deleted: sp.is_deleted,
+            },
+            steps: processedSteps,
+          };
+        })
       );
 
       return {
         process: {
           p_inserted_by: 1,
           p_modified_by: 1,
+          p_process_master_id: processMasterId,
           p_process_name: processName,
           p_process_version: 1,
           p_rerun: true,
@@ -551,21 +763,16 @@ export default function CreateProcess() {
     // Usage - simplified parameters since step data now contains all needed info
     const formattedData = await formatDataWithConfigDetails(
       processName,
-      subprocesses
+      subprocesses,
+      processMasterId
     );
 
     const formattedData2 = {
-      process:processName,
-      subprocess:subprocesses
-    }
+      process: processName,
+      subprocess: subprocesses,
+    };
     console.log(formattedData2);
     console.log(formattedData);
-
-    // setNotification({
-    //     show: true,
-    //     message: JSON.stringify(formattedData),
-    //     type: "default",
-    //   });
 
     //end---------------------------------------------------------------------------------
 
@@ -613,17 +820,32 @@ export default function CreateProcess() {
     }
   };
 
+  // Show loading screen while loading initial data
+  if (loadingData) {
+    return <LoadingOverlay />;
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       {/* Loading Screen */}
-      {loading && <LoadingOverlay />}
-      {/* Header - function called - saveProcess */}
+      {(loading || loadingSave) && <LoadingOverlay />}
+
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Create New Process</h1>
-        <Button onClick={saveProcess} disabled={loading}>
-          {loading ? "Saving..." : "Save Process"}
-        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Edit Process</h1>
+          <p className="text-gray-600 mt-1">Process ID: {id}</p>
+        </div>
+        <div className="flex space-x-3">
+          <Button variant="outline" onClick={() => router.push("/process")}>
+            Cancel
+          </Button>
+          <Button onClick={saveProcess} disabled={loadingSave}>
+            {loadingSave ? "Updating..." : "Update Process"}
+          </Button>
+        </div>
       </div>
+
       {/* Notification */}
       {notification.show && (
         <Alert
@@ -642,7 +864,8 @@ export default function CreateProcess() {
           </AlertDescription>
         </Alert>
       )}
-      {/* Main Process Card - function called - addSubprocess */}
+
+      {/* Main Process Card */}
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Process Details</CardTitle>
@@ -662,11 +885,6 @@ export default function CreateProcess() {
             </div>
           </div>
         </CardContent>
-        {/* <CardFooter>
-          <Button onClick={addSubprocess} className="w-full" variant="outline">
-            <Plus className="mr-2 h-4 w-4" /> Add Subprocess
-          </Button>
-        </CardFooter> */}
       </Card>
 
       {/* Draggable Subprocess Cards */}
@@ -676,28 +894,32 @@ export default function CreateProcess() {
         onDragEnd={handleSubprocessDragEnd}
       >
         <SortableContext
-          items={subprocesses.map(subprocess => subprocess.id)}
+          items={subprocesses
+            .filter((subprocess) => !subprocess.is_deleted)
+            .map((subprocess) => subprocess.id)}
           strategy={verticalListSortingStrategy}
         >
-          {subprocesses.map((subprocess) => (
-            <DraggableSubprocessCard
-              key={subprocess.id}
-              subprocess={subprocess}
-              connections={connections}
-              updateSubprocessName={updateSubprocessName}
-              deleteSubprocess={deleteSubprocess}
-              addStep={addStep}
-              updateStep={updateStep}
-              deleteStep={deleteStep}
-              updateSubprocessSteps={updateSubprocessSteps}
-            />
-          ))}
+          {subprocesses
+            .filter((subprocess) => !subprocess.is_deleted)
+            .map((subprocess) => (
+              <DraggableSubprocessCard
+                key={subprocess.id}
+                subprocess={subprocess}
+                connections={connections}
+                updateSubprocessName={updateSubprocessName}
+                deleteSubprocess={deleteSubprocess}
+                addStep={addStep}
+                updateStep={updateStep}
+                deleteStep={deleteStep}
+                updateSubprocessSteps={updateSubprocessSteps}
+              />
+            ))}
         </SortableContext>
       </DndContext>
 
       <Button onClick={addSubprocess} className="w-full" variant="outline">
-            <Plus className="mr-2 h-4 w-4" /> Add Subprocess
-          </Button>
+        <Plus className="mr-2 h-4 w-4" /> Add Subprocess
+      </Button>
     </div>
   );
 }
@@ -740,16 +962,20 @@ function DraggableSubprocessCard({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = subprocess.steps.findIndex(step => step.id === active.id);
-      const newIndex = subprocess.steps.findIndex(step => step.id === over.id);
-      
+      const oldIndex = subprocess.steps.findIndex(
+        (step) => step.id === active.id
+      );
+      const newIndex = subprocess.steps.findIndex(
+        (step) => step.id === over.id
+      );
+
       // Reorder the steps array
       const reorderedSteps = arrayMove(subprocess.steps, oldIndex, newIndex);
-      
+
       // Update step numbers based on new positions
       const updatedSteps = reorderedSteps.map((step, index) => ({
         ...step,
-        step_no: index + 1
+        step_no: index + 1,
       }));
 
       // Update the subprocess with new step order
@@ -759,7 +985,7 @@ function DraggableSubprocessCard({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`mb-6 ${isDragging ? 'shadow-lg' : ''}`}>
+      <Card className={`mb-6 ${isDragging ? "shadow-lg" : ""}`}>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2 flex-1 mr-4">
@@ -804,7 +1030,7 @@ function DraggableSubprocessCard({
               onDragEnd={handleStepDragEnd}
             >
               <SortableContext
-                items={subprocess.steps.map(step => step.id)}
+                items={subprocess.steps.map((step) => step.id)}
                 strategy={verticalListSortingStrategy}
               >
                 {subprocess.steps.map((step) => (
@@ -837,7 +1063,13 @@ function DraggableSubprocessCard({
 }
 
 // New Draggable StepCard component
-function DraggableStepCard({ step, subprocessId, connections, updateStep, deleteStep }) {
+function DraggableStepCard({
+  step,
+  subprocessId,
+  connections,
+  updateStep,
+  deleteStep,
+}) {
   const {
     attributes,
     listeners,
@@ -855,7 +1087,9 @@ function DraggableStepCard({ step, subprocessId, connections, updateStep, delete
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`border border-gray-200 ${isDragging ? 'shadow-lg' : ''}`}>
+      <Card
+        className={`border border-gray-200 ${isDragging ? "shadow-lg" : ""}`}
+      >
         <CardHeader className="pb-2 bg-gray-50">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
@@ -877,6 +1111,7 @@ function DraggableStepCard({ step, subprocessId, connections, updateStep, delete
                 onValueChange={(value) =>
                   updateStep(subprocessId, step.id, "step_type", value)
                 }
+                disabled={step.process_step_id != null}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select" />
@@ -1118,7 +1353,7 @@ function ImportStepContent({
     if (step.selected_tables && step.selected_tables.length > 0) {
       const createTableData = step.selected_tables.map((selectedTable) => ({
         table_name: selectedTable.table_name,
-        schema_name: selectedTable.schema_name,
+        source_schema_name: selectedTable.schema_name,
         dest_schema_name: selectedDestinationSchema,
         is_table_exist: step.destination_tables.includes(
           selectedTable.table_name
@@ -1219,7 +1454,7 @@ function ImportStepContent({
                 <Select
                   value={step.connection_id}
                   onValueChange={handleSourceConnectionChange}
-                  disabled={hasSelectedTables}
+                  disabled={hasSelectedTables || step.process_step_id != null}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select source connection" />
@@ -1278,7 +1513,11 @@ function ImportStepContent({
                 <Select
                   value={selectedSourceSchema}
                   onValueChange={handleSourceSchemaChange}
-                  disabled={!step.connection_id || loading}
+                  disabled={
+                    !step.connection_id ||
+                    loading ||
+                    step.process_step_id != null
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select schema" />
@@ -1374,7 +1613,7 @@ function ImportStepContent({
                 <Select
                   value={step.destination_connection_id}
                   onValueChange={handleDestinationConnectionChange}
-                  disabled={hasSelectedTables}
+                  disabled={hasSelectedTables || step.process_step_id != null}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select destination connection" />
@@ -1435,7 +1674,8 @@ function ImportStepContent({
                   disabled={
                     !step.destination_connection_id ||
                     loading ||
-                    hasSelectedTables
+                    hasSelectedTables ||
+                    step.process_step_id != null
                   }
                 >
                   <SelectTrigger>
@@ -1460,33 +1700,37 @@ function ImportStepContent({
               </div>
 
               {/* Destination Tables Display */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Available Tables in Destination Schema
-                </label>
-                {destinationTables.length > 0 ? (
-                  <ScrollArea className="h-40 border rounded-md p-4">
-                    <div className="space-y-1">
-                      {destinationTables.map((table) => (
-                        <div
-                          key={table.table_name}
-                          className="text-sm text-gray-600"
-                        >
-                          {table.table_name}
-                        </div>
-                      ))}
+              {step.process_step_id != null ? (
+                <div>Skibdi</div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Available Tables in Destination Schema
+                  </label>
+                  {destinationTables.length > 0 ? (
+                    <ScrollArea className="h-40 border rounded-md p-4">
+                      <div className="space-y-1">
+                        {destinationTables.map((table) => (
+                          <div
+                            key={table.table_name}
+                            className="text-sm text-gray-600"
+                          >
+                            {table.table_name}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  ) : selectedDestinationSchema ? (
+                    <div className="py-3 px-4 bg-gray-100 rounded text-gray-600 text-sm">
+                      No tables exist in this destination schema
                     </div>
-                  </ScrollArea>
-                ) : selectedDestinationSchema ? (
-                  <div className="py-3 px-4 bg-gray-100 rounded text-gray-600 text-sm">
-                    No tables exist in this destination schema
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-500 italic">
-                    Select a destination schema to view available tables
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 italic">
+                      Select a destination schema to view available tables
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Selected Tables Display */}
               <div>
