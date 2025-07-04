@@ -43,6 +43,7 @@ import {
   PowerOff,
   Ban,
   XCircle,
+  CheckCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -150,24 +151,109 @@ export default function ProcessPage() {
 
   // Handle execute
   const handleExecute = (id) => {
-    router.push(`/process/execute/${id}`);
+    router.push(`/process/execute-process?id=${id}`);
   };
 
-  // Handle disable
-  const handleDisable = (id) =>{
-    const confirmed = window.confirm(`Are you sure you want to disable process ${id}`);
+  // Handle Deactivate
+  const handleDeactivate = async (id) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to disable process ${id}`
+    );
     if (confirmed) {
-      alert(`Process ${id} disabled`)
+      try {
+        const response = await fetch(
+          `${baseURL}/process-deactivate?process_id=${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.ok) {
+          alert(`Process ${id} deactivated`);
+          window.location.reload();
+        } else {
+          const errorData = await response.json();
+          alert(
+            `Failed to deactivate process: ${
+              errorData.message || "Unknown error"
+            }`
+          );
+        }
+      } catch (error) {
+        console.error("Error deactivating process:", error);
+        alert("An error occurred while deactivating the process");
+      }
+    }
+  };
+
+  // Handle Activate
+  const handleActivate = async (id) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to activate process ${id}`
+    );
+    if (confirmed) {
+      try {
+        const response = await fetch(
+          `${baseURL}/process-activate?process_id=${id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.ok) {
+          alert(`Process ${id} activated`);
+          window.location.reload();
+        } else {
+          const errorData = await response.json();
+          alert(
+            `Failed to activate process: ${
+              errorData.message || "Unknown error"
+            }`
+          );
+        }
+      } catch (error) {
+        console.error("Error activating process:", error);
+        alert("An error occurred while activating the process");
+      }
     }
   }
 
   // handle delete
-  const handleDelete = (id) => {
-    const confirmed = window.confirm(`Are you sure you want to delete process ${id}`);
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete process ${id}`
+    );
     if (confirmed) {
-      alert(`Process ${id} deleted`)
+      try {
+        const response = await fetch(`${baseURL}/process-hierarchy-upsert`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            process: {
+              p_process_master_id: id,
+              p_is_deleted: true,
+            },
+          }),
+        });
+
+        if (response.ok) {
+          alert(`Process ${id} deleted`);
+          window.location.reload();
+        } else {
+          alert("Failed to delete process");
+        }
+      } catch (error) {
+        console.error("Error deleting process:", error);
+        alert("An error occurred while deleting the process");
+      }
     }
-  }
+  };
 
   // Format date
   const formatDate = (dateString) => {
@@ -335,9 +421,7 @@ export default function ProcessPage() {
                             <TableCell>
                               {formatDate(process.modified_date)}
                             </TableCell>
-                            <TableCell>
-                              {process.process_master_id}
-                            </TableCell>
+                            <TableCell>{process.process_master_id}</TableCell>
                             <TableCell>
                               <span
                                 className={`px-2 py-1 rounded-full text-xs ${
@@ -355,33 +439,55 @@ export default function ProcessPage() {
                                   size="sm"
                                   variant="outline"
                                   className="h-8 px-2"
+                                  disabled={!process.is_active}
                                   onClick={() =>
                                     handleEdit(process.process_master_id)
                                   }
                                 >
                                   <Edit className="h-4 w-4 mr-1" /> Edit
                                 </Button>
+
                                 <Button
                                   size="sm"
                                   className="h-8 px-2 bg-blue-500 hover:bg-blue-600"
+                                  disabled={!process.is_active}
                                   onClick={() =>
                                     handleExecute(process.process_master_id)
                                   }
                                 >
                                   <Play className="h-4 w-4 mr-1" /> Execute
                                 </Button>
-                                <Button
-                                  size="sm"
-                                  className="h-8 px-2 bg-gray-500 hover:bg-gray-600"
-                                  onClick={() =>
-                                    handleDisable(process.process_master_id)
-                                  }
-                                >
-                                  <XCircle className="h-4 w-4 mr-1" /> Disable
-                                </Button>
+
+                                {process.is_active ? (
+                                  <Button
+                                    size="sm"
+                                    className="h-8 px-2 bg-gray-500 hover:bg-gray-600"
+                                    onClick={() =>
+                                      handleDeactivate(
+                                        process.process_master_id
+                                      )
+                                    }
+                                  >
+                                    <XCircle className="h-4 w-4 mr-1" />{" "}
+                                    Deactivate
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    className="h-8 px-2 bg-green-600 hover:bg-green-70"
+                                    onClick={() =>
+                                      handleActivate(process.process_master_id)
+                                    }
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-1" />{" "}
+                                    Activate
+                                  </Button>
+                                )}
+
                                 <Button
                                   size="sm"
                                   className="h-8 px-2 bg-red-500 hover:bg-red-600"
+                                  disabled={!process.is_active}
                                   onClick={() =>
                                     handleDelete(process.process_master_id)
                                   }
