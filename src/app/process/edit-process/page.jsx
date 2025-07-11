@@ -1728,7 +1728,7 @@ function ImportStepContent({
 
               {/* Destination Tables Display */}
               {step.process_step_id != null ? (
-                <div>Skibdi</div>
+                <div></div>
               ) : (
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -1760,7 +1760,7 @@ function ImportStepContent({
               )}
 
               {/* Selected Tables Display */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium mb-2">
                   Selected Tables for Import
                 </label>
@@ -1781,7 +1781,7 @@ function ImportStepContent({
                     Tables will appear here when selected from source
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>

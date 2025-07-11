@@ -2081,3 +2081,95 @@ const new1 = {
         }
     ]
 }
+
+
+
+// {baseURL}/get-full-hierarchy/14
+
+const a = {
+  "process": {
+    "process_master_id": 14,
+    "process_name": "Test Process 1",
+    "is_active": true,
+    "is_deleted": false,
+  },
+  "subprocesses": [
+    {
+      "subprocess_data": {
+        "sub_process_id": 87,
+        "process_master_id": 14,
+        "sub_process_order": 1,
+        "sub_process_name": "Sub1",
+        "is_active": true,
+        "is_deleted": false
+      },
+      "steps": [
+        {
+          "steps": {
+            "process_step_id": 342,
+            "process_master_id": 14,
+            "sub_process_id": 87,
+            "process_step_order": 1,
+            "process_step_action": "import",
+            "is_active": true,
+            "is_deleted": false,
+          },
+        },
+        {
+          "steps": {
+            "process_step_id": 343,
+            "process_master_id": 14,
+            "sub_process_id": 87,
+            "process_step_order": 2,
+            "process_step_action": "process-query",
+            "is_active": true,
+            "is_deleted": false,
+            "process_step_description": "fsadfasdf",
+          },
+        },
+        {
+          "steps": {
+            "process_step_id": 344,
+            "process_master_id": 14,
+            "sub_process_id": 87,
+            "process_step_order": 3,
+            "process_step_action": "export",
+            "is_active": true,
+            "is_deleted": false,
+            "process_step_description": "fsa sadf",
+          },
+        }
+      ]
+    }
+  ]
+}
+
+const b = {
+  "status": "success",
+  "message": "Process executed",
+  "summary": {
+    "subprocesses": [
+      {
+        "subprocess_id": 87,
+        "status": "completed",
+        "steps": [
+          {
+            "step_id": 342,
+            "status": "success",
+            "select_results": null
+          },
+          {
+            "step_id": 343,
+            "status": "success",
+            "select_results": null
+          },
+          {
+            "step_id": 344,
+            "status": "success",
+            "select_results": {"data":"some json data"}
+          }
+        ]
+      },
+    ]
+  }
+}

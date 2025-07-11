@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation';
 
 export default function TemPage() {
-    const id=13;
+    const id=14;
     const router = useRouter();
 
     const handleEdit = () => {
