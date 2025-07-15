@@ -31,9 +31,9 @@ export const sidebarItems = [
     href: "/process",
     icon: FileSliders,
   },
-  {
-    title: "Temp Page",
-    href: "/temp-page",
-    icon: CatIcon,
-  },
+  // {
+  //   title: "Temp Page",
+  //   href: "/temp-page",
+  //   icon: CatIcon,
+  // },
 ]

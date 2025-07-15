@@ -70,8 +70,8 @@ export default function ProcessPage() {
   const [itemsPerPage, setItemsPerPage] = useState(5); // Number of items per page
 
   // Sorting state
-  const [sortField, setSortField] = useState("process_name"); // Field to sort by
-  const [sortDirection, setSortDirection] = useState("asc"); // Sort direction (asc/desc)
+  const [sortField, setSortField] = useState("modified_date"); // Field to sort by
+  const [sortDirection, setSortDirection] = useState("desc"); // Sort direction (asc/desc)
 
   // Filter state
   const [searchTerm, setSearchTerm] = useState(""); // Search/filter text
