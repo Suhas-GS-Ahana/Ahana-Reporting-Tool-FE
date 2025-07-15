@@ -1,8 +1,18 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Play, ChevronDown, ChevronRight, CheckCircle, XCircle, Clock, Download, Eye, AlertCircle } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import {
+  Play,
+  ChevronDown,
+  ChevronRight,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Download,
+  Eye,
+  AlertCircle,
+} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const host = process.env.NEXT_PUBLIC_API_HOST;
 const port = process.env.NEXT_PUBLIC_API_PORT;
@@ -16,12 +26,9 @@ const ProcessExecutionUI = () => {
   const [selectedResult, setSelectedResult] = useState(null);
   const [showResultModal, setShowResultModal] = useState(false);
 
-  // API Configuration - Replace with your actual base URL
-
-
-//   const router = useRouter();
-      const searchParams = useSearchParams();
-      const processId = searchParams.get("id");
+  //   const router = useRouter();
+  const searchParams = useSearchParams();
+  const processId = searchParams.get("id");
 
   useEffect(() => {
     fetchProcessData();
@@ -29,74 +36,81 @@ const ProcessExecutionUI = () => {
 
   const fetchProcessData = async () => {
     try {
-      const response = await fetch(`${baseURL}/get-full-hierarchy/${processId}`);
-      
+      const response = await fetch(
+        `${baseURL}/get-full-hierarchy/${processId}`
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setProcessData(data);
-      
+
       // Expand all subprocesses by default
       const expanded = {};
-      data.subprocesses.forEach(subprocess => {
+      data.subprocesses.forEach((subprocess) => {
         expanded[subprocess.subprocess_data.sub_process_id] = true;
       });
       setExpandedSubprocesses(expanded);
     } catch (error) {
-      console.error('Error fetching process data:', error);
+      console.error("Error fetching process data:", error);
       // You might want to show an error message to the user here
-      alert('Failed to load process data. Please check your API configuration.');
+      alert(
+        "Failed to load process data. Please check your API configuration."
+      );
     }
   };
 
   const executeProcess = async () => {
     setIsExecuting(true);
     try {
-      const response = await fetch(`${baseURL}/execute-hierarchy?process_id=${processId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
+      const response = await fetch(
+        `${baseURL}/execute-hierarchy?process_id=${processId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setExecutionResult(data);
     } catch (error) {
-      console.error('Error executing process:', error);
+      console.error("Error executing process:", error);
       setExecutionResult({
-        status: 'error',
-        message: 'Process execution failed',
-        summary: { subprocesses: [] }
+        status: "error",
+        message: "Process execution failed",
+        summary: { subprocesses: [] },
       });
       // You might want to show an error message to the user here
-      alert('Failed to execute process. Please check your API configuration.');
+      alert("Failed to execute process. Please check your API configuration.");
     } finally {
       setIsExecuting(false);
     }
   };
 
   const toggleSubprocess = (subprocessId) => {
-    setExpandedSubprocesses(prev => ({
+    setExpandedSubprocesses((prev) => ({
       ...prev,
-      [subprocessId]: !prev[subprocessId]
+      [subprocessId]: !prev[subprocessId],
     }));
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'success':
-      case 'completed':
+      case "success":
+      case "completed":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'failed':
-      case 'error':
+      case "failed":
+      case "error":
         return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'running':
+      case "running":
         return <Clock className="w-4 h-4 text-blue-500 animate-spin" />;
       default:
         return <AlertCircle className="w-4 h-4 text-gray-400" />;
@@ -105,43 +119,152 @@ const ProcessExecutionUI = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'success':
-      case 'completed':
-        return 'text-green-600 bg-green-50';
-      case 'failed':
-      case 'error':
-        return 'text-red-600 bg-red-50';
-      case 'running':
-        return 'text-blue-600 bg-blue-50';
+      case "success":
+      case "completed":
+        return "text-green-600 bg-green-50";
+      case "failed":
+      case "error":
+        return "text-red-600 bg-red-50";
+      case "running":
+        return "text-blue-600 bg-blue-50";
       default:
-        return 'text-gray-600 bg-gray-50';
+        return "text-gray-600 bg-gray-50";
     }
   };
 
   const getStepStatus = (stepId) => {
     if (!executionResult) return null;
-    
+
     for (const subprocess of executionResult.summary.subprocesses) {
-      const step = subprocess.steps.find(s => s.step_id === stepId);
+      const step = subprocess.steps.find((s) => s.step_id === stepId);
       if (step) return step;
     }
     return null;
   };
 
-  const viewResults = (results) => {
-    setSelectedResult(results);
-    setShowResultModal(true);
-  };
+  // const viewResults = (results) => {
+  //   setSelectedResult(results);
+  //   setShowResultModal(true);
+  // };
 
-  const downloadResults = (results) => {
+  // const downloadResults = (results) => {
+  //   const dataStr = JSON.stringify(results, null, 2);
+  //   const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  //   const exportFileDefaultName = 'process_results.json';
+  //   const linkElement = document.createElement('a');
+  //   linkElement.setAttribute('href', dataUri);
+  //   linkElement.setAttribute('download', exportFileDefaultName);
+  //   linkElement.click();
+  // };
+
+ const viewResults = (results) => {
+  setSelectedResult(results);
+  setShowResultModal(true);
+};
+
+const downloadResults = (results) => {
+  // Check if results is an array of query results
+  if (Array.isArray(results)) {
+    let downloadCount = 0;
+    
+    results.forEach((result, index) => {
+      // Download Excel file if xlsx_base64 exists and is not empty
+      if (result.xlsx_base64 && result.xlsx_base64.trim() !== '') {
+        // Create a more descriptive filename from the query
+        const queryName = result.query
+          .replace(/select \* from /i, '')
+          .replace(/[^a-zA-Z0-9_]/g, '_')
+          .substring(0, 50); // Limit filename length
+        
+        const filename = `${queryName}_${result.rows_affected}_rows.xlsx`;
+        downloadExcelFile(result.xlsx_base64, filename);
+        downloadCount++;
+      }
+    });
+    
+    // Show notification about downloads
+    if (downloadCount > 0) {
+      setTimeout(() => {
+        alert(`${downloadCount} Excel file(s) downloaded successfully!`);
+      }, 100);
+    } else {
+      alert('No Excel data available for download.');
+    }
+    
+    // Also download JSON summary with delay to avoid browser blocking
+    setTimeout(() => {
+      const summaryData = results.map((result, index) => ({
+        query: result.query,
+        rows_affected: result.rows_affected,
+        has_excel_data: !!(result.xlsx_base64 && result.xlsx_base64.trim() !== '')
+      }));
+      
+      downloadJson(summaryData, 'query_results_summary.json');
+    }, 200);
+    
+  } else {
+    // Fallback for single result or different structure
     const dataStr = JSON.stringify(results, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
     const exportFileDefaultName = 'process_results.json';
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
-  };
+  }
+};
+
+const downloadExcelFile = (base64Data, filename) => {
+  try {
+    // Convert base64 to blob
+    const binaryString = atob(base64Data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    const blob = new Blob([bytes], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const linkElement = document.createElement('a');
+    linkElement.href = url;
+    linkElement.download = filename;
+    linkElement.click();
+    
+    // Clean up
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading Excel file:', error);
+    alert('Error downloading Excel file. Please try again.');
+  }
+};
+
+const downloadJson = (data, filename) => {
+  const dataStr = JSON.stringify(data, null, 2);
+  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', filename);
+  linkElement.click();
+};
+
+// Optional: Function to download individual query result
+const downloadSingleQueryResult = (queryResult, index) => {
+  if (queryResult.xlsx_base64 && queryResult.xlsx_base64.trim() !== '') {
+    downloadExcelFile(queryResult.xlsx_base64, `${queryResult.query.replace(/[^a-zA-Z0-9]/g, '_')}_results.xlsx`);
+  } else {
+    // Download as JSON if no Excel data
+    const jsonData = {
+      query: queryResult.query,
+      rows_affected: queryResult.rows_affected,
+      message: 'No Excel data available for this query'
+    };
+    downloadJson(jsonData, `query_${index + 1}_result.json`);
+  }
+};
 
   if (!processData) {
     return (
@@ -161,8 +284,10 @@ const ProcessExecutionUI = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{processData.process.process_name}</h1>
-              <p className="text-sm text-gray-500">Process ID: {processData.process.process_master_id}</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {processData.process.process_name}
+              </h1>
+              {/* <p className="text-sm text-gray-500">Process ID: {processData.process.process_master_id}</p> */}
             </div>
             <button
               onClick={executeProcess}
@@ -189,10 +314,16 @@ const ProcessExecutionUI = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Process Status */}
         {executionResult && (
-          <div className={`mb-6 p-4 rounded-lg ${getStatusColor(executionResult.status)}`}>
+          <div
+            className={`mb-6 p-4 rounded-lg ${getStatusColor(
+              executionResult.status
+            )}`}
+          >
             <div className="flex items-center">
               {getStatusIcon(executionResult.status)}
-              <span className="ml-2 font-medium">{executionResult.message}</span>
+              <span className="ml-2 font-medium">
+                {executionResult.message}
+              </span>
             </div>
           </div>
         )}
@@ -200,25 +331,41 @@ const ProcessExecutionUI = () => {
         {/* Process Hierarchy */}
         <div className="bg-white rounded-lg shadow">
           <div className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Process Hierarchy</h2>
-            
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Process Hierarchy
+            </h2>
+
             {processData.subprocesses.map((subprocess) => (
-              <div key={subprocess.subprocess_data.sub_process_id} className="mb-4 border rounded-lg">
-                <div 
+              <div
+                key={subprocess.subprocess_data.sub_process_id}
+                className="mb-4 border rounded-lg"
+              >
+                <div
                   className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100"
-                  onClick={() => toggleSubprocess(subprocess.subprocess_data.sub_process_id)}
+                  onClick={() =>
+                    toggleSubprocess(subprocess.subprocess_data.sub_process_id)
+                  }
                 >
                   <div className="flex items-center">
-                    {expandedSubprocesses[subprocess.subprocess_data.sub_process_id] ? 
-                      <ChevronDown className="w-4 h-4 mr-2" /> : 
+                    {expandedSubprocesses[
+                      subprocess.subprocess_data.sub_process_id
+                    ] ? (
+                      <ChevronDown className="w-4 h-4 mr-2" />
+                    ) : (
                       <ChevronRight className="w-4 h-4 mr-2" />
-                    }
+                    )}
                     <span className="font-medium text-gray-900">
                       {subprocess.subprocess_data.sub_process_name}
                     </span>
                     {executionResult && (
                       <span className="ml-4">
-                        {getStatusIcon(executionResult.summary.subprocesses.find(s => s.subprocess_id === subprocess.subprocess_data.sub_process_id)?.status)}
+                        {getStatusIcon(
+                          executionResult.summary.subprocesses.find(
+                            (s) =>
+                              s.subprocess_id ===
+                              subprocess.subprocess_data.sub_process_id
+                          )?.status
+                        )}
                       </span>
                     )}
                   </div>
@@ -227,12 +374,19 @@ const ProcessExecutionUI = () => {
                   </span>
                 </div>
 
-                {expandedSubprocesses[subprocess.subprocess_data.sub_process_id] && (
+                {expandedSubprocesses[
+                  subprocess.subprocess_data.sub_process_id
+                ] && (
                   <div className="border-t">
                     {subprocess.steps.map((step, index) => {
-                      const stepStatus = getStepStatus(step.steps.process_step_id);
+                      const stepStatus = getStepStatus(
+                        step.steps.process_step_id
+                      );
                       return (
-                        <div key={step.steps.process_step_id} className="flex items-center justify-between p-4 border-b last:border-b-0">
+                        <div
+                          key={step.steps.process_step_id}
+                          className="flex items-center justify-between p-4 border-b last:border-b-0"
+                        >
                           <div className="flex items-center">
                             <span className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium mr-3">
                               {step.steps.process_step_order}
@@ -248,7 +402,7 @@ const ProcessExecutionUI = () => {
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             {stepStatus && (
                               <>
@@ -256,14 +410,20 @@ const ProcessExecutionUI = () => {
                                 {stepStatus.select_results && (
                                   <div className="flex space-x-1 ml-2">
                                     <button
-                                      onClick={() => viewResults(stepStatus.select_results)}
+                                      onClick={() =>
+                                        viewResults(stepStatus.select_results)
+                                      }
                                       className="inline-flex items-center px-2 py-1 border border-gray-300 rounded text-xs text-gray-700 bg-white hover:bg-gray-50"
                                     >
                                       <Eye className="w-3 h-3 mr-1" />
                                       View
                                     </button>
                                     <button
-                                      onClick={() => downloadResults(stepStatus.select_results)}
+                                      onClick={() =>
+                                        downloadResults(
+                                          stepStatus.select_results
+                                        )
+                                      }
                                       className="inline-flex items-center px-2 py-1 border border-gray-300 rounded text-xs text-gray-700 bg-white hover:bg-gray-50"
                                     >
                                       <Download className="w-3 h-3 mr-1" />
@@ -312,28 +472,6 @@ const ProcessExecutionUI = () => {
 
 export default ProcessExecutionUI;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // "use client"
 
 // import React, { useState, useEffect } from 'react'
@@ -349,7 +487,7 @@ export default ProcessExecutionUI;
 //     const router = useRouter();
 //     const searchParams = useSearchParams();
 //     const id = searchParams.get("id");
-    
+
 //     const [executionState, setExecutionState] = useState('idle'); // idle, executing, completed, failed
 //     const [executionLogs, setExecutionLogs] = useState([]);
 //     const [processData, setProcessData] = useState(null);
@@ -390,8 +528,8 @@ export default ProcessExecutionUI;
 //                     status: step.step_status,
 //                     startTime: step.start_time,
 //                     endTime: step.end_time,
-//                     duration: step.end_time ? 
-//                         `${((new Date(step.end_time) - new Date(step.start_time)) / 1000).toFixed(2)}s` : 
+//                     duration: step.end_time ?
+//                         `${((new Date(step.end_time) - new Date(step.start_time)) / 1000).toFixed(2)}s` :
 //                         null,
 //                     message: step.exec_msg,
 //                     order: step.process_step_order,
@@ -416,7 +554,7 @@ export default ProcessExecutionUI;
 //     const executeProcess = async () => {
 //         setExecutionState('executing');
 //         setError(null);
-        
+
 //         try {
 //             const response = await fetch(`${baseURL}/execute-hierarchy?process_id=${id}`, {
 //                 method: 'POST',
@@ -446,14 +584,14 @@ export default ProcessExecutionUI;
 //     const fetchExecutionLogs = async () => {
 //         try {
 //             const response = await fetch(`${baseURL}/get-execute-hierarchy-log?process_id=${id}`);
-            
+
 //             if (response.ok) {
 //                 const result = await response.json();
 //                 if (result.status === 'success' && result.data) {
 //                     setExecutionLogs(result.data);
 //                     const parsed = parseExecutionLogs(result.data);
 //                     setProcessData(parsed);
-                    
+
 //                     // Stop polling if process is completed
 //                     if (parsed && parsed.status === 'completed') {
 //                         setIsPolling(false);
@@ -544,7 +682,7 @@ export default ProcessExecutionUI;
 //             <div className="bg-white border-b border-gray-200 px-6 py-4">
 //                 <div className="flex items-center justify-between">
 //                     <div className="flex items-center space-x-4">
-//                         <button 
+//                         <button
 //                             onClick={() => window.history.back()}
 //                             className="text-blue-600 hover:text-blue-800 font-medium"
 //                         >
@@ -672,15 +810,15 @@ export default ProcessExecutionUI;
 //                         <div className="space-y-4">
 //                             {processData.subprocesses.map((subprocess, index) => (
 //                                 <div key={subprocess.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
-//                                     <div 
+//                                     <div
 //                                         className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
 //                                         onClick={() => toggleSubprocess(subprocess.id)}
 //                                     >
 //                                         <div className="flex items-center justify-between">
 //                                             <div className="flex items-center space-x-3">
 //                                                 <div className="flex items-center space-x-2">
-//                                                     {expandedSubprocesses.has(subprocess.id) ? 
-//                                                         <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+//                                                     {expandedSubprocesses.has(subprocess.id) ?
+//                                                         <ChevronDown className="w-5 h-5 text-gray-400" /> :
 //                                                         <ChevronRight className="w-5 h-5 text-gray-400" />
 //                                                     }
 //                                                     <span className="text-sm font-medium text-gray-500">

@@ -318,7 +318,7 @@ export default function ConnectionPage() {
                               <ChevronDown className="inline ml-1 h-4 w-4" />
                             ))}
                         </TableHead>
-                        <TableHead
+                        {/* <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("data_sources_id")}
                         >
@@ -329,7 +329,7 @@ export default function ConnectionPage() {
                             ) : (
                               <ChevronDown className="inline ml-1 h-4 w-4" />
                             ))}
-                        </TableHead>
+                        </TableHead> */}
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -353,7 +353,7 @@ export default function ConnectionPage() {
                             <TableCell className="font-medium">
                               {connection.connection_name}
                             </TableCell>
-                            <TableCell>{connection.data_sources_id}</TableCell>
+                            {/* <TableCell>{connection.data_sources_id}</TableCell> */}
                             <TableCell>
                               <div className="flex space-x-2">
                                 <Button

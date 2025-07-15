@@ -857,7 +857,7 @@ export default function EditProcess() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Edit Process</h1>
-          <p className="text-gray-600 mt-1">Process ID: {id}</p>
+          {/* <p className="text-gray-600 mt-1">Process ID: {id}</p> */}
         </div>
         <div className="flex space-x-3">
           <Button variant="outline" onClick={() => router.push("/process")}>

@@ -353,7 +353,7 @@ export default function ProcessPage() {
                               <ChevronDown className="inline ml-1 h-4 w-4" />
                             ))}
                         </TableHead>
-                        <TableHead
+                        {/* <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("process_version")}
                         >
@@ -364,7 +364,7 @@ export default function ProcessPage() {
                             ) : (
                               <ChevronDown className="inline ml-1 h-4 w-4" />
                             ))}
-                        </TableHead>
+                        </TableHead> */}
                         <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("inserted_date")}
@@ -389,7 +389,7 @@ export default function ProcessPage() {
                               <ChevronDown className="inline ml-1 h-4 w-4" />
                             ))}
                         </TableHead>
-                        <TableHead>ID</TableHead>
+                        {/* <TableHead>ID</TableHead> */}
                         <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
@@ -414,14 +414,14 @@ export default function ProcessPage() {
                             <TableCell className="font-medium">
                               {process.process_name}
                             </TableCell>
-                            <TableCell>{process.process_version}</TableCell>
+                            {/* <TableCell>{process.process_version}</TableCell> */}
                             <TableCell>
                               {formatDate(process.inserted_date)}
                             </TableCell>
                             <TableCell>
                               {formatDate(process.modified_date)}
                             </TableCell>
-                            <TableCell>{process.process_master_id}</TableCell>
+                            {/* <TableCell>{process.process_master_id}</TableCell> */}
                             <TableCell>
                               <span
                                 className={`px-2 py-1 rounded-full text-xs ${
