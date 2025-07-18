@@ -1,10 +1,7 @@
-// Process Management Page
-// Page to manage process - edit & execute
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -60,18 +57,21 @@ const host = process.env.NEXT_PUBLIC_API_HOST;
 const port = process.env.NEXT_PUBLIC_API_PORT;
 const baseURL = `http://${host}:${port}`;
 
-export default function ProcessPage() {
+export default function ExecutionHistory() {
   const router = useRouter();
   const [processes, setProcesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const searchParams = useSearchParams();
+  const processId = searchParams.get("id");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
   const [itemsPerPage, setItemsPerPage] = useState(5); // Number of items per page
 
   // Sorting state
-  const [sortField, setSortField] = useState("modified_date"); // Field to sort by
+  const [sortField, setSortField] = useState("start_time"); // Field to sort by
   const [sortDirection, setSortDirection] = useState("desc"); // Sort direction (asc/desc)
 
   // Filter state
@@ -86,7 +86,7 @@ export default function ProcessPage() {
   const fetchProcesses = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${baseURL}/process`);
+      const response = await fetch(`${baseURL}/get-execute-hierarchy-log?process_master_id=${processId}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -145,121 +145,6 @@ export default function ProcessPage() {
     setCurrentPage(pageNumber);
   };
 
-  // Handle edit
-  const handleEdit = (id) => {
-    router.push(`/process/edit-process?id=${id}`);
-  };
-
-  // Handle execute
-  const handleExecute = (id) => {
-    router.push(`/process/execute-process?id=${id}`);
-  };
-
-  // Handle history
-  const handleHistory = (id) => {
-    router.push(`/process/execution-history?id=${id}`);
-  };
-
-  // Handle Deactivate
-  const handleDeactivate = async (id) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to disable process ${id}`
-    );
-    if (confirmed) {
-      try {
-        const response = await fetch(
-          `${baseURL}/process-deactivate?process_id=${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (response.ok) {
-          alert(`Process ${id} deactivated`);
-          window.location.reload();
-        } else {
-          const errorData = await response.json();
-          alert(
-            `Failed to deactivate process: ${
-              errorData.message || "Unknown error"
-            }`
-          );
-        }
-      } catch (error) {
-        console.error("Error deactivating process:", error);
-        alert("An error occurred while deactivating the process");
-      }
-    }
-  };
-
-  // Handle Activate
-  const handleActivate = async (id) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to activate process ${id}`
-    );
-    if (confirmed) {
-      try {
-        const response = await fetch(
-          `${baseURL}/process-activate?process_id=${id}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (response.ok) {
-          alert(`Process ${id} activated`);
-          window.location.reload();
-        } else {
-          const errorData = await response.json();
-          alert(
-            `Failed to activate process: ${
-              errorData.message || "Unknown error"
-            }`
-          );
-        }
-      } catch (error) {
-        console.error("Error activating process:", error);
-        alert("An error occurred while activating the process");
-      }
-    }
-  }
-
-  // handle delete
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete process ${id}`
-    );
-    if (confirmed) {
-      try {
-        const response = await fetch(`${baseURL}/process-hierarchy-upsert`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            process: {
-              p_process_master_id: id,
-              p_is_deleted: true,
-            },
-          }),
-        });
-
-        if (response.ok) {
-          alert(`Process ${id} deleted`);
-          window.location.reload();
-        } else {
-          alert("Failed to delete process");
-        }
-      } catch (error) {
-        console.error("Error deleting process:", error);
-        alert("An error occurred while deleting the process");
-      }
-    }
-  };
 
   // Format date
   const formatDate = (dateString) => {
@@ -287,11 +172,16 @@ export default function ProcessPage() {
       <div className="p-6">
         <Card className="w-full shadow-md rounded-md">
           {/* Header */}
-          <CardHeader className="bg-gray-1 rounded-t-md">
-            <CardTitle className="text-xl">Process Management</CardTitle>
-            <CardDescription>View, edit and execute processes</CardDescription>
-          </CardHeader>
 
+          {loading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            ):(
+          <CardHeader className="bg-gray-1 rounded-t-md">
+            <CardTitle className="text-xl">{processes[0].process_name}</CardTitle>
+            <CardDescription>Execution History</CardDescription>
+          </CardHeader>)}
           {/* Main Content */}
           <CardContent className="pt-6">
             {/* Search and filter */}
@@ -322,8 +212,8 @@ export default function ProcessPage() {
                   </SelectContent>
                 </Select>
                 {/* <Button variant="outline" className="gap-1">
-                  <Filter className="h-4 w-4" /> Filter
-                </Button> */}
+                      <Filter className="h-4 w-4" /> Filter
+                    </Button> */}
               </div>
             </div>
 
@@ -347,7 +237,7 @@ export default function ProcessPage() {
                     {/* Header */}
                     <TableHeader className="bg-gray-100">
                       <TableRow>
-                        <TableHead
+                        {/* <TableHead
                           className="cursor-pointer hover:bg-gray-200"
                           onClick={() => handleSort("process_name")}
                         >
@@ -358,25 +248,25 @@ export default function ProcessPage() {
                             ) : (
                               <ChevronDown className="inline ml-1 h-4 w-4" />
                             ))}
-                        </TableHead>
-                        {/* <TableHead
-                          className="cursor-pointer hover:bg-gray-200"
-                          onClick={() => handleSort("process_version")}
-                        >
-                          Version
-                          {sortField === "process_version" &&
-                            (sortDirection === "asc" ? (
-                              <ChevronUp className="inline ml-1 h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="inline ml-1 h-4 w-4" />
-                            ))}
                         </TableHead> */}
+                        {/* <TableHead
+                              className="cursor-pointer hover:bg-gray-200"
+                              onClick={() => handleSort("process_version")}
+                            >
+                              Version
+                              {sortField === "process_version" &&
+                                (sortDirection === "asc" ? (
+                                  <ChevronUp className="inline ml-1 h-4 w-4" />
+                                ) : (
+                                  <ChevronDown className="inline ml-1 h-4 w-4" />
+                                ))}
+                            </TableHead> */}
                         <TableHead
                           className="cursor-pointer hover:bg-gray-200"
-                          onClick={() => handleSort("inserted_date")}
+                          onClick={() => handleSort("start_time")}
                         >
-                          Created Date
-                          {sortField === "inserted_date" &&
+                          Start Time
+                          {sortField === "start_time" &&
                             (sortDirection === "asc" ? (
                               <ChevronUp className="inline ml-1 h-4 w-4" />
                             ) : (
@@ -385,10 +275,10 @@ export default function ProcessPage() {
                         </TableHead>
                         <TableHead
                           className="cursor-pointer hover:bg-gray-200"
-                          onClick={() => handleSort("modified_date")}
+                          onClick={() => handleSort("end_time")}
                         >
-                          Modified Date
-                          {sortField === "modified_date" &&
+                          End Time
+                          {sortField === "end_time" &&
                             (sortDirection === "asc" ? (
                               <ChevronUp className="inline ml-1 h-4 w-4" />
                             ) : (
@@ -397,7 +287,7 @@ export default function ProcessPage() {
                         </TableHead>
                         {/* <TableHead>ID</TableHead> */}
                         <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                        {/* <TableHead>Actions</TableHead> */}
                       </TableRow>
                     </TableHeader>
                     {/* Body */}
@@ -414,21 +304,24 @@ export default function ProcessPage() {
                       ) : (
                         currentItems.map((process) => (
                           <TableRow
-                            key={process.process_master_id}
+                            key={process.start_time}
                             className="hover:bg-gray-50"
                           >
-                            <TableCell className="font-medium">
+                            {/* <TableCell className="font-medium">
                               {process.process_name}
-                            </TableCell>
+                            </TableCell> */}
                             {/* <TableCell>{process.process_version}</TableCell> */}
                             <TableCell>
-                              {formatDate(process.inserted_date)}
+                              {formatDate(process.start_time)}
                             </TableCell>
                             <TableCell>
-                              {formatDate(process.modified_date)}
+                              {formatDate(process.end_time)}
+                            </TableCell>
+                            <TableCell>
+                              {process.status}
                             </TableCell>
                             {/* <TableCell>{process.process_master_id}</TableCell> */}
-                            <TableCell>
+                            {/* <TableCell>
                               <span
                                 className={`px-2 py-1 rounded-full text-xs ${
                                   process.is_active
@@ -512,7 +405,7 @@ export default function ProcessPage() {
                                   <Trash className="h-4 w-4" />
                                 </Button>
                               </div>
-                            </TableCell>
+                            </TableCell> */}
                           </TableRow>
                         ))
                       )}
