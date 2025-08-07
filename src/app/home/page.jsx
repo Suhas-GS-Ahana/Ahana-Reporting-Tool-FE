@@ -27,7 +27,7 @@ export default function HomePage() {
         {/* Configuration Card */}
         <Card
           className="rounded-md shadow-md cursor-pointer hover:shadow-lg transition"
-          onClick={() => router.push("/configurations")}
+          onClick={() => router.push("/connections")}
         >
           <CardContent className="p-6 flex flex-col items-start">
             <div className="flex items-center gap-3 mb-4">
@@ -38,7 +38,7 @@ export default function HomePage() {
               Add and manage data source connections. Create ETL processes to
               automate data flow.
             </p>
-            <Button className="bg-gray-700">Go to Configuration</Button>
+            <Button className="bg-gray-700">Go to Data Configuration</Button>
           </CardContent>
         </Card>
 
@@ -55,8 +55,8 @@ export default function HomePage() {
             <p className="text-sm text-gray-600 mb-4">
               Manage and execute business processes like NPA analysis with
               robust reporting options.
-            </p>
-            <Button className="bg-gray-700">Go to Process</Button>
+            </p>  
+            <Button className="bg-gray-700">Go to Process Configuration</Button>
           </CardContent>
         </Card>
       </div>
