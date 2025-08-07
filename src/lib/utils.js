@@ -17,12 +17,12 @@ export const sidebarItems = [
     icon: Home,
   },
   {
-    title: "Connections",
+    title: "Data Source",
     href: "/connections",
     icon: Network,
   },
   {
-    title: "Configurations",
+    title: "Create Process",
     href: "/configurations",
     icon: Cog,
   },

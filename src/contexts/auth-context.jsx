@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem("user", JSON.stringify(user)); // saves the user data in browser's localStorage
         Cookies.set("user", JSON.stringify(user), { expires: 7 }); // Set cookie to expire in 7 days
         setUser(user);
-        router.push("/configurations"); 
+        router.push("/home"); 
       } else {
         throw new Error("Login failed");
       }
