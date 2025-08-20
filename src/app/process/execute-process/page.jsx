@@ -15,7 +15,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 
 const host = process.env.NEXT_PUBLIC_API_HOST;
-const port = process.env.NEXT_PUBLIC_API_PORT;
+const port = process.env.NEXT_PUBLIC_API_PORT_EXECUTE;
 const baseURL = `http://${host}:${port}`;
 
 const ProcessExecutionUI = () => {

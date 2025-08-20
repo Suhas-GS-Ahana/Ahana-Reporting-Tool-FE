@@ -54,7 +54,7 @@ import {
 
 // API Setup
 const host = process.env.NEXT_PUBLIC_API_HOST;
-const port = process.env.NEXT_PUBLIC_API_PORT;
+const port = process.env.NEXT_PUBLIC_API_PORT_EXECUTE;
 const baseURL = `http://${host}:${port}`;
 
 export default function ExecutionHistory() {
@@ -179,7 +179,7 @@ export default function ExecutionHistory() {
               </div>
             ):(
           <CardHeader className="bg-gray-1 rounded-t-md">
-            <CardTitle className="text-xl">{processes[0].process_name}</CardTitle>
+            {/*<CardTitle className="text-xl">{processes[0].process_name}</CardTitle>*/}
             <CardDescription>Execution History</CardDescription>
           </CardHeader>)}
           {/* Main Content */}
